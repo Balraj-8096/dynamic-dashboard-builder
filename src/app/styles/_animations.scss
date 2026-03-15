@@ -1,0 +1,75 @@
+// ═══════════════════════════════════════════════════════════════
+//  DASHCRAFT — Animations
+// ═══════════════════════════════════════════════════════════════
+
+// ── Widget save flash (green glow) ──────────────────────────────
+@keyframes widget-save-flash {
+  0%   { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+  30%  { box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.4); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+// ── Context menu fade in ─────────────────────────────────────────
+@keyframes ctx-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+// ── Modal fade in ────────────────────────────────────────────────
+@keyframes modal-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ── Widget drag active pulse ─────────────────────────────────────
+@keyframes drag-pulse {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4); }
+  50%       { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); }
+}
+
+// ── Sidebar item hover slide ─────────────────────────────────────
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// ── Minimap viewport indicator blink ────────────────────────────
+@keyframes viewport-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+// ── Utility animation classes ────────────────────────────────────
+.animate-save-flash {
+  animation: widget-save-flash 0.7s ease forwards;
+}
+
+.animate-ctx-menu {
+  animation: ctx-fade-in 0.1s ease forwards;
+}
+
+.animate-modal {
+  animation: modal-fade-in 0.2s ease forwards;
+}
+
+.animate-drag {
+  animation: drag-pulse 1s ease-in-out infinite;
+}

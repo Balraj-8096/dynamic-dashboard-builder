@@ -1,0 +1,91 @@
+// ═══════════════════════════════════════════════════════════════
+//  Analytics Widget Styles
+// ═══════════════════════════════════════════════════════════════
+
+:host {
+  display: block;
+  width:   100%;
+  height:  100%;
+}
+
+// ── Layout ────────────────────────────────────────────────────
+.analytics-layout {
+  display:         flex;
+  flex-direction:  column;
+  height:          100%;
+  padding:         12px 14px 10px;
+  gap:             8px;
+}
+
+// ── Top section ───────────────────────────────────────────────
+.analytics-top {
+  display:        flex;
+  flex-direction: column;
+  gap:            6px;
+}
+
+// ── Primary value ─────────────────────────────────────────────
+.analytics-value {
+  font-size:   26px;
+  font-weight: 700;
+  line-height: 1;
+  font-family: var(--font-mono);
+}
+
+// ── Change badge ──────────────────────────────────────────────
+.change-badge {
+  display:       inline-flex;
+  align-items:   center;
+  gap:           4px;
+  font-size:     11px;
+  font-family:   var(--font-mono);
+  font-weight:   500;
+  padding:       3px 8px;
+  border-radius: 20px;
+  width:         fit-content;
+}
+
+.change-arrow {
+  font-size: 8px;
+}
+
+.change-value {
+  font-weight: 600;
+}
+
+.change-label {
+  font-size: 10px;
+  opacity:   0.75;
+}
+
+.change--up {
+  color:      var(--grn);
+  background: rgba(34, 197, 94, 0.12);
+  border:     1px solid rgba(34, 197, 94, 0.25);
+}
+
+.change--down {
+  color:      var(--red);
+  background: rgba(239, 68, 68, 0.12);
+  border:     1px solid rgba(239, 68, 68, 0.25);
+}
+
+// ── Chart wrapper ─────────────────────────────────────────────
+.chart-wrapper {
+  flex:       1;
+  min-height: 0;
+  overflow:   hidden;
+
+  svg {
+    display: block;
+    width:   100%;
+  }
+}
+
+// ── Period label ──────────────────────────────────────────────
+.period-label {
+  font-size:   10px;
+  color:       var(--txt2);
+  font-family: var(--font-mono);
+  text-align:  right;
+}

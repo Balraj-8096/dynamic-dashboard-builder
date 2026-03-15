@@ -30,6 +30,9 @@
               }
             ],
             "styles": [
+              "src/app/styles/_tokens.scss",
+              "src/app/styles/_material.scss",
+              "src/app/styles/_animations.scss",
               "src/styles.scss"
             ]
           },

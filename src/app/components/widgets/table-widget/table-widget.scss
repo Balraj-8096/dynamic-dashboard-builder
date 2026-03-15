@@ -1,0 +1,89 @@
+:host {
+  display: block;
+  width:   100%;
+  height:  100%;
+}
+
+.table-wrapper {
+  overflow:   auto;
+  height:     100%;
+  width:      100%;
+}
+
+.widget-table {
+  width:      100%;
+  background: transparent !important;
+
+  // Header
+  .mat-mdc-header-row {
+    background:  var(--bg2) !important;
+    height:      32px !important;
+  }
+
+  .mat-mdc-header-cell {
+    color:          var(--txt2) !important;
+    font-family:    var(--font-mono) !important;
+    font-size:      10px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    border-bottom:  1px solid var(--bdr) !important;
+    padding:        0 10px !important;
+  }
+
+  // Rows
+  .mat-mdc-row {
+    height:     36px !important;
+    background: transparent !important;
+
+    &:hover .mat-mdc-cell {
+      background: rgba(255, 255, 255, 0.02) !important;
+    }
+
+    &.row--striped:nth-child(even) .mat-mdc-cell {
+      background: rgba(255, 255, 255, 0.015) !important;
+    }
+  }
+
+  .mat-mdc-cell {
+    color:         var(--txt1) !important;
+    font-size:     11px !important;
+    border-bottom: 1px solid var(--bdr) !important;
+    padding:       0 10px !important;
+  }
+
+  // Compact mode
+  .table--compact & {
+    .mat-mdc-header-row { height: 26px !important; }
+    .mat-mdc-row        { height: 28px !important; }
+  }
+}
+
+// Status badge
+.status-badge {
+  display:       inline-flex;
+  align-items:   center;
+  gap:           5px;
+  padding:       2px 8px;
+  border-radius: 20px;
+  font-size:     10px;
+  font-family:   var(--font-mono);
+  font-weight:   500;
+  white-space:   nowrap;
+}
+
+.status-dot {
+  width:         5px;
+  height:        5px;
+  border-radius: 50%;
+  flex-shrink:   0;
+}
+
+.table-empty {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  height:          100%;
+  color:           var(--txt2);
+  font-size:       12px;
+  font-family:     var(--font-mono);
+}

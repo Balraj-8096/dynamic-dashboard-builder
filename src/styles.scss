@@ -1,1 +1,73 @@
-/* You can add global styles to this file, and also import other style files */
+// ── Angular Material theme ───────────────────────────────────────
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+$dashcraft-theme: mat.define-theme((
+  color: (
+    theme-type: dark,
+    primary: mat.$azure-palette,
+  ),
+  typography: (
+    brand-family: 'Outfit, sans-serif',
+    plain-family: 'Outfit, sans-serif',
+  ),
+));
+
+:root {
+  @include mat.all-component-themes($dashcraft-theme);
+}
+
+// ── Fonts ────────────────────────────────────────────────────────
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap');
+
+// ── Our token files ──────────────────────────────────────────────
+@import 'app/styles/tokens';
+@import 'app/styles/material';
+@import 'app/styles/animations';
+
+// ── Global reset ─────────────────────────────────────────────────
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  background: var(--bg0);
+  color: var(--txt0);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// ── Utility classes ──────────────────────────────────────────────
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+.text-primary   { color: var(--txt0); }
+.text-secondary { color: var(--txt1); }
+.text-muted     { color: var(--txt2); }
+.text-accent    { color: var(--acc);  }
+.text-green     { color: var(--grn);  }
+.text-red       { color: var(--red);  }
+.text-amber     { color: var(--amb);  }
+.text-purple    { color: var(--pur);  }
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+}

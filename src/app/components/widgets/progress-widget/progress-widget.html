@@ -1,0 +1,35 @@
+@if (cfg) {
+  <div class="progress-layout">
+
+    @for (item of items; track item.label) {
+      <div class="progress-item">
+
+        <!-- Label row -->
+        <div class="progress-item__header">
+          <span class="progress-item__label">
+            {{ item.label }}
+          </span>
+          @if (cfg.showValues) {
+            <span
+              class="progress-item__value"
+              [style.color]="item.color">
+              {{ getPercent(item) }}%
+            </span>
+          }
+        </div>
+
+        <!-- Track -->
+        <div class="progress-track">
+          <div
+            class="progress-fill"
+            [style.width.%]="getPercent(item)"
+            [style.background]="item.color"
+            [style.box-shadow]="'0 0 6px ' + item.color + '66'">
+          </div>
+        </div>
+
+      </div>
+    }
+
+  </div>
+}

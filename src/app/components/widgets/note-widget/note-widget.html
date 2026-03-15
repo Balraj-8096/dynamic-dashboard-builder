@@ -1,0 +1,22 @@
+@if (cfg) {
+  <div
+    class="note-layout"
+    [style.background]="cfg.bgColor || 'transparent'"
+    [style.border-left-color]="cfg.accent">
+
+    <div
+      class="note-content"
+      [style.font-size]="fontSize">
+
+      @for (line of lines; track $index) {
+        @if (line.trim()) {
+          <p class="note-line">{{ line }}</p>
+        } @else {
+          <br />
+        }
+      }
+
+    </div>
+
+  </div>
+}

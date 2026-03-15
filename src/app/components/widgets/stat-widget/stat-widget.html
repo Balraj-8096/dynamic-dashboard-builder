@@ -1,0 +1,129 @@
+<!-- ═══════════════════════════════════════════════════════════
+     Stat Widget — Single KPI with trend + sparkline
+     ═══════════════════════════════════════════════════════════ -->
+
+@if (cfg) {
+
+  <!-- ── Multi-field grid mode ─────────────────────────────── -->
+  @if (isMultiField) {
+    <div
+      class="multi-grid"
+      [style.grid-template-columns]="'repeat(' + multiCols + ', 1fr)'">
+
+      @for (field of selectedFields; track field!.id) {
+        <div class="mini-tile">
+
+          <!-- Mini value -->
+          <div
+            class="mini-tile__value"
+            [style.color]="field!.accent">
+            {{ field!.value }}
+          </div>
+
+          <!-- Mini label -->
+          <div class="mini-tile__label">
+            {{ field!.label }}
+          </div>
+
+          <!-- Mini trend -->
+          <div
+            class="mini-tile__trend"
+            [class.trend--up]="field!.trendUp"
+            [class.trend--down]="!field!.trendUp">
+            {{ field!.trend }}
+          </div>
+
+        </div>
+      }
+
+    </div>
+  }
+
+  <!-- ── Single field mode ─────────────────────────────────── -->
+  @if (!isMultiField) {
+    <div class="single-layout">
+
+      <!-- Top section: value + trend -->
+      <div class="single-layout__top">
+
+        <!-- Primary value -->
+        <div class="value-block">
+          @if (cfg.prefix) {
+            <span
+              class="value-prefix"
+              [style.color]="cfg.accent">
+              {{ cfg.prefix }}
+            </span>
+          }
+          <span
+            class="value-main"
+            [style.color]="cfg.accent">
+            {{ cfg.value }}
+          </span>
+          @if (cfg.suffix) {
+            <span
+              class="value-suffix"
+              [style.color]="cfg.accent">
+              {{ cfg.suffix }}
+            </span>
+          }
+        </div>
+
+        <!-- Sub value label -->
+        @if (cfg.subValue) {
+          <div class="sub-value">
+            {{ cfg.subValue }}
+          </div>
+        }
+
+        <!-- Trend badge -->
+        @if (cfg.trend) {
+          <div
+            class="trend-badge"
+            [class.trend--up]="cfg.trendUp"
+            [class.trend--down]="!cfg.trendUp"
+            [style.border-color]="cfg.trendUp
+              ? 'rgba(34,197,94,0.3)'
+              : 'rgba(239,68,68,0.3)'">
+            <span class="trend-arrow">
+              {{ cfg.trendUp ? '▲' : '▼' }}
+            </span>
+            {{ cfg.trend }}
+          </div>
+        }
+
+        <!-- Description tooltip -->
+        @if (cfg.description) {
+          <div class="description">
+            {{ cfg.description }}
+          </div>
+        }
+
+      </div>
+
+      <!-- Bottom: sparkline -->
+      @if (cfg.showSparkline && cfg.sparkData?.length) {
+        <div class="sparkline-wrapper">
+
+          <!-- Bar sparkline -->
+          <div class="sparkline-bars">
+            @for (
+              bar of getSparkBars(cfg.sparkData);
+              track $index
+            ) {
+              <div
+                class="sparkline-bar"
+                [style.height]="bar.height"
+                [style.opacity]="bar.opacity"
+                [style.background]="cfg.accent">
+              </div>
+            }
+          </div>
+
+        </div>
+      }
+
+    </div>
+  }
+
+}

@@ -1,0 +1,32 @@
+@if (cfg) {
+  <div
+    class="section-layout"
+    [class.section--left]="cfg.align === 'left'"
+    [class.section--center]="cfg.align === 'center'"
+    [class.section--right]="cfg.align === 'right'">
+
+    <!-- Left line -->
+    @if (cfg.showLine && cfg.align !== 'left') {
+      <div
+        class="section-line"
+        [style.background]="cfg.accent">
+      </div>
+    }
+
+    <!-- Label -->
+    <span
+      class="section-label"
+      [style.color]="cfg.accent">
+      {{ cfg.label }}
+    </span>
+
+    <!-- Right line -->
+    @if (cfg.showLine && cfg.align !== 'right') {
+      <div
+        class="section-line"
+        [style.background]="cfg.accent">
+      </div>
+    }
+
+  </div>
+}

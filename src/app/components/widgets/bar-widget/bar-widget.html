@@ -1,0 +1,26 @@
+<!-- ═══════════════════════════════════════════════════════════
+     Bar Chart Widget
+     ═══════════════════════════════════════════════════════════ -->
+
+@if (chartOptions && cfg?.series?.length) {
+  <div class="chart-container">
+    <apx-chart
+      [series]="chartOptions.series"
+      [chart]="chartOptions.chart"
+      [xaxis]="chartOptions.xaxis"
+      [yaxis]="chartOptions.yaxis"
+      [dataLabels]="chartOptions.dataLabels"
+      [grid]="chartOptions.grid"
+      [legend]="chartOptions.legend"
+      [tooltip]="chartOptions.tooltip"
+      [plotOptions]="chartOptions.plotOptions"
+      [stroke]="chartOptions.stroke"
+      [fill]="chartOptions.fill"
+      [colors]="chartOptions.colors">
+    </apx-chart>
+  </div>
+} @else {
+  <div class="chart-empty">
+    <span>No data</span>
+  </div>
+}
