@@ -1,0 +1,36 @@
+<div class="section-hdr">Values</div>
+<div class="two-col">
+  <div class="field-row">
+    <label class="field-label">Primary Value</label>
+    <input class="inp" [value]="cfg.value" (input)="upd('value', $any($event.target).value)" />
+  </div>
+  <div class="field-row">
+    <label class="field-label">Change %</label>
+    <input class="inp" [value]="cfg.changeValue || ''" (input)="upd('changeValue', $any($event.target).value)" />
+  </div>
+  <div class="field-row">
+    <label class="field-label">Change Label</label>
+    <input class="inp" [value]="cfg.changeLabel || ''" (input)="upd('changeLabel', $any($event.target).value)" />
+  </div>
+  <div class="field-row">
+    <label class="field-label">Period</label>
+    <input class="inp" [value]="cfg.period || ''" (input)="upd('period', $any($event.target).value)" />
+  </div>
+  <div class="field-row">
+    <label class="field-label">Direction</label>
+    <select class="sel" [value]="cfg.trendUp ? 'up' : 'down'" (change)="upd('trendUp', $any($event.target).value === 'up')">
+      <option value="up">↑ Positive</option>
+      <option value="down">↓ Negative</option>
+    </select>
+  </div>
+  <div class="field-row">
+    <label class="field-label">Line Color</label>
+    <input type="color" class="inp" [value]="cfg.accent || '#22c55e'" (input)="upd('accent', $any($event.target).value)" />
+  </div>
+</div>
+
+<div class="section-hdr">Chart Data</div>
+<div class="field-row">
+  <label class="field-label">Sparkline data <span class="field-hint">comma-separated numbers</span></label>
+  <input class="inp" [value]="dataStr" (change)="setData($any($event.target).value)" />
+</div>

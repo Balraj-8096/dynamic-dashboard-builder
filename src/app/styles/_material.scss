@@ -5,8 +5,11 @@
 
 // ── Dialog ───────────────────────────────────────────────────────
 .mat-mdc-dialog-container {
+  width: auto !important;
+  min-width: fit-content !important;
+  max-width: fit-content !important;
   --mdc-dialog-container-color: var(--bg1) !important;
-  --mdc-dialog-subhead-color:   var(--txt0) !important;
+  --mdc-dialog-subhead-color: var(--txt0) !important;
   --mdc-dialog-supporting-text-color: var(--txt1) !important;
 
   .mdc-dialog__surface {
@@ -19,10 +22,10 @@
 
 // ── Form fields ──────────────────────────────────────────────────
 .mat-mdc-form-field {
-  --mdc-filled-text-field-container-color:       var(--bg3) !important;
+  --mdc-filled-text-field-container-color: var(--bg3) !important;
   --mdc-filled-text-field-focus-active-indicator-color: var(--acc) !important;
-  --mdc-filled-text-field-label-text-color:      var(--txt2) !important;
-  --mdc-filled-text-field-input-text-color:      var(--txt0) !important;
+  --mdc-filled-text-field-label-text-color: var(--txt2) !important;
+  --mdc-filled-text-field-input-text-color: var(--txt0) !important;
   --mdc-filled-text-field-hover-label-text-color: var(--txt1) !important;
 
   .mat-mdc-floating-label {
@@ -62,33 +65,33 @@
 
 // ── Checkbox ─────────────────────────────────────────────────────
 .mat-mdc-checkbox {
-  --mdc-checkbox-selected-checkmark-color:      var(--bg0) !important;
-  --mdc-checkbox-selected-focus-icon-color:     var(--acc) !important;
-  --mdc-checkbox-selected-hover-icon-color:     var(--acc) !important;
-  --mdc-checkbox-selected-icon-color:           var(--acc) !important;
-  --mdc-checkbox-selected-pressed-icon-color:   var(--acc) !important;
-  --mdc-checkbox-unselected-icon-color:         var(--txt2) !important;
-  --mdc-checkbox-label-text-color:              var(--txt1) !important;
+  --mdc-checkbox-selected-checkmark-color: var(--bg0) !important;
+  --mdc-checkbox-selected-focus-icon-color: var(--acc) !important;
+  --mdc-checkbox-selected-hover-icon-color: var(--acc) !important;
+  --mdc-checkbox-selected-icon-color: var(--acc) !important;
+  --mdc-checkbox-selected-pressed-icon-color: var(--acc) !important;
+  --mdc-checkbox-unselected-icon-color: var(--txt2) !important;
+  --mdc-checkbox-label-text-color: var(--txt1) !important;
 }
 
 // ── Radio Button ─────────────────────────────────────────────────
 .mat-mdc-radio-button {
-  --mdc-radio-selected-icon-color:        var(--acc) !important;
-  --mdc-radio-selected-focus-icon-color:  var(--acc) !important;
-  --mdc-radio-selected-hover-icon-color:  var(--acc) !important;
-  --mdc-radio-unselected-icon-color:      var(--txt2) !important;
-  --mat-radio-label-text-color:           var(--txt1) !important;
+  --mdc-radio-selected-icon-color: var(--acc) !important;
+  --mdc-radio-selected-focus-icon-color: var(--acc) !important;
+  --mdc-radio-selected-hover-icon-color: var(--acc) !important;
+  --mdc-radio-unselected-icon-color: var(--txt2) !important;
+  --mat-radio-label-text-color: var(--txt1) !important;
 }
 
 // ── Slider ───────────────────────────────────────────────────────
 .mat-mdc-slider {
-  --mdc-slider-active-track-color:        var(--acc) !important;
-  --mdc-slider-inactive-track-color:      var(--bg3) !important;
-  --mdc-slider-handle-color:              var(--acc) !important;
-  --mdc-slider-focus-handle-color:        var(--acc2) !important;
-  --mdc-slider-hover-handle-color:        var(--acc2) !important;
-  --mdc-slider-label-container-color:     var(--acc) !important;
-  --mdc-slider-label-label-text-color:    var(--bg0) !important;
+  --mdc-slider-active-track-color: var(--acc) !important;
+  --mdc-slider-inactive-track-color: var(--bg3) !important;
+  --mdc-slider-handle-color: var(--acc) !important;
+  --mdc-slider-focus-handle-color: var(--acc2) !important;
+  --mdc-slider-hover-handle-color: var(--acc2) !important;
+  --mdc-slider-label-container-color: var(--acc) !important;
+  --mdc-slider-label-label-text-color: var(--bg0) !important;
 }
 
 // ── Table ────────────────────────────────────────────────────────
@@ -129,7 +132,7 @@
 
 // ── Tooltip ──────────────────────────────────────────────────────
 .mat-mdc-tooltip {
-  --mdc-plain-tooltip-container-color:    var(--bg3) !important;
+  --mdc-plain-tooltip-container-color: var(--bg3) !important;
   --mdc-plain-tooltip-supporting-text-color: var(--txt0) !important;
   font-size: 11px !important;
   font-family: var(--font-mono) !important;
@@ -137,7 +140,7 @@
 
 // ── Scrollbar (global) ───────────────────────────────────────────
 ::-webkit-scrollbar {
-  width:  6px;
+  width: 6px;
   height: 6px;
 }
 
@@ -146,7 +149,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background:    var(--bg3);
+  background: var(--bg3);
   border-radius: 3px;
 
   &:hover {

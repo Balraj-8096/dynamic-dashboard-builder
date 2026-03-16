@@ -1,1 +1,115 @@
-<p>toolbar works!</p>
+<header class="toolbar">
+
+  <!-- ── LEFT CLUSTER ─────────────────────────────────────────── -->
+  <div class="cluster cluster--left">
+
+    <!-- Logo -->
+    <div class="logo">
+      <span class="logo-diamond">◈</span>
+      <span class="logo-dash"> dash</span><span class="logo-craft">craft</span>
+    </div>
+
+    <div class="vdivider"></div>
+
+    <!-- Dashboard title (editable) -->
+    @if (svc.editingTitle()) {
+      <input
+        #titleInput
+        class="title-input"
+        type="text"
+        [value]="svc.dashTitle()"
+        (blur)="onTitleBlur($any($event.target).value)"
+        (keydown)="onTitleKeyDown($event, $any($event.target).value)"
+      />
+    } @else {
+      <span class="title-span" title="Click to rename" (click)="startEditTitle()">
+        {{ svc.dashTitle() }} ✏
+      </span>
+    }
+
+    <span class="widget-count">{{ widgetCount }}w</span>
+  </div>
+
+  <!-- ── CENTER CLUSTER ────────────────────────────────────────── -->
+  <div class="cluster cluster--center">
+
+    <!-- Add Widget -->
+    <button class="btn-add" (click)="svc.openWizard(null)" title="Add a new widget">
+      + Add Widget
+    </button>
+
+    <div class="vdivider"></div>
+
+    <!-- Undo -->
+    <button
+      class="btn-icon"
+      title="Undo (Ctrl+Z)"
+      [disabled]="!svc.canUndo()"
+      (click)="svc.undo()"
+    >↩</button>
+
+    <!-- Redo -->
+    <button
+      class="btn-icon"
+      title="Redo (Ctrl+Y)"
+      [disabled]="!svc.canRedo()"
+      (click)="svc.redo()"
+    >↪</button>
+
+    <div class="vdivider"></div>
+
+    <!-- Pack -->
+    <button class="btn-text btn-text--green" title="Auto-arrange: collapse empty rows" (click)="svc.applyPackLayout()">
+      ⊕ pack
+    </button>
+
+    <!-- Clear -->
+    <button class="btn-text btn-text--red" title="Clear all widgets" (click)="svc.clearAll()">
+      ✕ clear
+    </button>
+  </div>
+
+  <!-- ── RIGHT CLUSTER ─────────────────────────────────────────── -->
+  <div class="cluster cluster--right">
+
+    <!-- Zoom controls -->
+    <div class="zoom-group">
+      <button class="zoom-btn" title="Zoom out (Ctrl+scroll)" (click)="svc.zoomOut()">−</button>
+      <button
+        class="zoom-pct"
+        title="Reset zoom to 100%"
+        [class.is-non-default]="!svc.isDefaultZoom()"
+        (click)="svc.resetZoom()"
+      >{{ svc.zoomPercent() }}</button>
+      <button class="zoom-btn" title="Zoom in (Ctrl+scroll)" (click)="svc.zoomIn()">+</button>
+    </div>
+
+    <div class="vdivider"></div>
+
+    <!-- Import -->
+    <button class="btn-text" title="Import JSON layout" (click)="svc.openImport()">
+      ⬆ import
+    </button>
+
+    <!-- Export -->
+    <button class="btn-text" title="Export layout as JSON" (click)="svc.exportLayout()">
+      ⬇ export
+    </button>
+
+    <!-- Help -->
+    <button class="btn-icon" title="How to use (help)" (click)="svc.openHelp()">?</button>
+
+    <div class="vdivider"></div>
+
+    <!-- View Dashboard -->
+    <button
+      class="btn-view"
+      title="Preview the dashboard in view-only mode"
+      [disabled]="svc.widgetCount() === 0"
+      (click)="goToView()"
+    >
+      ▶ View
+    </button>
+  </div>
+
+</header>

@@ -1,1 +1,174 @@
-<p>add-widget-wizard works!</p>
+<div class="wizard">
+
+    <!-- ── HEADER ─────────────────────────────────────────────────── -->
+    <div class="wizard-header">
+        <div>
+            <div class="wizard-title">Add Widget</div>
+            <div class="wizard-subtitle">Configure your widget before adding it to the dashboard</div>
+        </div>
+        <button class="btn-close" (click)="close()">×</button>
+    </div>
+
+    <!-- ── STEP INDICATOR ─────────────────────────────────────────── -->
+    <div class="step-bar">
+        @for (label of stepLabels; track $index) {
+        <div class="step-item" [style.flex]="$index < stepLabels.length - 1 ? '1' : '0'">
+            <div class="step-node-wrap">
+                <!-- Circle -->
+                <div class="step-circle" [class.done]="$index + 1 < step" [class.active]="$index + 1 === step">
+                    @if ($index + 1 < step) { ✓ } @else { {{ $index + 1 }} } </div>
+                        <!-- Label -->
+                        <span class="step-label" [class.active]="$index + 1 === step" [class.done]="$index + 1 < step">
+                            {{ label }}
+                        </span>
+                </div>
+                <!-- Connector line -->
+                @if ($index < stepLabels.length - 1) { <div class="step-line" [class.done]="$index + 1 < step">
+            </div>
+            }
+        </div>
+        }
+    </div>
+
+    <!-- ── BODY ───────────────────────────────────────────────────── -->
+    <div class="wizard-body">
+
+        <!-- LEFT: Step content -->
+        <div class="wizard-left">
+
+            <!-- STEP 1: Choose Type -->
+            @if (step === 1) {
+            <div class="step-heading">What kind of widget do you want to add?</div>
+            <div class="step-hint">Choose a widget type — you'll configure its data and appearance next.</div>
+            <div class="type-grid">
+                @for (item of catalog; track item.type) {
+                <button class="type-card" [class.is-selected]="selectedType === item.type"
+                    [style.--card-color]="item.color" (click)="selectType(item.type)">
+                    <div class="type-icon" [style.color]="item.color">{{ item.icon }}</div>
+                    <div class="type-info">
+                        <div class="type-label">{{ item.label }}</div>
+                        <div class="type-desc">{{ item.desc }}</div>
+                    </div>
+                </button>
+                }
+            </div>
+            }
+
+            <!-- STEP 2: Select Fields -->
+            @if (step === 2 && hasFields && selectedType) {
+            <div class="step-heading">Which fields should this widget display?</div>
+            <div class="step-hint">Only selected fields will appear. You can change this later by editing the
+                widget.
+            </div>
+            <app-field-selector [type]="selectedType" [selectedFields]="selectedFields"
+                (selectedFieldsChange)="onFieldsChange($event)" />
+            }
+
+            <!-- FINAL STEP: Configure -->
+            @if (isConfigStep && selectedType && cfg) {
+            <div class="step-heading">Set a title and fine-tune appearance</div>
+            <div class="step-hint">Adjust labels, colors, chart options, and other display settings.</div>
+
+            <!-- Title input -->
+            <div class="title-field" [formGroup]="titleForm">
+                <label class="field-label">Widget Title</label>
+                <input class="title-inp" formControlName="title" placeholder="e.g. Monthly Revenue"
+                    [class.is-invalid]="titleForm.get('title')?.invalid && titleForm.get('title')?.touched" />
+                @if (titleForm.get('title')?.invalid && titleForm.get('title')?.touched) {
+                <span class="error-msg">Title is required</span>
+                }
+            </div>
+
+            <!-- Type-specific config panel -->
+            @switch (selectedType) {
+            @case ('stat') {
+            <app-edit-stat-config [cfg]="cfgAsStat" (cfgChange)="onCfgChange($event)" />
+            }
+            @case ('analytics') {
+            <app-edit-analytics-config [cfg]="cfgAsAnalytics" (cfgChange)="onCfgChange($event)" />
+            }
+            @case ('bar') {
+            <app-edit-series-config [cfg]="cfgAsSeries" typeLabel="bar" (cfgChange)="onCfgChange($event)" />
+            }
+            @case ('line') {
+            <app-edit-series-config [cfg]="cfgAsSeries" typeLabel="line" (cfgChange)="onCfgChange($event)" />
+            }
+            @case ('pie') {
+            <app-edit-pie-config [cfg]="cfgAsPie" (cfgChange)="onCfgChange($event)" />
+            }
+            @case ('table') {
+            <app-edit-table-config [cfg]="cfgAsTable" (cfgChange)="onCfgChange($event)" />
+            }
+            @case ('progress') {
+            <app-edit-progress-config [cfg]="cfgAsProgress" (cfgChange)="onCfgChange($event)" />
+            }
+            @case ('note') {
+            <app-edit-note-config [cfg]="cfgAsNote" (cfgChange)="onCfgChange($event)" />
+            }
+            @case ('section') {
+            <app-edit-section-config [cfg]="cfgAsSection" (cfgChange)="onCfgChange($event)" />
+            }
+            }
+            }
+        </div>
+
+        <!-- RIGHT: Live preview -->
+        <div class="wizard-right">
+            <div class="preview-label">Live Preview</div>
+
+            <app-widget-mini-preview [type]="selectedType" [config]="cfg" [title]="previewTitle" />
+
+            <!-- Setup summary -->
+            @if (selectedType && cfg) {
+            <div class="summary">
+                <div class="summary-label">Setup Summary</div>
+                @for (row of summaryRows; track row.k) {
+                <div class="summary-row">
+                    <span class="summary-key">{{ row.k }}</span>
+                    <span class="summary-val">{{ row.v }}</span>
+                </div>
+                }
+            </div>
+            }
+
+            <!-- Selected field chips (step 2 only) -->
+            @if (selectedFieldChips.length > 0) {
+            <div class="chips-section">
+                <div class="summary-label">Selected</div>
+                <div class="chips">
+                    @for (chip of selectedFieldChips; track chip.label) {
+                    <span class="chip" [style.--chip-color]="chip.color">{{ chip.label }}</span>
+                    }
+                </div>
+            </div>
+            }
+        </div>
+
+    </div><!-- /wizard-body -->
+
+    <!-- ── FOOTER ─────────────────────────────────────────────────── -->
+    <div class="wizard-footer">
+        <!-- Back button -->
+        <div>
+            @if (step > 1) {
+            <button class="btn-back" (click)="prevStep()">← Back</button>
+            }
+        </div>
+
+        <!-- Step counter + next / add -->
+        <div class="footer-right">
+            <span class="step-counter">Step {{ step }} of {{ totalSteps }}</span>
+
+            @if (!isConfigStep) {
+            <button class="btn-next" [disabled]="!canNext()" (click)="nextStep()">
+                Next Step →
+            </button>
+            } @else {
+            <button class="btn-add" (click)="addToDashboard()">
+                <span class="btn-add-plus">+</span> Add to Dashboard
+            </button>
+            }
+        </div>
+    </div>
+
+</div>

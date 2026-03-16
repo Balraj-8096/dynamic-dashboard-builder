@@ -1,0 +1,42 @@
+<div class="section-hdr">Chart Options</div>
+<div class="two-col">
+  <div class="field-row">
+    <label class="field-label">Inner Radius (%)</label>
+    <div class="range-wrap">
+      <input type="range" min="0" max="80"
+        [value]="innerRadius"
+        (input)="upd('innerRadius', +$any($event.target).value)" />
+      <span class="range-label">{{ innerRadius }}% — {{ radiusLabel }}</span>
+    </div>
+  </div>
+  <div class="field-row">
+    <label class="field-label">Options</label>
+    <div style="display:flex;flex-direction:column;gap:8px;padding-top:6px">
+      <div class="toggle-wrap" (click)="upd('showLegend', !cfg.showLegend)">
+        <div class="toggle-box" [class.is-on]="cfg.showLegend"></div>
+        <span class="toggle-label">Show legend</span>
+      </div>
+      <div class="toggle-wrap" (click)="upd('showLabels', !cfg.showLabels)">
+        <div class="toggle-box" [class.is-on]="cfg.showLabels"></div>
+        <span class="toggle-label">Show labels</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section-hdr">Segments</div>
+@for (seg of data; track $index) {
+  <div style="display:grid;grid-template-columns:1fr 80px auto auto;gap:6px;margin-bottom:6px;align-items:center">
+    <input class="inp inp--sm" placeholder="Label"
+      [value]="seg.name"
+      (input)="updateSegment($index, 'name', $any($event.target).value)" />
+    <input class="inp inp--sm" type="number" placeholder="Value"
+      [value]="seg.value"
+      (input)="updateSegment($index, 'value', +$any($event.target).value)" />
+    <input type="color" class="inp inp--w40"
+      [value]="chartColor($index, seg.color)"
+      (input)="updateSegment($index, 'color', $any($event.target).value)" />
+    <button class="btn-remove-sm" (click)="removeSegment($index)">✕</button>
+  </div>
+}
+<button class="btn-add-dashed" (click)="addSegment()">+ Add Segment</button>

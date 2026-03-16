@@ -1,1 +1,40 @@
-<p>import-modal works!</p>
+<div class="import-modal">
+
+    <!-- ── HEADER ────────────────────────────────────────────── -->
+    <div class="modal-header">
+        <div>
+            <div class="modal-title">Import Layout</div>
+            <div class="modal-sub">Load a previously exported dashcraft JSON file</div>
+        </div>
+        <button class="btn-close" (click)="close()">×</button>
+    </div>
+
+    <!-- ── BODY ─────────────────────────────────────────────── -->
+    <div class="modal-body">
+
+        <!-- Drop zone -->
+        <div class="drop-zone" [class.is-dragging]="dragging" (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave()" (drop)="onDrop($event)" (click)="openFilePicker()">
+            <div class="drop-icon">⬆</div>
+            <div class="drop-primary">Drop your JSON file here</div>
+            <div class="drop-secondary">or click to browse</div>
+            <!-- Hidden file input -->
+            <input #fileInput type="file" accept=".json" style="display:none" (change)="onFileSelected($event)" />
+        </div>
+
+        <!-- Error message -->
+        @if (errorMsg) {
+        <div class="error-bar">
+            <span class="error-icon">✕</span>
+            {{ errorMsg }}
+        </div>
+        }
+
+        <!-- Warning -->
+        <div class="warning-bar">
+            <span class="warning-icon">⚠</span>
+            This replaces your current dashboard. Export first to save it.
+        </div>
+
+    </div>
+</div>

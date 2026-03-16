@@ -1,0 +1,94 @@
+<div class="section-hdr">Display Options</div>
+<div class="two-col">
+  @if (typeLabel === 'bar') {
+    <div class="field-row">
+      <label class="field-label">Orientation</label>
+      <select class="sel" [value]="$any(cfg).horizontal ? 'h' : 'v'"
+        (change)="upd('horizontal', $any($event.target).value === 'h')">
+        <option value="v">Vertical bars</option>
+        <option value="h">Horizontal bars</option>
+      </select>
+    </div>
+    <div class="field-row">
+      <label class="field-label">Stacked</label>
+      <div class="toggle-row">
+        <div class="toggle-wrap" (click)="upd('stacked', !$any(cfg).stacked)">
+          <div class="toggle-box" [class.is-on]="$any(cfg).stacked"></div>
+          <span class="toggle-label">Stack series</span>
+        </div>
+      </div>
+    </div>
+  }
+  @if (typeLabel === 'line') {
+    <div class="field-row">
+      <label class="field-label">Fill Area</label>
+      <div class="toggle-row">
+        <div class="toggle-wrap" (click)="upd('areaFill', !$any(cfg).areaFill)">
+          <div class="toggle-box" [class.is-on]="$any(cfg).areaFill"></div>
+          <span class="toggle-label">Area fill</span>
+        </div>
+      </div>
+    </div>
+    <div class="field-row">
+      <label class="field-label">Smooth Curve</label>
+      <div class="toggle-row">
+        <div class="toggle-wrap" (click)="upd('smooth', !$any(cfg).smooth)">
+          <div class="toggle-box" [class.is-on]="$any(cfg).smooth"></div>
+          <span class="toggle-label">Smooth</span>
+        </div>
+      </div>
+    </div>
+    <div class="field-row">
+      <label class="field-label">Show Dots</label>
+      <div class="toggle-row">
+        <div class="toggle-wrap" (click)="upd('showDots', !$any(cfg).showDots)">
+          <div class="toggle-box" [class.is-on]="$any(cfg).showDots"></div>
+          <span class="toggle-label">Data points</span>
+        </div>
+      </div>
+    </div>
+  }
+  <div class="field-row">
+    <label class="field-label">Grid Lines</label>
+    <div class="toggle-row">
+      <div class="toggle-wrap" (click)="upd('showGrid', !$any(cfg).showGrid)">
+        <div class="toggle-box" [class.is-on]="$any(cfg).showGrid"></div>
+        <span class="toggle-label">Show grid</span>
+      </div>
+    </div>
+  </div>
+  <div class="field-row">
+    <label class="field-label">Legend</label>
+    <div class="toggle-row">
+      <div class="toggle-wrap" (click)="upd('showLegend', !$any(cfg).showLegend)">
+        <div class="toggle-box" [class.is-on]="$any(cfg).showLegend"></div>
+        <span class="toggle-label">Show legend</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section-hdr">Data Series</div>
+@for (s of series; track $index) {
+  <div class="item-card">
+    <div class="item-card-header">
+      <span class="item-card-title">Series {{ $index + 1 }}</span>
+      @if (series.length > 1) {
+        <button class="btn-remove" (click)="removeSeries($index)">Remove</button>
+      }
+    </div>
+    <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:8px">
+      <input class="inp inp--sm" placeholder="Series name"
+        [value]="s.key"
+        (input)="updateSeriesField($index, 'key', $any($event.target).value)" />
+      <input type="color" class="inp inp--w44"
+        [value]="chartColor($index, s.color)"
+        (input)="updateSeriesField($index, 'color', $any($event.target).value)" />
+    </div>
+    <textarea class="ta"
+      [value]="seriesDataToStr(s)"
+      (change)="updateSeriesData($index, $any($event.target).value)"
+      placeholder="Label:Value&#10;Jan:420&#10;Feb:380&#10;..."></textarea>
+  </div>
+}
+<button class="btn-add-dashed" (click)="addSeries()">+ Add Series</button>

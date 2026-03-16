@@ -62,13 +62,19 @@ export interface StatConfig {
  * Metric with sparkline area chart
  */
 export interface AnalyticsConfig {
-  value:        string;
-  changeValue:  string;
-  changeLabel:  string;
-  trendUp:      boolean;
-  accent:       string;
-  data:         number[];
-  period:       string;
+  value:          string;
+  changeValue:    string;
+  changeLabel:    string;
+  trendUp:        boolean;
+  accent:         string;
+  data:           number[];
+  period:         string;
+  /**
+   * B6 fix: tracks which DATA_SCHEMA.kpi field is selected.
+   * Required so Edit Modal fields tab can pre-check the right radio.
+   * Single-element array (analytics is single-select).
+   */
+  selectedFields: string[];
 }
 
 /**
@@ -94,24 +100,34 @@ export interface ChartSeries {
  * Bar Chart config
  */
 export interface BarConfig {
-  accent:     string;
-  stacked:    boolean;
-  horizontal: boolean;
-  showGrid:   boolean;
-  showLegend: boolean;
-  series:     ChartSeries[];
+  accent:         string;
+  stacked:        boolean;
+  horizontal:     boolean;
+  showGrid:       boolean;
+  showLegend:     boolean;
+  series:         ChartSeries[];
+  /**
+   * B6 fix: tracks which DATA_SCHEMA.series IDs are selected.
+   * Required so Edit Modal fields tab can pre-check the right boxes.
+   */
+  selectedFields: string[];
 }
 
 /**
  * Line / Area Chart config
  */
 export interface LineConfig {
-  areaFill:   boolean;
-  smooth:     boolean;
-  showGrid:   boolean;
-  showDots:   boolean;
-  showLegend: boolean;
-  series:     ChartSeries[];
+  areaFill:       boolean;
+  smooth:         boolean;
+  showGrid:       boolean;
+  showDots:       boolean;
+  showLegend:     boolean;
+  series:         ChartSeries[];
+  /**
+   * B6 fix: tracks which DATA_SCHEMA.series IDs are selected.
+   * Required so Edit Modal fields tab can pre-check the right boxes.
+   */
+  selectedFields: string[];
 }
 
 /**
@@ -127,10 +143,15 @@ export interface PieSegment {
  * Pie / Donut Chart config
  */
 export interface PieConfig {
-  data:        PieSegment[];
-  innerRadius: number;
-  showLabels:  boolean;
-  showLegend:  boolean;
+  data:           PieSegment[];
+  innerRadius:    number;
+  showLabels:     boolean;
+  showLegend:     boolean;
+  /**
+   * B6 fix: tracks which DATA_SCHEMA.segments IDs are selected.
+   * Required so Edit Modal fields tab can pre-check the right boxes.
+   */
+  selectedFields: string[];
 }
 
 /**
@@ -154,11 +175,16 @@ export interface TableRow {
  * Data Table config
  */
 export interface TableConfig {
-  columns:      TableColumn[];
-  rows:         TableRow[];
-  striped:      boolean;
-  compact:      boolean;
-  statusColumn: boolean;
+  columns:        TableColumn[];
+  rows:           TableRow[];
+  striped:        boolean;
+  compact:        boolean;
+  statusColumn:   boolean;
+  /**
+   * B6 fix: tracks which DATA_SCHEMA.columns IDs are selected.
+   * Required so Edit Modal fields tab can pre-check the right boxes.
+   */
+  selectedFields: string[];
 }
 
 /**
@@ -175,9 +201,14 @@ export interface ProgressItem {
  * Progress Bars config
  */
 export interface ProgressConfig {
-  items:      ProgressItem[];
-  showValues: boolean;
-  animated:   boolean;
+  items:          ProgressItem[];
+  showValues:     boolean;
+  animated:       boolean;
+  /**
+   * B6 fix: tracks which DATA_SCHEMA.items IDs are selected.
+   * Required so Edit Modal fields tab can pre-check the right boxes.
+   */
+  selectedFields: string[];
 }
 
 /**

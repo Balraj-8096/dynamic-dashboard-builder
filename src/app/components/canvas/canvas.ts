@@ -9,6 +9,7 @@ import {
   inject,
   effect,
   ChangeDetectionStrategy,
+  HostListener,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -21,221 +22,194 @@ import {
 
 import { DashboardService } from '../../services/dashboard.service';
 import { Widget } from '../../core/interfaces';
-import { gridToPixel } from '../../core/layout.utils';
-import { COLS } from '../../core/constants';
+import { gridToPixel, nudgeWidget } from '../../core/layout.utils';
+import { COLS, KB_BLOCKED_TAGS, ZOOM_MAX, ZOOM_MIN } from '../../core/constants';
 import { WidgetCard } from "../widget-card/widget-card";
+import { Sidebar } from "../sidebar/sidebar";
+import { getCatalogByIndex } from '../../core/catalog';
+import { Toolbar } from "../toolbar/toolbar";
+import { MatDialog } from '@angular/material/dialog';
+import { AddWidgetWizard, WizardDialogData } from '../modals/add-widget-wizard/add-widget-wizard';
+import { EditModal } from '../modals/edit-modal/edit-modal';
+import { TemplatesModal } from '../modals/templates-modal/templates-modal';
+import { ImportModal } from '../modals/import-modal/import-modal';
+import { HelpModal } from '../modals/help-modal/help-modal';
+import { Minimap } from "../minimap/minimap";
+import { ContextMenu } from "../modals/context-menu/context-menu";
 
 @Component({
   selector: 'app-canvas',
-  imports: [CommonModule, WidgetCard],
+  imports: [CommonModule, WidgetCard, Sidebar, Toolbar, Minimap, ContextMenu],
   templateUrl: './canvas.html',
   styleUrl: './canvas.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Canvas implements OnInit, AfterViewInit, OnDestroy {
-  // ── Injections ──────────────────────────────────────────────
+export class Canvas implements OnInit, OnDestroy {
   readonly svc = inject(DashboardService);
-  private router = inject(Router);
+  private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
 
-  // ── Template refs ────────────────────────────────────────────
-  @ViewChild('mainRef') mainRef!: ElementRef<HTMLDivElement>;
-  @ViewChild('canvasRef') canvasRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('mainRef', { static: true }) mainRef!: ElementRef<HTMLElement>;
+  @ViewChild('canvasRef', { static: true }) canvasRef!: ElementRef<HTMLElement>;
 
-  // ── RxJS cleanup ─────────────────────────────────────────────
-  private destroy$ = new Subject<void>();
-
-  // ── ResizeObserver ───────────────────────────────────────────
-  private resizeObserver?: ResizeObserver;
-
-  // ── Expose COLS for template ─────────────────────────────────
   readonly COLS = COLS;
+  readonly colIndices = Array.from({ length: COLS }, (_, i) => i);
 
+  // Step 32: destroy$ drives all RxJS subscription cleanup
+  private readonly destroy$ = new Subject<void>();
+  private resizeObserver?: ResizeObserver;
+  // Step 32: stored reference so removeEventListener gets the same function
+  private onWheel!: (e: WheelEvent) => void;
 
   constructor() {
-    // Scroll to newly added widget after DOM commit
-    // Runs whenever widgets signal changes
+    // ── Add Widget Wizard ──────────────────────────────────────
+    // Single open point for sidebar / toolbar / Ctrl+1-9
+    effect(() => {
+      if (!this.svc.wizardOpen()) return;
+      const ref = this.dialog.open<AddWidgetWizard, WizardDialogData>(
+        AddWidgetWizard,
+        { width: '75%', data: { initType: this.svc.wizardInitType() } }
+      );
+      ref.afterClosed().subscribe(() => this.svc.closeWizard());
+    });
+
+    // ── Edit Modal ─────────────────────────────────────────────
+    effect(() => {
+      const widget = this.svc.editingWidget();
+      if (!widget) return;
+      const ref = this.dialog.open(EditModal, { width: '75%', data: widget });
+      ref.afterClosed().subscribe(() => this.svc.closeEditModal());
+    });
+
+    // ── Templates Modal ────────────────────────────────────────
+    effect(() => {
+      if (!this.svc.showTemplates()) return;
+      const ref = this.dialog.open(TemplatesModal, { width: '75%' });
+      ref.afterClosed().subscribe(() => this.svc.closeTemplates());
+    });
+
+    // ── Import Modal ───────────────────────────────────────────
+    effect(() => {
+      if (!this.svc.showImport()) return;
+      const ref = this.dialog.open(ImportModal, { width: '75%' });
+      ref.afterClosed().subscribe(() => this.svc.closeImport());
+    });
+
+    // ── Help Modal ─────────────────────────────────────────────
+    effect(() => {
+      if (!this.svc.showHelp()) return;
+      const ref = this.dialog.open(HelpModal, { width: '75%' });
+      ref.afterClosed().subscribe(() => this.svc.closeHelp());
+    });
+
+    // ── C21: auto-scroll to newly added widget ─────────────────
+    // pendingScrollId cleared on first match — fires once (C21)
     effect(() => {
       const widgets = this.svc.widgets();
-      const pending = this.svc.pendingScrollId;
-
-      if (!pending) return;
-
-      // Find the pending widget
-      const widget = widgets.find(w => w.id === pending);
-      if (!widget || !this.mainRef?.nativeElement) return;
-
-      // Clear pending flag — fires once only (C21 audit)
-      this.svc.pendingScrollId = null;
-
-      // Compute scroll target — centre widget in viewport
-      const colW = this.svc.colW();
-      const zoom = this.svc.zoom();
-      const px = gridToPixel(widget, colW);
-      const scaledTop = px.top * zoom;
-      const viewH = this.mainRef.nativeElement.clientHeight;
-      const widgetH = px.height * zoom;
-      const target = Math.max(
-        0,
-        scaledTop - (viewH - widgetH) / 2
-      );
-
-      this.mainRef.nativeElement.scrollTo({
-        top: target,
-        behavior: 'smooth',
-      });
-
-      this.svc.setScrollTop(target);
+      const pendingId = this.svc.pendingScrollId;
+      if (!pendingId) return;
+      const found = widgets.find(w => w.id === pendingId);
+      if (found) {
+        this.svc.pendingScrollId = null;
+        requestAnimationFrame(() =>
+          this.mainRef?.nativeElement.scrollTo({ top: 99999, behavior: 'smooth' })
+        );
+      }
     });
   }
 
+  ngOnInit(): void {
+    const main = this.mainRef.nativeElement;
+    const canvas = this.canvasRef.nativeElement;
 
-  ngOnInit(): void { }
+    // Step 32: ResizeObserver with rAF delay (bug fix #14)
+    this.resizeObserver = new ResizeObserver(() => {
+      requestAnimationFrame(() => this.svc.setCanvasW(canvas.offsetWidth));
+    });
+    this.resizeObserver.observe(canvas);
 
+    // Step 32: scroll uses fromEvent + takeUntil(destroy$)
+    fromEvent(main, 'scroll')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.svc.setScrollTop(main.scrollTop));
 
-  ngAfterViewInit(): void {
-    this.setupResizeObserver();
-    this.setupScrollListener();
-    this.setupZoomListener();
+    // Step 32: wheel stored as named reference for cleanup; passive:false for preventDefault
+    this.onWheel = (e: WheelEvent) => {
+      if (!e.ctrlKey && !e.metaKey) return;
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.1 : 0.1;
+      this.svc.setZoom(Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, this.svc.zoom() + delta)));
+    };
+    main.addEventListener('wheel', this.onWheel, { passive: false });
   }
 
-
   ngOnDestroy(): void {
+    // Step 32: complete destroy$ — kills all takeUntil subscriptions
     this.destroy$.next();
     this.destroy$.complete();
     this.resizeObserver?.disconnect();
+    // Step 32: remove wheel listener by stored reference
+    this.mainRef?.nativeElement.removeEventListener('wheel', this.onWheel);
   }
 
+  // ── Keyboard shortcuts (Step 22) ──────────────────────────────
+  @HostListener('document:keydown', ['$event'])
+  onKeyDown(e: KeyboardEvent): void {
+    // C24: block when typing in form fields
+    if (KB_BLOCKED_TAGS.has((e.target as HTMLElement).tagName)) return;
+    const ctrl = e.ctrlKey || e.metaKey;
 
-  // ── ResizeObserver ───────────────────────────────────────────
-
-  /**
-   * Watch canvas container width and update canvasW signal.
-   * Re-fires when returning from View mode (page signal changes).
-   * Includes rAF delay for layout settle (bug fix #14 React source).
-   */
-  private setupResizeObserver(): void {
-    if (!this.canvasRef?.nativeElement) return;
-
-    this.resizeObserver = new ResizeObserver(entries => {
-      const width = entries[0]?.contentRect.width;
-      if (width) {
-        // rAF ensures layout has settled before measuring
-        requestAnimationFrame(() => {
-          this.svc.setCanvasW(width);
-        });
-      }
-    });
-
-    this.resizeObserver.observe(this.canvasRef.nativeElement);
-
-    // Immediate measurement
-    requestAnimationFrame(() => {
-      const w = this.canvasRef.nativeElement.offsetWidth;
-      if (w) this.svc.setCanvasW(w);
-    });
-  }
-
-
-  // ── Scroll listener ──────────────────────────────────────────
-
-  /**
-   * Track scroll position reactively.
-   * Updates scrollTop signal for minimap viewport rect.
-   * NOT read from DOM at render time (bug fix #11 React source).
-   */
-  private setupScrollListener(): void {
-    if (!this.mainRef?.nativeElement) return;
-
-    fromEvent(this.mainRef.nativeElement, 'scroll')
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.svc.setScrollTop(
-          this.mainRef.nativeElement.scrollTop
-        );
-      });
-  }
-
-
-  // ── Zoom listener ────────────────────────────────────────────
-
-  /**
-   * Ctrl+scroll to zoom canvas.
-   * Uses passive: false to allow preventDefault.
-   * RxJS fromEvent with options via addEventListener directly.
-   */
-  private setupZoomListener(): void {
-    if (!this.mainRef?.nativeElement) return;
-
-    const el = this.mainRef.nativeElement;
-
-    const onWheel = (e: WheelEvent) => {
-      if (!e.ctrlKey) return;
+    // Ctrl+Z — undo
+    if (ctrl && e.key === 'z' && !e.shiftKey) { e.preventDefault(); this.svc.undo(); return; }
+    // Ctrl+Y / Ctrl+Shift+Z — redo
+    if (ctrl && (e.key === 'y' || (e.key === 'Z' && e.shiftKey))) { e.preventDefault(); this.svc.redo(); return; }
+    // Ctrl+D — duplicate (A3: svc.duplicateWidget always scrolls+selects)
+    if (ctrl && e.key === 'd') {
+      const w = this.svc.selectedWidget();
+      if (w) { e.preventDefault(); this.svc.duplicateWidget(w); }
+      return;
+    }
+    // Del/Backspace — delete (A2: deleteWidget clears all stale IDs)
+    if ((e.key === 'Delete' || e.key === 'Backspace') && this.svc.selectedId()) {
       e.preventDefault();
-      this.svc.setZoom(
-        this.svc.zoom() - e.deltaY * 0.001
-      );
+      this.svc.deleteWidget(this.svc.selectedId()!);
+      return;
+    }
+    // Escape — close all modals + deselect
+    if (e.key === 'Escape') { this.svc.closeAllModals(); return; }
+    // Ctrl+1-9 — open wizard (C18: getCatalogByIndex, ignores sidebarSearch)
+    if (ctrl && e.key >= '1' && e.key <= '9') {
+      const cat = getCatalogByIndex(parseInt(e.key, 10) - 1);
+      if (cat) { e.preventDefault(); this.svc.openWizard(cat.type); }
+      return;
+    }
+    // L/l — lock toggle (bug fix #9: case-insensitive)
+    if ((e.key === 'l' || e.key === 'L') && this.svc.selectedId()) {
+      this.svc.lockWidget(this.svc.selectedId()!);
+      return;
+    }
+    // Arrow nudge (C17: nudgeWidget — no push, silent block on collision)
+    const dirMap: Record<string, [number, number]> = {
+      ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1],
     };
-
-    // Must use addEventListener directly for passive:false
-    el.addEventListener('wheel', onWheel, { passive: false });
-
-    // Clean up on destroy
-    this.destroy$.pipe(
-      takeUntil(this.destroy$)
-    ).subscribe(() => {
-      el.removeEventListener('wheel', onWheel);
-    });
+    const dir = dirMap[e.key];
+    if (dir && this.svc.selectedId()) {
+      e.preventDefault();
+      const w = this.svc.selectedWidget();
+      if (w) this.svc.widgets.set(nudgeWidget(w, dir[0], dir[1], this.svc.widgets()));
+    }
   }
 
+  onCanvasClick(): void { this.svc.select(null); this.svc.closeContextMenu(); }
+  trackWidget(_: number, widget: { id: string }): string { return widget.id; }
 
-  // ── Canvas click ─────────────────────────────────────────────
-
-  /**
-   * Click on canvas background:
-   * - Deselects any selected widget
-   * - Closes context menu
-   */
-  onCanvasClick(): void {
-    this.svc.select(null);
-    this.svc.closeContextMenu();
-  }
-
-
-  // ── View mode navigation ─────────────────────────────────────
-
-  /**
-   * Navigate to view mode.
-   * Disabled when no widgets on canvas.
-   */
-  goToView(): void {
-    if (this.svc.widgetCount() === 0) return;
-    this.router.navigate(['/view']);
-  }
-
-
-  // ── Template helpers ─────────────────────────────────────────
-
-  /**
-   * TrackBy function for widget ngFor loop.
-   * Prevents full re-render when only one widget changes.
-   */
-  trackByWidget(_: number, widget: Widget): string {
-    return widget.id;
-  }
-
-  /**
-   * Get pixel rect for a widget.
-   * Called by template for each widget card positioning.
-   */
-  getPixelRect(widget: Widget) {
-    return gridToPixel(widget, this.svc.colW());
-  }
-
-  /**
-   * Get snap guide column positions during drag.
-   * Returns array of column x positions for visual guides.
-   */
-  getSnapGuidePositions(): number[] {
-    return Array.from({ length: this.COLS }, (_, i) => i);
+  get zoomStyle(): Record<string, string> {
+    const z = this.svc.zoom();
+    return {
+      transform: `scale(${z})`,
+      transformOrigin: 'top left',
+      width: `${100 / z}%`,
+      minHeight: `${100 / z}%`,
+    };
   }
 }

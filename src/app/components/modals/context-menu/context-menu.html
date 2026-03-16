@@ -1,1 +1,27 @@
-<p>context-menu works!</p>
+<!-- Transparent full-screen backdrop — click anywhere outside to close -->
+<div class="ctx-backdrop"
+  (click)="close()"
+  (contextmenu)="$event.preventDefault(); close()">
+</div>
+
+<!-- Menu panel -->
+<div class="ctx-menu" [style.left.px]="x" [style.top.px]="y">
+
+  <!-- Widget label header -->
+  <div class="ctx-header">
+    <div class="ctx-header-sub">Widget</div>
+    <div class="ctx-header-title">{{ widget?.title }}</div>
+  </div>
+
+  <!-- Menu items -->
+  @for (item of menuItems; track $index) {
+    @if (item === null) {
+      <div class="ctx-divider"></div>
+    } @else {
+      <button class="ctx-item" (click)="item.action()">
+        <span class="ctx-icon" [style.color]="item.color">{{ item.icon }}</span>
+        <span class="ctx-label">{{ item.label }}</span>
+      </button>
+    }
+  }
+</div>

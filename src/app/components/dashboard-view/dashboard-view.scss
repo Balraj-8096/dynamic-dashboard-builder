@@ -1,0 +1,235 @@
+.view-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg0);
+  color: var(--txt0);
+  font-family: var(--font-sans);
+}
+
+// ── Header ────────────────────────────────────────────────────
+.view-header {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: var(--bg1);
+  border-bottom: 1px solid var(--bdr);
+  flex-shrink: 0;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03);
+  gap: 12px;
+}
+
+.header-left,
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vdivider {
+  width: 1px;
+  height: 20px;
+  background: var(--bdr);
+  flex-shrink: 0;
+}
+
+// Back button
+.btn-back {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
+  border-radius: 7px;
+  border: 1px solid var(--bdr);
+  background: transparent;
+  color: var(--txt1);
+  cursor: pointer;
+  font-size: 13px;
+  font-family: var(--font-mono);
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+
+  &:hover {
+    background: var(--bg3);
+    border-color: var(--bdrH);
+    color: var(--txt0);
+  }
+}
+
+// Logo
+.logo {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.logo-diamond { color: var(--acc); }
+.logo-dash    { color: var(--txt0); }
+.logo-craft   { color: var(--acc2); }
+
+// Title
+.title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.view-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--txt0);
+}
+
+.live-badge {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--grn) 9%, transparent);
+  color: var(--grn);
+  border: 1px solid color-mix(in srgb, var(--grn) 20%, transparent);
+}
+
+// Type breakdown chips
+.type-chips {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.type-chip {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--chip-color, var(--acc)) 9%, transparent);
+  color: var(--chip-color, var(--acc));
+  border: 1px solid color-mix(in srgb, var(--chip-color, var(--acc)) 20%, transparent);
+}
+
+// Clock
+.clock { text-align: right; }
+
+.clock-time {
+  font-size: 13px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--txt0);
+}
+
+.clock-date {
+  font-size: 9px;
+  color: var(--txt2);
+  margin-top: 1px;
+}
+
+// Icon button (fullscreen)
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  border: 1px solid var(--bdr);
+  background: transparent;
+  cursor: pointer;
+  color: var(--txt1);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+
+  &:hover { background: var(--bg3); color: var(--txt0); }
+}
+
+// ── Canvas ────────────────────────────────────────────────────
+.view-main {
+  flex: 1;
+  overflow: auto;
+  background: var(--bg0);
+  position: relative;
+
+  &::-webkit-scrollbar       { width: 8px; height: 8px; }
+  &::-webkit-scrollbar-track { background: var(--bg0); }
+  &::-webkit-scrollbar-thumb { background: var(--bdr); border-radius: 4px; }
+}
+
+.view-canvas {
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
+  background-image: radial-gradient(circle, color-mix(in srgb, var(--bdr) 53%, transparent) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+// ── Empty state ────────────────────────────────────────────────
+.empty-state {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.empty-icon    { font-size: 64px; opacity: 0.06; font-family: var(--font-mono); }
+.empty-primary { font-size: 14px; color: var(--txt2); opacity: 0.4; }
+.empty-secondary { font-size: 12px; color: var(--txt2); opacity: 0.25; }
+
+// ── Footer ────────────────────────────────────────────────────
+.view-footer {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background: var(--bg1);
+  border-top: 1px solid var(--bdr);
+  flex-shrink: 0;
+}
+
+.footer-left,
+.footer-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.footer-stat {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--txt2);
+}
+
+.footer-locked {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--amb);
+}
+
+.footer-mode {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--txt2);
+}
+
+.btn-footer-back {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  padding: 3px 12px;
+  border-radius: 5px;
+  border: 1px solid var(--bdr);
+  background: transparent;
+  color: var(--txt2);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+
+  &:hover { color: var(--txt0); border-color: var(--bdrH); }
+}

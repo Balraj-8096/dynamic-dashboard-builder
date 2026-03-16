@@ -1,1 +1,51 @@
-<p>templates-modal works!</p>
+<div class="tpl-modal">
+
+    <!-- ── HEADER ─────────────────────────────────────────────── -->
+    <div class="modal-header">
+        <div>
+            <div class="modal-title">Dashboard Templates</div>
+            <div class="modal-sub">Start with a pre-built layout — you can customise everything after loading</div>
+        </div>
+        <button class="btn-close" (click)="close()">×</button>
+    </div>
+
+    <!-- ── WARNING ────────────────────────────────────────────── -->
+    <div class="warning-bar">
+        <span class="warning-icon">⚠</span>
+        Loading a template replaces your current dashboard. Export first to save it.
+    </div>
+
+    <!-- ── TEMPLATE GRID ──────────────────────────────────────── -->
+    <div class="tpl-grid">
+        @for (tpl of templates; track tpl.id) {
+        <button class="tpl-card" [style.--tpl-color]="tpl.color" (click)="loadTemplate(tpl)">
+
+            <!-- Icon + name row -->
+            <div class="tpl-top">
+                <div class="tpl-icon" [style.color]="tpl.color">{{ tpl.icon }}</div>
+                <div class="tpl-info">
+                    <div class="tpl-name">{{ tpl.name }}</div>
+                    <div class="tpl-count">{{ getWidgetCount(tpl) }} widgets</div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="tpl-desc">{{ tpl.description }}</div>
+
+            <!-- Widget type chips -->
+            <div class="tpl-chips">
+                @for (chip of getTypeChips(tpl); track chip.label) {
+                <span class="tpl-chip" [style.--chip-color]="chip.color">{{ chip.label }}</span>
+                }
+            </div>
+
+        </button>
+        }
+    </div>
+
+    <!-- ── FOOTER ─────────────────────────────────────────────── -->
+    <div class="modal-footer">
+        <button class="btn-cancel" (click)="close()">Cancel</button>
+    </div>
+
+</div>

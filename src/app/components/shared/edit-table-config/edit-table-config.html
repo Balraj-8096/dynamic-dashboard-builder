@@ -1,0 +1,88 @@
+<div class="section-hdr">Table Options</div>
+<div class="two-col">
+  <div class="field-row">
+    <label class="field-label">Row Stripes</label>
+    <div class="toggle-row">
+      <div class="toggle-wrap" (click)="upd('striped', !cfg.striped)">
+        <div class="toggle-box" [class.is-on]="cfg.striped"></div>
+        <span class="toggle-label">Alternating rows</span>
+      </div>
+    </div>
+  </div>
+  <div class="field-row">
+    <label class="field-label">Compact Mode</label>
+    <div class="toggle-row">
+      <div class="toggle-wrap" (click)="upd('compact', !cfg.compact)">
+        <div class="toggle-box" [class.is-on]="cfg.compact"></div>
+        <span class="toggle-label">Dense layout</span>
+      </div>
+    </div>
+  </div>
+  <div class="field-row">
+    <label class="field-label">Status Column</label>
+    <div class="toggle-row">
+      <div class="toggle-wrap" (click)="upd('statusColumn', !cfg.statusColumn)">
+        <div class="toggle-box" [class.is-on]="cfg.statusColumn"></div>
+        <span class="toggle-label">Auto-color status</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section-hdr">Columns</div>
+@for (col of cols; track $index) {
+  <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:6px;margin-bottom:6px;align-items:center">
+    <input class="inp inp--sm inp--mono" placeholder="Key (code)"
+      [value]="col.key"
+      (input)="updateCol($index, 'key', $any($event.target).value)" />
+    <input class="inp inp--sm" placeholder="Display label"
+      [value]="col.label"
+      (input)="updateCol($index, 'label', $any($event.target).value)" />
+    <button class="btn-remove-sm" (click)="removeCol($index)">✕</button>
+  </div>
+}
+<button class="btn-add-dashed" style="margin-bottom:16px" (click)="addCol()">+ Add Column</button>
+
+<div class="section-hdr">Rows</div>
+<div style="overflow-x:auto">
+  <table class="data-table">
+    <thead>
+      <tr>
+        @for (col of cols; track col.key) {
+          <th>{{ col.key }}</th>
+        }
+        <th style="width:32px"></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of rows; track $index) {
+        <tr>
+          @for (col of cols; track col.key) {
+            <td>
+              <input class="inp inp--sm inp--mono"
+                [value]="row[col.key] || ''"
+                (input)="updateRow($index, col.key, $any($event.target).value)" />
+            </td>
+          }
+          <td>
+            <button class="btn-remove" (click)="removeRow($index)">✕</button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+<button class="btn-add-dashed" style="margin-top:8px" (click)="addRow()">+ Add Row</button>
+
+@if (cfg.statusColumn) {
+  <div class="status-hint">
+    <div class="status-hint-label">AUTO-COLORED STATUS VALUES</div>
+    <div class="status-chips">
+      @for (entry of statusEntries; track entry[0]) {
+        <span class="status-chip" [style.background]="entry[1].bg" [style.color]="entry[1].fg">
+          {{ entry[0] }}
+        </span>
+      }
+    </div>
+  </div>
+}

@@ -1,0 +1,245 @@
+.toolbar {
+  height: var(--toolbar-h);
+  background: var(--bg1);
+  border-bottom: 1px solid var(--bdr);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+// ── Clusters ──────────────────────────────────────────────────
+.cluster {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  &--left  { min-width: 0; }
+  &--right { flex-shrink: 0; }
+}
+
+// ── Vertical divider ──────────────────────────────────────────
+.vdivider {
+  width: 1px;
+  height: 18px;
+  background: var(--bdr);
+  flex-shrink: 0;
+  margin: 0 3px;
+}
+
+// ── Logo ──────────────────────────────────────────────────────
+.logo {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 0;
+}
+
+.logo-diamond { color: var(--acc); }
+.logo-dash    { color: var(--txt0); }
+.logo-craft   { color: var(--acc2); }
+
+// ── Title ─────────────────────────────────────────────────────
+.title-span {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--txt0);
+  cursor: text;
+  padding: 3px 6px;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: border-color var(--transition-base);
+
+  &:hover { border-color: var(--bdrH); }
+}
+
+.title-input {
+  background: var(--bg3);
+  border: 1px solid var(--acc);
+  border-radius: 5px;
+  color: var(--txt0);
+  padding: 3px 8px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  outline: none;
+  width: 180px;
+}
+
+.widget-count {
+  font-size: 11px;
+  color: var(--txt2);
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+}
+
+// ── Icon buttons (undo/redo/help) ─────────────────────────────
+.btn-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--bdr);
+  background: transparent;
+  color: var(--txt1);
+  cursor: pointer;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+
+  &:not(:disabled):hover {
+    background: var(--bg3);
+    color: var(--txt0);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+// ── Text buttons ──────────────────────────────────────────────
+.btn-text {
+  padding: 5px 11px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--bdr);
+  background: transparent;
+  color: var(--txt1);
+  cursor: pointer;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+
+  &:hover {
+    background: var(--bg3);
+    color: var(--txt0);
+  }
+
+  &--green {
+    color: var(--grn);
+    &:hover {
+      background: color-mix(in srgb, var(--grn) 8%, #000);
+      color: var(--grn);
+    }
+  }
+
+  &--red {
+    color: var(--red);
+    border-color: color-mix(in srgb, var(--red) 18%, transparent);
+    &:hover {
+      background: color-mix(in srgb, var(--red) 10%, #000);
+      color: var(--red);
+    }
+  }
+}
+
+// ── Add Widget button ─────────────────────────────────────────
+.btn-add {
+  padding: 6px 16px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: linear-gradient(135deg, #1d4ed8, var(--acc));
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--acc) 27%, transparent);
+  transition: opacity var(--transition-fast);
+  white-space: nowrap;
+
+  &:hover { opacity: 0.88; }
+}
+
+// ── Zoom group ────────────────────────────────────────────────
+.zoom-group {
+  display: flex;
+  align-items: center;
+  background: var(--bg3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--bdr);
+  overflow: hidden;
+}
+
+.zoom-btn {
+  width: 26px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--txt1);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+
+  &:first-child { border-right: 1px solid var(--bdr); }
+  &:last-child  { border-left:  1px solid var(--bdr); }
+
+  &:hover {
+    background: var(--bg4);
+    color: var(--txt0);
+  }
+}
+
+.zoom-pct {
+  height: 28px;
+  padding: 0 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--txt1);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  min-width: 42px;
+  text-align: center;
+
+  &:hover {
+    background: color-mix(in srgb, var(--acc) 16%, transparent);
+    color: var(--acc2);
+  }
+
+  &.is-non-default {
+    background: color-mix(in srgb, var(--acc) 9%, transparent);
+    color: var(--acc);
+  }
+}
+
+// ── View button ───────────────────────────────────────────────
+.btn-view {
+  padding: 6px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in srgb, var(--grn) 40%, transparent);
+  background: color-mix(in srgb, var(--grn) 7%, transparent);
+  color: var(--grn);
+  cursor: pointer;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+
+  &:not(:disabled):hover {
+    background: var(--grn);
+    color: #000;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}

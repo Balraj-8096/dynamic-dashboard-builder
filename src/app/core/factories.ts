@@ -77,6 +77,7 @@ export function createAnalytics(x: number, y: number): Widget {
             accent: '#22c55e',
             data: [18, 25, 32, 28, 42, 38, 51, 45, 60, 54, 68, 72],
             period: 'Last 12 weeks',
+            selectedFields: [],
         },
     };
 }
@@ -127,6 +128,7 @@ export function createBar(x: number, y: number): Widget {
                     ],
                 },
             ],
+            selectedFields: [],
         },
     };
 }
@@ -179,6 +181,7 @@ export function createLine(x: number, y: number): Widget {
                     ],
                 },
             ],
+            selectedFields: [],
         },
     };
 }
@@ -208,6 +211,7 @@ export function createPie(x: number, y: number): Widget {
                 { name: 'Social Media', value: 1200, color: '#a78bfa' },
                 { name: 'Email', value: 900, color: '#f97316' },
             ],
+            selectedFields: [],
         },
     };
 }
@@ -246,6 +250,7 @@ export function createTable(x: number, y: number): Widget {
                 { id: '#10477', customer: 'Eve Stanton', product: 'Starter', amount: '$49.00', date: 'Dec 12', status: 'paid' },
                 { id: '#10476', customer: 'Frank Ohara', product: 'Pro Plan', amount: '$299.00', date: 'Dec 12', status: 'paid' },
             ],
+            selectedFields: [],
         },
     };
 }
@@ -274,6 +279,7 @@ export function createProgress(x: number, y: number): Widget {
                 { label: 'NPS Score', value: 64, max: 100, color: '#a78bfa' },
                 { label: 'Uptime', value: 99, max: 100, color: '#06b6d4' },
             ],
+            selectedFields: [],
         },
     };
 }

@@ -376,6 +376,8 @@ export function buildConfigFromFields(
   switch (type) {
 
     // ── Stat ────────────────────────────────────────────────
+    // B3 fix: was missing subValue (field.category) and
+    // description (field.label) — both visible in the stat card UI
     case 'stat': {
       const fields = selectedIds
         .map(id => DATA_SCHEMA.kpi.find(f => f.id === id))
@@ -383,21 +385,26 @@ export function buildConfigFromFields(
 
       if (!fields.length) return existingConfig;
 
-      const first  = fields[0];
-      const base   = existingConfig as StatConfig;
+      const first = fields[0];
+      const base  = existingConfig as StatConfig;
 
       return {
         ...base,
         value:          first.value,
+        subValue:       first.category,   // B3 fix: category label below metric name
         trend:          first.trend,
         trendUp:        first.trendUp,
         accent:         first.accent,
         sparkData:      first.spark,
+        description:    first.label,      // B3 fix: full field label shown as description
         selectedFields: selectedIds,
       } satisfies StatConfig;
     }
 
     // ── Analytics ───────────────────────────────────────────
+    // B2 fix: was missing changeLabel (field.category)
+    // B9 fix: was missing selectedFields — edit modal radio
+    //         couldn't determine which KPI was selected
     case 'analytics': {
       const field = DATA_SCHEMA.kpi.find(f => f.id === selectedIds[0]);
       if (!field) return existingConfig;
@@ -406,15 +413,19 @@ export function buildConfigFromFields(
 
       return {
         ...base,
-        value:       field.value,
-        changeValue: field.trend,
-        trendUp:     field.trendUp,
-        accent:      field.accent,
-        data:        field.spark,
+        value:          field.value,
+        changeValue:    field.trend,
+        changeLabel:    field.category,   // B2 fix: e.g. "Finance", "Audience"
+        trendUp:        field.trendUp,
+        accent:         field.accent,
+        data:           field.spark,
+        selectedFields: selectedIds,      // B9 fix: persists selection for re-edit
       } satisfies AnalyticsConfig;
     }
 
     // ── Bar ─────────────────────────────────────────────────
+    // B6 fix: was missing selectedFields — edit modal checkboxes
+    //         had no way to know which series were selected
     case 'bar': {
       const series = selectedIds
         .map(id => DATA_SCHEMA.series.find(s => s.id === id))
@@ -431,10 +442,12 @@ export function buildConfigFromFields(
           color: s.color,
           data:  s.data,
         })),
+        selectedFields: selectedIds,      // B6 fix
       } satisfies BarConfig;
     }
 
     // ── Line ────────────────────────────────────────────────
+    // B6 fix: same as bar — selectedFields needed for re-edit
     case 'line': {
       const series = selectedIds
         .map(id => DATA_SCHEMA.series.find(s => s.id === id))
@@ -451,10 +464,12 @@ export function buildConfigFromFields(
           color: s.color,
           data:  s.data,
         })),
+        selectedFields: selectedIds,      // B6 fix
       } satisfies LineConfig;
     }
 
     // ── Pie ─────────────────────────────────────────────────
+    // B6 fix: selectedFields needed for edit modal re-selection
     case 'pie': {
       const segments = selectedIds
         .map(id => DATA_SCHEMA.segments.find(s => s.id === id))
@@ -471,10 +486,16 @@ export function buildConfigFromFields(
           value: s.value,
           color: s.color,
         })),
+        selectedFields: selectedIds,      // B6 fix
       } satisfies PieConfig;
     }
 
     // ── Table ───────────────────────────────────────────────
+    // B4 fix: was only updating columns — rows must be rebuilt
+    //         to add missing keys (blank) and preserve existing
+    //         data for keys that remain. Without this, MatTable
+    //         renders blank cells for new columns.
+    // B6 fix: selectedFields needed for edit modal re-selection
     case 'table': {
       const cols = selectedIds
         .map(id => DATA_SCHEMA.columns.find(c => c.id === id))
@@ -484,17 +505,34 @@ export function buildConfigFromFields(
 
       const base = existingConfig as TableConfig;
 
+      // B4 fix: rebuild rows to match new column set
+      // — preserve existing values for keys that remain
+      // — add empty string for any newly-added column key
+      const visibleCols = cols.map(c => ({
+        key:   c.key,
+        label: c.label,
+        width: 'auto' as const,
+      }));
+
+      const updatedRows = (base.rows ?? []).map(row => {
+        const newRow: Record<string, string> = {};
+        visibleCols.forEach(col => {
+          // Keep existing value if present, otherwise blank
+          newRow[col.key] = col.key in row ? row[col.key] : '';
+        });
+        return newRow;
+      });
+
       return {
         ...base,
-        columns: cols.map(c => ({
-          key:   c.key,
-          label: c.label,
-          width: 'auto',
-        })),
+        columns:        visibleCols,
+        rows:           updatedRows,      // B4 fix: rebuilt rows
+        selectedFields: selectedIds,      // B6 fix
       } satisfies TableConfig;
     }
 
     // ── Progress ────────────────────────────────────────────
+    // B6 fix: selectedFields needed for edit modal re-selection
     case 'progress': {
       const items = selectedIds
         .map(id => DATA_SCHEMA.items.find(i => i.id === id))
@@ -512,6 +550,7 @@ export function buildConfigFromFields(
           max:   i.max,
           color: i.color,
         })),
+        selectedFields: selectedIds,      // B6 fix
       } satisfies ProgressConfig;
     }
 

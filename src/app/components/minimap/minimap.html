@@ -1,1 +1,40 @@
-<p>minimap works!</p>
+<div class="minimap" (click)="onMinimapClick($event)">
+  <!-- Label strip -->
+  <div class="minimap-label">Minimap</div>
+
+  <!-- SVG canvas representation -->
+  <svg
+    #svgEl
+    [attr.width]="W"
+    [attr.height]="minimapH"
+    [attr.viewBox]="'0 0 ' + W + ' ' + minimapH"
+    class="minimap-svg">
+
+    <!-- Widget rectangles -->
+    @for (r of widgetRects; track r.id) {
+      <rect
+        [attr.x]="r.x"
+        [attr.y]="r.y"
+        [attr.width]="r.width"
+        [attr.height]="r.height"
+        [attr.fill]="r.fill"
+        [attr.stroke]="r.stroke"
+        stroke-width="0.5"
+        rx="1"
+      />
+    }
+
+    <!-- Viewport indicator -->
+    <rect
+      [attr.x]="viewportRect.x"
+      [attr.y]="viewportRect.y"
+      [attr.width]="viewportRect.width"
+      [attr.height]="viewportRect.height"
+      fill="color-mix(in srgb, var(--acc) 7%, transparent)"
+      stroke="var(--acc)"
+      stroke-width="1"
+      rx="2"
+    />
+
+  </svg>
+</div>

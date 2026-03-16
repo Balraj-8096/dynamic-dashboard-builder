@@ -1,0 +1,24 @@
+<div class="view-card" [ngStyle]="posStyle">
+
+    <!-- Clean read-only header — no action buttons, no drag cursor -->
+    <div class="card-header">
+        <span class="card-icon" [style.color]="cat?.color">{{ cat?.icon }}</span>
+        <span class="card-title">{{ widget.title }}</span>
+        <span class="card-type">{{ cat?.label }}</span>
+    </div>
+
+    <!-- Widget content -->
+    <div class="card-content" [style.height.px]="contentH">
+        @switch (widget.type) {
+        @case ('stat') { <app-stat-widget [widget]="widget" [contentH]="contentH" /> }
+        @case ('analytics') { <app-analytics-widget [widget]="widget" [contentH]="contentH" /> }
+        @case ('bar') { <app-bar-widget [widget]="widget" [contentH]="contentH" /> }
+        @case ('line') { <app-line-widget [widget]="widget" [contentH]="contentH" /> }
+        @case ('pie') { <app-pie-widget [widget]="widget" [contentH]="contentH" /> }
+        @case ('table') { <app-table-widget [widget]="widget" [contentH]="contentH" /> }
+        @case ('progress') { <app-progress-widget [widget]="widget" [contentH]="contentH" /> }
+        @case ('note') { <app-note-widget [widget]="widget" [contentH]="contentH" /> }
+        @case ('section') { <app-section-widget [widget]="widget" [contentH]="contentH" /> }
+        }
+    </div>
+</div>

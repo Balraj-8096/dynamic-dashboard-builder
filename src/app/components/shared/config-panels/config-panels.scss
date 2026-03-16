@@ -1,0 +1,275 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// _config-panels.scss
+// Shared form styles for all 8 config panel components.
+// Referenced in each config panel's styleUrls.
+// ─────────────────────────────────────────────────────────────────────────────
+
+:host { display: block; }
+
+// ── Section header ──────────────────────────────────────────────
+.section-hdr {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--txt2);
+  padding: 12px 0 6px;
+  border-bottom: 1px solid var(--bdr);
+  margin-bottom: 10px;
+
+  &:first-child { padding-top: 0; }
+}
+
+// ── Two-column grid ─────────────────────────────────────────────
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.three-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+// ── Field row ───────────────────────────────────────────────────
+.field-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  .field-label {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--txt2);
+  }
+
+  .field-hint {
+    font-size: 10px;
+    color: var(--txt2);
+    margin-top: 2px;
+  }
+}
+
+// ── Inputs ───────────────────────────────────────────────────────
+.inp {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--bdr);
+  border-radius: var(--radius-sm);
+  color: var(--txt0);
+  padding: 7px 10px;
+  font-size: 13px;
+  font-family: var(--font-sans);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color var(--transition-fast);
+
+  &:focus { border-color: var(--acc); }
+
+  &::placeholder { color: var(--txt2); }
+
+  &[type='color'] {
+    height: 40px;
+    padding: 4px;
+    cursor: pointer;
+  }
+
+  &[type='number'] { font-family: var(--font-mono); }
+
+  &.inp--sm { font-size: 12px; padding: 5px 8px; }
+  &.inp--mono { font-family: var(--font-mono); font-size: 12px; }
+  &.inp--w44 { width: 44px; }
+  &.inp--w64 { width: 64px; }
+  &.inp--w40 { width: 40px; padding: 4px; }
+}
+
+.sel {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--bdr);
+  border-radius: var(--radius-sm);
+  color: var(--txt0);
+  padding: 7px 10px;
+  font-size: 13px;
+  font-family: var(--font-sans);
+  outline: none;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+  appearance: none;
+  box-sizing: border-box;
+
+  &:focus { border-color: var(--acc); }
+
+  option { background: var(--bg3); }
+
+  &.sel--sm { font-size: 12px; padding: 5px 8px; }
+}
+
+.ta {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--bdr);
+  border-radius: var(--radius-sm);
+  color: var(--txt0);
+  padding: 8px 10px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  outline: none;
+  resize: vertical;
+  box-sizing: border-box;
+  transition: border-color var(--transition-fast);
+  min-height: 80px;
+  line-height: 1.5;
+
+  &:focus { border-color: var(--acc); }
+
+  &::placeholder { color: var(--txt2); }
+}
+
+// ── Toggle row ───────────────────────────────────────────────────
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+}
+
+.toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-box {
+  width: 32px;
+  height: 18px;
+  border-radius: 9px;
+  border: 1px solid var(--bdr);
+  background: var(--bg3);
+  position: relative;
+  transition: all var(--transition-base);
+  flex-shrink: 0;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--txt2);
+    transition: all var(--transition-base);
+  }
+
+  &.is-on {
+    background: color-mix(in srgb, var(--acc) 18%, transparent);
+    border-color: var(--acc);
+
+    &::after {
+      left: 16px;
+      background: var(--acc);
+    }
+  }
+}
+
+.toggle-label {
+  font-size: 12px;
+  color: var(--txt1);
+}
+
+// ── Card box (series, items) ─────────────────────────────────────
+.item-card {
+  background: var(--bg0);
+  border: 1px solid var(--bdr);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+
+.item-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+
+  .item-card-title {
+    font-size: 12px;
+    color: var(--txt0);
+    font-weight: 500;
+  }
+}
+
+// ── Remove / add buttons ─────────────────────────────────────────
+.btn-remove {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--red);
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background var(--transition-fast);
+
+  &:hover { background: color-mix(in srgb, var(--red) 10%, transparent); }
+}
+
+.btn-remove-sm {
+  background: transparent;
+  border: 1px solid var(--bdr);
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--red);
+  padding: 4px 8px;
+  font-size: 12px;
+  transition: background var(--transition-fast);
+
+  &:hover { background: color-mix(in srgb, var(--red) 10%, transparent); }
+}
+
+.btn-add-dashed {
+  width: 100%;
+  padding: 8px;
+  background: var(--bg3);
+  border: 1px dashed var(--bdrH);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--acc);
+  font-size: 12px;
+  font-family: var(--font-mono);
+  transition: all var(--transition-fast);
+  margin-top: 4px;
+
+  &:hover {
+    background: var(--bg4);
+    border-color: var(--acc);
+  }
+}
+
+// ── Range slider ─────────────────────────────────────────────────
+.range-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+input[type='range'] {
+  width: 100%;
+  margin-top: 8px;
+  accent-color: var(--acc);
+  cursor: pointer;
+}
+
+.range-label {
+  font-size: 11px;
+  color: var(--txt2);
+  font-family: var(--font-mono);
+}

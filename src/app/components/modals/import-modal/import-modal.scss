@@ -1,0 +1,135 @@
+.import-modal {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg1);
+  border-radius: 16px;
+  width: 75vw;
+  max-width: 440px;
+  box-shadow: var(--shadow-modal);
+  overflow: hidden;
+}
+
+// ── Header ────────────────────────────────────────────────────
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--bdr);
+  flex-shrink: 0;
+}
+
+.modal-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--txt0);
+}
+
+.modal-sub {
+  font-size: 11px;
+  color: var(--txt2);
+  margin-top: 2px;
+}
+
+.btn-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  border: 1px solid var(--bdr);
+  background: transparent;
+  cursor: pointer;
+  color: var(--txt1);
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+
+  &:hover { background: var(--bg3); color: var(--txt0); }
+}
+
+// ── Body ──────────────────────────────────────────────────────
+.modal-body {
+  padding: 20px 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+// ── Drop zone ─────────────────────────────────────────────────
+.drop-zone {
+  border: 2px dashed var(--bdrH);
+  border-radius: 10px;
+  padding: 32px 24px;
+  text-align: center;
+  cursor: pointer;
+  background: var(--bg0);
+  transition: all var(--transition-base);
+  user-select: none;
+
+  &:hover {
+    border-color: var(--acc);
+    background: color-mix(in srgb, var(--acc) 3%, transparent);
+  }
+
+  &.is-dragging {
+    border-color: var(--acc);
+    background: color-mix(in srgb, var(--acc) 5%, transparent);
+  }
+}
+
+.drop-icon {
+  font-size: 32px;
+  margin-bottom: 10px;
+  opacity: 0.5;
+  color: var(--txt1);
+}
+
+.drop-primary {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--txt0);
+  margin-bottom: 5px;
+}
+
+.drop-secondary {
+  font-size: 11px;
+  color: var(--txt2);
+}
+
+// ── Error bar ─────────────────────────────────────────────────
+.error-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: color-mix(in srgb, var(--red) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--red) 25%, transparent);
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  color: var(--red);
+}
+
+.error-icon {
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+// ── Warning bar ───────────────────────────────────────────────
+.warning-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--bg3);
+  border-radius: var(--radius-md);
+  font-size: 11px;
+  color: var(--txt2);
+  line-height: 1.6;
+}
+
+.warning-icon {
+  color: var(--amb);
+  flex-shrink: 0;
+}

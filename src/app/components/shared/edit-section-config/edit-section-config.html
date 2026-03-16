@@ -1,0 +1,37 @@
+<div class="section-hdr">Label</div>
+<div class="field-row" style="margin-bottom:10px">
+  <label class="field-label">Section Text</label>
+  <input class="inp"
+    placeholder="e.g. Revenue Overview"
+    [value]="cfg.label || ''"
+    (input)="upd('label', $any($event.target).value)" />
+</div>
+
+<div class="section-hdr">Appearance</div>
+<div class="two-col">
+  <div class="field-row">
+    <label class="field-label">Accent Color</label>
+    <input type="color" class="inp"
+      [value]="cfg.accent || '#3b82f6'"
+      (input)="upd('accent', $any($event.target).value)" />
+  </div>
+  <div class="field-row">
+    <label class="field-label">Alignment</label>
+    <select class="sel"
+      [value]="cfg.align || 'left'"
+      (change)="upd('align', $any($event.target).value)">
+      <option value="left">Left</option>
+      <option value="center">Center</option>
+      <option value="right">Right</option>
+    </select>
+  </div>
+  <div class="field-row">
+    <label class="field-label">Show Line</label>
+    <div class="toggle-row">
+      <div class="toggle-wrap" (click)="upd('showLine', cfg.showLine === false ? true : false)">
+        <div class="toggle-box" [class.is-on]="cfg.showLine !== false"></div>
+        <span class="toggle-label">Divider line</span>
+      </div>
+    </div>
+  </div>
+</div>

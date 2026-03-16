@@ -308,16 +308,25 @@ export class DashboardService {
   );
 
   /**
-   * Whether any modal is currently open.
-   * Used to suppress keyboard shortcuts when modal is active.
+   * Whether any BLOCKING modal is currently open.
+   * Used to suppress keyboard shortcuts when a dialog is active.
+   *
+   * B8 fix: contextMenu intentionally excluded.
+   * In React, keyboard shortcuts (Del, L, arrows) fire normally
+   * while the context menu is visible — only Esc closes it.
+   * Including contextMenu here would silently block Del/L/nudge
+   * whenever the user right-clicks, which is wrong.
+   *
+   * The keyboard handler (Step 22) will explicitly check
+   * contextMenu separately and close it on Esc only.
    */
   readonly isAnyModalOpen = computed(() =>
-    this.wizardOpen() ||
+    this.wizardOpen()      ||
     this.isEditModalOpen() ||
-    this.showTemplates() ||
-    this.showImport() ||
-    this.showHelp() ||
-    this.contextMenu() !== null
+    this.showTemplates()   ||
+    this.showImport()      ||
+    this.showHelp()
+    // contextMenu excluded — B8 fix
   );
 
   /**
@@ -854,6 +863,7 @@ export class DashboardService {
     this.dashTitle.set('My Dashboard');
     this.selectedId.set(null);
     this.frontId.set(null);
+    this.animatingId.set(null);    // B7 fix: clear any in-flight save animation
   }
 
   /**
@@ -945,4 +955,3 @@ export class DashboardService {
     }
   }
 }
-

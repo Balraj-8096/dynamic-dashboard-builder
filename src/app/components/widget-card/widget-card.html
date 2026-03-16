@@ -1,153 +1,77 @@
-<!-- ═══════════════════════════════════════════════════════════
-     Widget Card — Interactive wrapper
-     ═══════════════════════════════════════════════════════════ -->
+<div class="widget-card"
+  [ngStyle]="posStyle"
+  [class.is-selected]="isSelected"
+  [class.is-active]="isActive"
+  [class.is-front]="isFront"
+  [class.is-animating]="isAnimating"
+  [class.is-locked]="isLocked"
+  (click)="onCardClick($event)"
+  (contextmenu)="onContextMenu($event)">
 
-<div class="widget-card" [class.is-selected]="isSelected" [class.is-active]="isActive" [class.is-front]="isFront"
-    [class.is-animating]="isAnimating" [class.is-locked]="isLocked" [style.left.px]="pixelRect.left"
-    [style.top.px]="pixelRect.top" [style.width.px]="pixelRect.width" [style.height.px]="pixelRect.height"
-    [style.z-index]="isActive ? 200 : isFront ? 100 : isSelected ? 150 : 1" (click)="onCardClick($event)"
-    (contextmenu)="onContextMenu($event)">
+  <!-- ── HEADER ────────────────────────────────────────────── -->
+  <div class="card-header"
+    [class.can-drag]="!isLocked"
+    (mousedown)="onHeaderMousedown($event)">
 
-    <!-- ── Header ──────────────────────────────────────────── -->
-    <div class="widget-header" [class.widget-header--draggable]="!isLocked" (mousedown)="onDragStart($event)">
-
-        <!-- Left: icon + title -->
-        <div class="widget-header__left">
-
-            <!-- Widget type icon -->
-            <span class="widget-header__icon" [style.color]="catalogColor">
-                {{ catalogIcon }}
-            </span>
-
-            <!-- Widget title -->
-            <span class="widget-header__title">
-                {{ widget.title }}
-            </span>
-
-            <!-- Lock badge -->
-            @if (isLocked) {
-            <span class="widget-badge widget-badge--locked">
-                🔒 locked
-            </span>
-            }
-
-            <!-- Front badge -->
-            @if (isFront) {
-            <span class="widget-badge widget-badge--front">
-                ↑ front
-            </span>
-            }
-
-        </div>
-
-        <!-- Right: type label + action buttons -->
-        <div class="widget-header__right">
-
-            <!-- Type label — always visible -->
-            <span class="widget-header__type" [style.color]="catalogColor">
-                {{ catalogLabel }}
-            </span>
-
-            <!-- Action buttons — visible on hover -->
-            <div class="widget-actions">
-
-                <!-- Edit -->
-                <button class="widget-action-btn" title="Edit widget" (click)="onEdit($event)">
-                    ✎
-                </button>
-
-                <!-- Duplicate -->
-                <button class="widget-action-btn" title="Duplicate widget" (click)="onDuplicate($event)">
-                    ⧉
-                </button>
-
-                <!-- Lock / Unlock -->
-                <button class="widget-action-btn" [title]="isLocked ? 'Unlock widget' : 'Lock widget'"
-                    (click)="onLock($event)">
-                    {{ isLocked ? '🔓' : '🔒' }}
-                </button>
-
-                <!-- Bring to front -->
-                <button class="widget-action-btn" title="Bring to front" (click)="onBringFront($event)">
-                    ↑
-                </button>
-
-                <!-- Delete -->
-                <button class="widget-action-btn widget-action-btn--danger" title="Delete widget"
-                    (click)="onDelete($event)">
-                    ✕
-                </button>
-
-            </div>
-
-        </div>
-
+    <!-- Left: icon + title + badges -->
+    <div class="header-left">
+      <span class="header-icon" [style.color]="catalogColor">{{ catalogIcon }}</span>
+      <span class="header-title">{{ widget.title }}</span>
+      @if (isLocked) {
+        <span class="badge badge--locked">locked</span>
+      }
+      @if (isFront) {
+        <span class="badge badge--front">front</span>
+      }
     </div>
 
+    <!-- Right: type label + action buttons -->
+    <div class="header-right">
+      <span class="type-label">{{ catalogLabel }}</span>
+
+      <div class="action-btns">
+        <!-- Edit -->
+        <button class="action-btn" title="Edit" (click)="onEdit($event)">✎</button>
+        <!-- Duplicate -->
+        <button class="action-btn" title="Duplicate" (click)="onDuplicate($event)">⧉</button>
+        <!-- Lock / Unlock -->
+        <button class="action-btn" title="{{ isLocked ? 'Unlock' : 'Lock' }}"
+          (click)="onLock($event)">
+          {{ isLocked ? '🔒' : '🔓' }}
+        </button>
+        <!-- Bring to front -->
+        <button class="action-btn" title="Bring to front" (click)="onBringFront($event)">↑</button>
+        <!-- Delete -->
+        <button class="action-btn action-btn--delete" title="Delete" (click)="onDelete($event)">✕</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CONTENT ───────────────────────────────────────────── -->
+  <div class="card-content" [style.height.px]="contentH">
     @switch (widget.type) {
-
-    @case ('stat') {
-    <app-stat-widget [widget]="widget" [contentH]="contentH" />
+      @case ('stat')      { <app-stat-widget      [widget]="widget" [contentH]="contentH" /> }
+      @case ('analytics') { <app-analytics-widget [widget]="widget" [contentH]="contentH" /> }
+      @case ('bar')       { <app-bar-widget        [widget]="widget" [contentH]="contentH" /> }
+      @case ('line')      { <app-line-widget       [widget]="widget" [contentH]="contentH" /> }
+      @case ('pie')       { <app-pie-widget        [widget]="widget" [contentH]="contentH" /> }
+      @case ('table')     { <app-table-widget      [widget]="widget" [contentH]="contentH" /> }
+      @case ('progress')  { <app-progress-widget   [widget]="widget" [contentH]="contentH" /> }
+      @case ('note')      { <app-note-widget       [widget]="widget" [contentH]="contentH" /> }
+      @case ('section')   { <app-section-widget    [widget]="widget" [contentH]="contentH" /> }
     }
+  </div>
 
-    @case ('analytics') {
-    <app-analytics-widget [widget]="widget" [contentH]="contentH" />
-    }
-
-    @case ('bar') {
-    <app-bar-widget [widget]="widget" [contentH]="contentH" />
-    }
-
-    @case ('line') {
-    <app-line-widget [widget]="widget" [contentH]="contentH" />
-    }
-
-    @case ('pie') {
-    <app-pie-widget [widget]="widget" [contentH]="contentH" />
-    }
-
-    @case ('progress') {
-    <app-progress-widget [widget]="widget" [contentH]="contentH" />
-    }
-
-    @case ('table') {
-    <app-table-widget [widget]="widget" [contentH]="contentH" />
-    }
-
-    @case ('note') {
-    <app-note-widget [widget]="widget" [contentH]="contentH" />
-    }
-
-    @case ('section') {
-    <app-section-widget [widget]="widget" [contentH]="contentH" />
-    }
-
-    @default {
-    <div class="widget-content__placeholder">
-        <span class="font-mono" style="color: var(--txt2); font-size: 10px;">
-            {{ widget.type }} — coming soon
-        </span>
+  <!-- ── RESIZE HANDLES (hidden when locked) ───────────────── -->
+  @if (!isLocked) {
+    <div class="resize-handle resize-handle--e"
+      (mousedown)="onResizeMousedown($event, 'e')"></div>
+    <div class="resize-handle resize-handle--s"
+      (mousedown)="onResizeMousedown($event, 's')"></div>
+    <div class="resize-handle resize-handle--se"
+      (mousedown)="onResizeMousedown($event, 'se')">
+      <div class="resize-corner-dot"></div>
     </div>
-    }
-
-    }
-
-
-    <!-- ── Resize handles — hidden when locked ─────────────── -->
-    @if (!isLocked) {
-
-    <!-- Right edge handle -->
-    <div class="resize-handle resize-handle--e" (mousedown)="onResizeStart($event, 'e')">
-    </div>
-
-    <!-- Bottom edge handle -->
-    <div class="resize-handle resize-handle--s" (mousedown)="onResizeStart($event, 's')">
-    </div>
-
-    <!-- SE corner handle -->
-    <div class="resize-handle resize-handle--se" (mousedown)="onResizeStart($event, 'se')">
-    </div>
-
-    }
+  }
 
 </div>

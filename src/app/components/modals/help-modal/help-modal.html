@@ -1,1 +1,93 @@
-<p>help-modal works!</p>
+<div class="help-modal">
+
+    <!-- ── HEADER ────────────────────────────────────────────── -->
+    <div class="modal-header">
+        <div>
+            <div class="modal-title">How to use dashcraft</div>
+            <div class="modal-sub">{{ totalSections }} sections · {{ totalTopics }} topics</div>
+        </div>
+        <button class="btn-close" (click)="close()">×</button>
+    </div>
+
+    <!-- ── BODY: left nav + right content ────────────────────── -->
+    <div class="modal-body">
+
+        <!-- Left nav -->
+        <nav class="help-nav">
+            @for (sec of sections; track $index) {
+            <button class="nav-item" [class.is-active]="activeIdx === $index" [style.--sec-color]="sec.color"
+                (click)="activeIdx = $index">
+                <div class="nav-icon" [style.color]="sec.color">{{ sec.icon }}</div>
+                <div class="nav-text">
+                    <div class="nav-title">{{ sec.title }}</div>
+                    <div class="nav-count">{{ sec.items.length }} topics</div>
+                </div>
+                @if (activeIdx === $index) {
+                <div class="nav-indicator" [style.background]="sec.color"></div>
+                }
+            </button>
+            }
+
+            <!-- Quick ref strip -->
+            <div class="quick-ref">
+                <div class="quick-ref-label">Quick ref</div>
+                @for (item of quickRef; track item.key) {
+                <div class="quick-row">
+                    <span class="quick-key">{{ item.key }}</span>
+                    <span class="quick-desc">{{ item.desc }}</span>
+                </div>
+                }
+            </div>
+        </nav>
+
+        <!-- Right content -->
+        <div class="help-content">
+
+            <!-- Section header -->
+            <div class="content-header">
+                <div class="content-badge" [style.--sec-color]="activeSection.color">
+                    {{ activeSection.icon }}
+                </div>
+                <div>
+                    <div class="content-title">{{ activeSection.title }}</div>
+                    <div class="content-count">{{ activeSection.items.length }} topics</div>
+                </div>
+            </div>
+
+            <!-- Intro card -->
+            <div class="intro-card" [style.border-left-color]="activeSection.color">
+                {{ activeSection.intro }}
+            </div>
+
+            <!-- Topic items -->
+            @for (item of activeSection.items; track $index) {
+            <div class="topic-card" [style.--sec-color]="activeSection.color">
+                <div class="topic-num" [style.color]="activeSection.color">{{ $index + 1 }}</div>
+                <div class="topic-body">
+                    <div class="topic-key" [style.color]="activeSection.color">{{ item.key }}</div>
+                    <p class="topic-desc">{{ item.desc }}</p>
+                </div>
+            </div>
+            }
+
+            <!-- Prev / Next navigation -->
+            <div class="nav-footer">
+                <button class="nav-btn" [disabled]="activeIdx === 0" (click)="prev()">
+                    ← {{ prevLabel }}
+                </button>
+                <span class="nav-counter">{{ activeIdx + 1 }} / {{ totalSections }}</span>
+                <button class="nav-btn" [disabled]="activeIdx === totalSections - 1" (click)="next()">
+                    {{ nextLabel }} →
+                </button>
+            </div>
+
+        </div><!-- /help-content -->
+    </div><!-- /modal-body -->
+
+    <!-- ── FOOTER ─────────────────────────────────────────────── -->
+    <div class="modal-footer">
+        <span class="footer-hint">Press Esc or click outside to close</span>
+        <button class="btn-got-it" (click)="close()">Got it</button>
+    </div>
+
+</div>

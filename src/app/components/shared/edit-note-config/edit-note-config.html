@@ -1,0 +1,33 @@
+<div class="section-hdr">Content</div>
+<div class="field-row" style="margin-bottom:10px">
+  <label class="field-label">Note Text</label>
+  <textarea class="ta" rows="6"
+    [value]="cfg.content || ''"
+    (input)="upd('content', $any($event.target).value)"></textarea>
+</div>
+
+<div class="section-hdr">Appearance</div>
+<div class="three-col">
+  <div class="field-row">
+    <label class="field-label">Accent Color</label>
+    <input type="color" class="inp"
+      [value]="cfg.accent || '#94a3b8'"
+      (input)="upd('accent', $any($event.target).value)" />
+  </div>
+  <div class="field-row">
+    <label class="field-label">Bg Color</label>
+    <input type="color" class="inp"
+      [value]="cfg.bgColor || '#0d1219'"
+      (input)="upd('bgColor', $any($event.target).value)" />
+  </div>
+  <div class="field-row">
+    <label class="field-label">Font Size</label>
+    <select class="sel"
+      [value]="cfg.fontSize || '13'"
+      (change)="upd('fontSize', $any($event.target).value)">
+      @for (size of fontSizes; track size) {
+        <option [value]="size">{{ size }}px</option>
+      }
+    </select>
+  </div>
+</div>

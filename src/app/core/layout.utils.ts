@@ -489,7 +489,7 @@ export function computeColW(canvasW: number): number {
  * @example
  * // Widget at y=5, h=3 → bottom row = y+h = 8
  * computeCanvasH([{ y:5, h:3 }])
- * // → Math.max(600, 8 * (80+10) + 60) = Math.max(600, 780) = 780
+ * // → Math.max(600, 8 * (80+10) + 120) = Math.max(600, 840) = 840
  */
 export function computeCanvasH(
   widgets: Pick<Widget, 'y' | 'h'>[]
@@ -498,7 +498,8 @@ export function computeCanvasH(
   const maxBottom = Math.max(
     ...widgets.map(w => (w.y + w.h) * (ROW_H + GAP))
   );
-  return Math.max(600, maxBottom + 60);
+  // B1 fix: 120px padding matches React source (was 60px — too tight)
+  return Math.max(600, maxBottom + 120);
 }
 
 

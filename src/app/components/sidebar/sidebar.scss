@@ -1,0 +1,298 @@
+.sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  // KEY: flex items default to min-height:auto which prevents overflow from
+  // ever activating. min-height:0 lets the flex parent constrain the height,
+  // and height:100% anchors it to the row so overflow-y:auto can kick in.
+  min-height: 0;
+  height: 100%;
+  background: var(--bg1);
+  border-right: 1px solid var(--bdr);
+  padding: 14px 10px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  // Custom scrollbar
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: var(--bdr); border-radius: 4px; }
+}
+
+// ── Section label ──────────────────────────────────────────────
+.section-label {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--txt2);
+  margin-bottom: 8px;
+  padding-left: 8px;
+}
+
+// ── Search ────────────────────────────────────────────────────
+.search-wrap {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--txt2);
+  font-size: 12px;
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--bdr);
+  border-radius: 7px;
+  color: var(--txt0);
+  padding: 6px 8px 6px 26px;
+  font-size: 12px;
+  font-family: var(--font-sans);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color var(--transition-fast);
+
+  &::placeholder { color: var(--txt2); }
+
+  &:focus { border-color: var(--acc); }
+}
+
+.search-clear {
+  position: absolute;
+  right: 7px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--txt2);
+  font-size: 12px;
+  padding: 0;
+  line-height: 1;
+  transition: color var(--transition-fast);
+
+  &:hover { color: var(--txt0); }
+}
+
+// ── Palette ───────────────────────────────────────────────────
+.palette {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.palette-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--bdr);
+  background: transparent;
+  cursor: pointer;
+  margin-bottom: 5px;
+  width: 100%;
+  text-align: left;
+  color: var(--txt0);
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+
+  &:hover {
+    background: var(--bg2);
+    border-color: color-mix(in srgb, var(--item-color) 27%, transparent);
+  }
+}
+
+.palette-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  background: color-mix(in srgb, var(--item-color) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--item-color) 27%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+
+.palette-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--txt0);
+  margin-bottom: 1px;
+}
+
+.palette-desc {
+  font-size: 10px;
+  color: var(--txt2);
+}
+
+// ── No results ────────────────────────────────────────────────
+.no-results {
+  text-align: center;
+  padding: 16px 8px;
+  color: var(--txt2);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.no-results-icon {
+  font-size: 20px;
+  margin-bottom: 6px;
+  opacity: 0.4;
+}
+
+.no-results-query {
+  color: var(--txt1);
+}
+
+// ── Divider ───────────────────────────────────────────────────
+.divider {
+  height: 1px;
+  background: var(--bdr);
+  margin: 12px 0;
+}
+
+// ── Keyboard shortcuts ────────────────────────────────────────
+.shortcuts {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 2px;
+}
+
+.shortcut-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 6px;
+  padding: 0 4px 0 6px;
+}
+
+.shortcut-key {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--acc);
+  background: color-mix(in srgb, var(--acc) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--acc) 13%, transparent);
+  border-radius: 4px;
+  padding: 1px 5px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.shortcut-desc {
+  font-size: 10px;
+  color: var(--txt2);
+  line-height: 1.5;
+  margin-left: 6px;
+  text-align: right;
+}
+
+// ── Grid info ─────────────────────────────────────────────────
+.grid-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+  padding: 0 4px 0 6px;
+}
+
+.info-key {
+  font-size: 11px;
+  color: var(--txt2);
+}
+
+.info-val {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--txt1);
+}
+
+// ── Spacer ────────────────────────────────────────────────────
+.spacer {
+  flex: 1;
+}
+
+// ── Minimap toggle ────────────────────────────────────────────
+.minimap-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding-left: 6px;
+}
+
+.minimap-label {
+  font-size: 11px;
+  color: var(--txt2);
+}
+
+.minimap-toggle {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  padding: 2px 8px;
+  border-radius: 5px;
+  border: 1px solid var(--bdr);
+  background: transparent;
+  color: var(--txt2);
+  cursor: pointer;
+  transition: all var(--transition-base);
+
+  &.is-on {
+    border-color: var(--acc);
+    background: color-mix(in srgb, var(--acc) 9%, transparent);
+    color: var(--acc);
+  }
+}
+
+// ── Bottom action buttons ─────────────────────────────────────
+.btn-templates {
+  width: 100%;
+  padding: 8px;
+  border-radius: 7px;
+  border: 1px solid color-mix(in srgb, var(--pur) 27%, transparent);
+  background: color-mix(in srgb, var(--pur) 5%, transparent);
+  color: var(--pur);
+  cursor: pointer;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  transition: background var(--transition-base);
+  margin-bottom: 6px;
+
+  &:hover {
+    background: color-mix(in srgb, var(--pur) 10%, transparent);
+  }
+}
+
+.btn-demo {
+  width: 100%;
+  padding: 8px;
+  border-radius: 7px;
+  border: 1px solid color-mix(in srgb, var(--grn) 27%, transparent);
+  background: color-mix(in srgb, var(--grn) 5%, transparent);
+  color: var(--grn);
+  cursor: pointer;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  transition: background var(--transition-base);
+
+  &:hover {
+    background: color-mix(in srgb, var(--grn) 10%, transparent);
+  }
+}

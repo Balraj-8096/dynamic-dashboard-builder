@@ -1,0 +1,37 @@
+<div class="section-hdr">Options</div>
+<div class="two-col">
+  <div class="field-row">
+    <label class="field-label">Show Values</label>
+    <div class="toggle-row">
+      <div class="toggle-wrap" (click)="upd('showValues', !cfg.showValues)">
+        <div class="toggle-box" [class.is-on]="cfg.showValues"></div>
+        <span class="toggle-label">Show numbers</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section-hdr">Progress Items</div>
+@for (item of items; track $index) {
+  <div class="item-card">
+    <div class="item-card-header">
+      <span class="item-card-title">Item {{ $index + 1 }}</span>
+      <button class="btn-remove" (click)="removeItem($index)">Remove</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center">
+      <input class="inp inp--sm" placeholder="Label"
+        [value]="item.label"
+        (input)="updateItem($index, 'label', $any($event.target).value)" />
+      <input class="inp inp--sm" type="number" style="width:64px"
+        [value]="item.value" [min]="0" [max]="item.max || 100"
+        (input)="updateItem($index, 'value', +$any($event.target).value)" />
+      <input class="inp inp--sm" type="number" placeholder="Max" style="width:64px"
+        [value]="item.max || 100"
+        (input)="updateItem($index, 'max', +$any($event.target).value)" />
+      <input type="color" class="inp inp--w40"
+        [value]="item.color || '#3b82f6'"
+        (input)="updateItem($index, 'color', $any($event.target).value)" />
+    </div>
+  </div>
+}
+<button class="btn-add-dashed" (click)="addItem()">+ Add Item</button>

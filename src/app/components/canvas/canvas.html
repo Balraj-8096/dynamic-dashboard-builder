@@ -1,65 +1,26 @@
-<!-- ═══════════════════════════════════════════════════════════
-     DASHCRAFT — Canvas Template
-     ═══════════════════════════════════════════════════════════ -->
-
 <div class="canvas-shell">
 
-    <!-- ── Sidebar ──────────────────────────────────────────── -->
-    <!-- Step 23 — sidebar component goes here -->
-    <aside class="sidebar-placeholder">
-        <p class="font-mono" style="color: var(--acc); font-size: 11px;">
-            ◈ Sidebar — Step 23
-        </p>
-    </aside>
+    <!-- ── SIDEBAR ── -->
+    <app-sidebar />
 
-    <!-- ── Main area ─────────────────────────────────────────── -->
+    <!-- ── MAIN AREA ── -->
     <div class="main-area">
 
-        <!-- ── Toolbar ─────────────────────────────────────────── -->
-        <!-- Step 24 — toolbar component goes here -->
-        <div class="toolbar-placeholder">
-            <span class="font-mono" style="color: var(--txt2); font-size: 11px;">
-                Toolbar — Step 24
-            </span>
+        <!-- ── TOOLBAR ── -->
+        <app-toolbar />
 
-            <!-- Temporary zoom display -->
-            <span class="font-mono" style="color: var(--acc); font-size: 11px;">
-                Zoom: {{ svc.zoomPercent() }}
-            </span>
-
-            <!-- Temporary widget count -->
-            <span class="font-mono" style="color: var(--txt2); font-size: 11px;">
-                Widgets: {{ svc.widgetCount() }}
-            </span>
-
-            <!-- Temporary load demo button -->
-            <button class="btn-demo" (click)="svc.loadDemo()">
-                ⚡ Load Demo
-            </button>
-
-            <!-- Temporary view mode button -->
-            <button class="btn-view" [disabled]="svc.widgetCount() === 0" (click)="goToView()">
-                ▶ View
-            </button>
-        </div>
-
-        <!-- ── Scrollable canvas container ───────────────────── -->
-        <main #mainRef class="canvas-main" (click)="onCanvasClick()">
+        <!-- ── SCROLL CONTAINER ── -->
+        <main class="scroll-area" #mainRef (click)="onCanvasClick()">
 
             <!-- Zoom wrapper -->
-            <div class="zoom-wrapper" [style.transform]="'scale(' + svc.zoom() + ')'"
-                [style.width]="(100 / svc.zoom()) + '%'" [style.min-height]="(100 / svc.zoom()) + '%'">
+            <div class="zoom-wrapper" [ngStyle]="zoomStyle">
 
-                <!-- Canvas grid -->
-                <div #canvasRef class="canvas-grid" [style.min-height.px]="svc.canvasH()">
-
-                    <!-- Dot grid background via CSS -->
-
-                    <!-- Column snap guides — shown during drag -->
+                <!-- Canvas -->
+                <div class="canvas" #canvasRef [style.min-height.px]="svc.canvasH()">
+                    <!-- Column snap guides (during active drag) -->
                     @if (svc.activeId()) {
-                    @for (col of getSnapGuidePositions(); track col) {
-                    <div class="snap-guide" [style.left.px]="col * (svc.colW() + 10) + 10"
-                        [style.width.px]="svc.colW()">
+                    @for (i of colIndices; track i) {
+                    <div class="snap-guide" [style.left.px]="i * (svc.colW() + 10) + 10" [style.width.px]="svc.colW()">
                     </div>
                     }
                     }
@@ -68,33 +29,34 @@
                     @if (svc.widgetCount() === 0) {
                     <div class="empty-state">
                         <div class="empty-icon">◈</div>
-                        <p class="empty-text">
-                            Click a widget from the sidebar to begin
-                        </p>
-                        <div class="empty-actions">
-                            <button class="empty-btn empty-btn--purple" (click)="svc.openTemplates()">
-                                ⊟ templates
-                            </button>
-                            <span class="empty-divider">·</span>
-                            <button class="empty-btn empty-btn--green" (click)="svc.loadDemo()">
-                                ⚡ demo
-                            </button>
+                        <div class="empty-hint">Click a widget from the sidebar to begin</div>
+                        <div class="empty-links">
+                            <span class="empty-link empty-link--pur">⊟ templates</span>
+                            <span class="empty-sep">·</span>
+                            <span class="empty-link empty-link--grn">⚡ demo</span>
                         </div>
                     </div>
                     }
 
                     <!-- Widget cards -->
-                    @for (widget of svc.widgets(); track trackByWidget($index, widget)) {
+                    @for (widget of svc.widgets(); track trackWidget($index, widget)) {
                     <app-widget-card [widget]="widget" />
                     }
 
-                </div>
-            </div>
+                </div><!-- /canvas -->
+            </div><!-- /zoom-wrapper -->
 
-            <!-- Minimap — Step 31 -->
+            <!-- ── MINIMAP (Step 30) ── -->
+            @if (svc.showMinimap() && svc.widgetCount() > 0) {
+            <app-minimap />
+            }
 
-        </main>
+        </main><!-- /scroll-area -->
 
-    </div>
+        <!-- ── CONTEXT MENU (Step 29) — outside scroll-area so fixed positioning works ── -->
+        @if (svc.contextMenu()) {
+        <app-context-menu />
+        }
 
+    </div><!-- /main-area -->
 </div>

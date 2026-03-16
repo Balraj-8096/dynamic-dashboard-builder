@@ -1,1 +1,182 @@
-<p>edit-modal works!</p>
+<div class="edit-modal">
+
+    <!-- ── HEADER ─────────────────────────────────────────────────── -->
+    <div class="modal-header">
+        <div class="header-left">
+            <!-- Widget type icon badge -->
+            <div class="type-badge" [style.--badge-color]="cat?.color || 'var(--acc)'">
+                {{ cat?.icon }}
+            </div>
+            <div>
+                <div class="header-title">Edit Widget</div>
+                <div class="header-sub">
+                    {{ cat?.label }} · {{ widget.w }}×{{ widget.h }} · changes preview live
+                </div>
+            </div>
+        </div>
+        <button class="btn-close" (click)="cancel()">×</button>
+    </div>
+
+    <!-- ── BODY: left form + right preview ───────────────────────── -->
+    <div class="modal-body">
+
+        <!-- ── LEFT PANEL ────────────────────────────────────────────── -->
+        <div class="panel-left">
+
+            <!-- Tab bar -->
+            <div class="tab-bar">
+                @for (tab of tabs; track tab.id) {
+                <button class="tab-btn" [class.is-active]="activeTab === tab.id" (click)="activeTab = tab.id">
+                    <span class="tab-icon">{{ tab.icon }}</span>
+                    {{ tab.label }}
+                    @if (tab.id === 'fields' && poolMap) {
+                    <span class="tab-badge">{{ selectedFields.length }}</span>
+                    }
+                </button>
+                }
+            </div>
+
+            <!-- Form body -->
+            <div class="form-body">
+
+                <!-- Title input (always visible) -->
+                <div class="title-field">
+                    <label class="field-label">Widget Title</label>
+                    <input class="title-inp" [(ngModel)]="title" placeholder="e.g. Monthly Revenue" />
+                </div>
+
+                <!-- Tab: Fields -->
+                @if (activeTab === 'fields' && poolMap) {
+                <app-field-selector [type]="widget.type" [selectedFields]="selectedFields"
+                    (selectedFieldsChange)="onFieldsChange($event)" />
+                }
+
+                <!-- Tab: Configure -->
+                @if (activeTab === 'configure') {
+                @switch (widget.type) {
+                @case ('stat') {
+                <app-edit-stat-config [cfg]="cfgAsStat" (cfgChange)="onCfgChange($event)" />
+                }
+                @case ('analytics') {
+                <app-edit-analytics-config [cfg]="cfgAsAnalytics" (cfgChange)="onCfgChange($event)" />
+                }
+                @case ('bar') {
+                <app-edit-series-config [cfg]="cfgAsSeries" typeLabel="bar" (cfgChange)="onCfgChange($event)" />
+                }
+                @case ('line') {
+                <app-edit-series-config [cfg]="cfgAsSeries" typeLabel="line" (cfgChange)="onCfgChange($event)" />
+                }
+                @case ('pie') {
+                <app-edit-pie-config [cfg]="cfgAsPie" (cfgChange)="onCfgChange($event)" />
+                }
+                @case ('table') {
+                <app-edit-table-config [cfg]="cfgAsTable" (cfgChange)="onCfgChange($event)" />
+                }
+                @case ('progress') {
+                <app-edit-progress-config [cfg]="cfgAsProgress" (cfgChange)="onCfgChange($event)" />
+                }
+                @case ('note') {
+                <app-edit-note-config [cfg]="cfgAsNote" (cfgChange)="onCfgChange($event)" />
+                }
+                @case ('section') {
+                <app-edit-section-config [cfg]="cfgAsSection" (cfgChange)="onCfgChange($event)" />
+                }
+                }
+                }
+            </div>
+
+        </div>
+
+        <!-- ── RIGHT PANEL ────────────────────────────────────────────── -->
+        <div class="panel-right">
+
+            <!-- Preview header -->
+            <div class="preview-hdr">
+                <div>
+                    <div class="preview-label">Live Preview</div>
+                    <div class="preview-sub">Updates as you type</div>
+                </div>
+            </div>
+
+            <!-- Preview card -->
+            <div class="preview-section">
+                <div class="preview-card">
+                    <!-- Mini widget header -->
+                    <div class="preview-card-header">
+                        <span class="preview-card-icon" [style.color]="cat?.color">{{ cat?.icon }}</span>
+                        <span class="preview-card-title">{{ title || cat?.label }}</span>
+                        <span class="preview-card-size">{{ widget.w }}×{{ widget.h }}</span>
+                    </div>
+                    <!-- Live widget content -->
+                    <div class="preview-content" [style.height.px]="previewH">
+                        @switch (widget.type) {
+                        @case ('stat') {
+                        <app-stat-widget [widget]="previewWidget" [contentH]="previewH" />
+                        }
+                        @case ('analytics') {
+                        <app-analytics-widget [widget]="previewWidget" [contentH]="previewH" />
+                        }
+                        @case ('bar') {
+                        <app-bar-widget [widget]="previewWidget" [contentH]="previewH" />
+                        }
+                        @case ('line') {
+                        <app-line-widget [widget]="previewWidget" [contentH]="previewH" />
+                        }
+                        @case ('pie') {
+                        <app-pie-widget [widget]="previewWidget" [contentH]="previewH" />
+                        }
+                        @case ('table') {
+                        <app-table-widget [widget]="previewWidget" [contentH]="previewH" />
+                        }
+                        @case ('progress') {
+                        <app-progress-widget [widget]="previewWidget" [contentH]="previewH" />
+                        }
+                        @case ('note') {
+                        <app-note-widget [widget]="previewWidget" [contentH]="previewH" />
+                        }
+                        @case ('section') {
+                        <app-section-widget [widget]="previewWidget" [contentH]="previewH" />
+                        }
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current settings strip -->
+            <div class="settings-section">
+                <div class="settings-label">Current Settings</div>
+                <div class="settings-list">
+                    @for (row of settingsRows; track row.k) {
+                    <div class="settings-row">
+                        <span class="settings-key">{{ row.k }}</span>
+                        <span class="settings-val">
+                            @if (row.isColor) {
+                            <span class="color-dot" [style.background]="row.v"></span>
+                            }
+                            {{ row.v }}
+                        </span>
+                    </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Field chips (visible on Fields tab only) -->
+            @if (fieldChips.length > 0) {
+            <div class="chips-section">
+                <div class="settings-label">Selected Fields</div>
+                <div class="chips">
+                    @for (chip of fieldChips; track chip.label) {
+                    <span class="chip" [style.--chip-color]="chip.color">{{ chip.label }}</span>
+                    }
+                </div>
+            </div>
+            }
+
+        </div><!-- /panel-right -->
+    </div><!-- /modal-body -->
+    <!-- Footer: Cancel + Save -->
+    <div class="form-footer">
+        <button class="btn-cancel" (click)="cancel()">Cancel</button>
+        <button class="btn-save" (click)="save()">Save Changes</button>
+    </div>
+</div>

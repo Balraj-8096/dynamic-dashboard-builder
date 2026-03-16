@@ -1,1 +1,111 @@
-<p>sidebar works!</p>
+<aside class="sidebar">
+
+  <!-- ── WIDGET PALETTE ── -->
+  <div class="section-label">Widget Palette</div>
+
+  <!-- Search box -->
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input
+      class="search-input"
+      type="text"
+      placeholder="Search widgets…"
+      [value]="svc.sidebarSearch()"
+      (input)="onSearchChange($any($event.target).value)"
+    />
+    @if (svc.sidebarSearch()) {
+      <button class="search-clear" (click)="clearSearch()" title="Clear search">✕</button>
+    }
+  </div>
+
+  <!-- Filtered palette items -->
+  <div class="palette">
+    @for (item of filteredCatalog; track item.type) {
+      <button
+        class="palette-item"
+        [style.--item-color]="item.color"
+        (click)="openWizard(item.type)"
+        title="{{ item.label }}"
+      >
+        <div class="palette-icon" [style.color]="item.color">{{ item.icon }}</div>
+        <div class="palette-text">
+          <div class="palette-label">{{ item.label }}</div>
+          <div class="palette-desc">{{ item.desc }}</div>
+        </div>
+      </button>
+    }
+
+    <!-- Empty search state -->
+    @if (hasNoResults) {
+      <div class="no-results">
+        <div class="no-results-icon">⌕</div>
+        No widgets matching<br/>
+        <span class="no-results-query">"{{ svc.sidebarSearch() }}"</span>
+      </div>
+    }
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── KEYBOARD SHORTCUTS ── -->
+  <div class="section-label">Keyboard Shortcuts</div>
+  <div class="shortcuts">
+    @for (shortcut of KEYBOARD_SHORTCUTS; track shortcut.key) {
+      <div class="shortcut-row">
+        <span class="shortcut-key">{{ shortcut.key }}</span>
+        <span class="shortcut-desc">{{ shortcut.tip }}</span>
+      </div>
+    }
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ── GRID INFO ── -->
+  <div class="section-label">Grid Info</div>
+  <div class="grid-info">
+    <div class="info-row">
+      <span class="info-key">Columns</span>
+      <span class="info-val">{{ COLS }}</span>
+    </div>
+    <div class="info-row">
+      <span class="info-key">Row height</span>
+      <span class="info-val">{{ ROW_H }}px</span>
+    </div>
+    <div class="info-row">
+      <span class="info-key">Col width</span>
+      <span class="info-val">~{{ colWRounded }}px</span>
+    </div>
+    <div class="info-row">
+      <span class="info-key">Zoom</span>
+      <span class="info-val">{{ svc.zoomPercent() }}</span>
+    </div>
+    <div class="info-row">
+      <span class="info-key">Widgets</span>
+      <span class="info-val">{{ svc.widgetCount() }}</span>
+    </div>
+    <div class="info-row">
+      <span class="info-key">Locked</span>
+      <span class="info-val">{{ svc.lockedCount() }}</span>
+    </div>
+  </div>
+
+  <!-- ── SPACER ── -->
+  <div class="spacer"></div>
+
+  <!-- ── MINIMAP TOGGLE ── -->
+  <div class="minimap-row">
+    <span class="minimap-label">Minimap</span>
+    <button
+      class="minimap-toggle"
+      [class.is-on]="svc.showMinimap()"
+      (click)="svc.toggleMinimap()"
+    >
+      {{ svc.showMinimap() ? 'on' : 'off' }}
+    </button>
+  </div>
+
+  <!-- ── BOTTOM ACTIONS ── -->
+  <button class="btn-templates" (click)="svc.openTemplates()">⊟ Browse Templates</button>
+  <button class="btn-demo" (click)="svc.loadDemo()">⚡ Load Demo</button>
+
+</aside>
