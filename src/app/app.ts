@@ -10,4 +10,7 @@ import { RouterOutlet } from '@angular/router';
 })
 export class App {
   protected readonly title = signal('dnamic-dashboard-builder');
+
+  //ng build --configuration production --base-href /dnamic-dashboard-builder/
+  //npx angular-cli-ghpages --dir=dist/dnamic-dashboard-builder/browser
 }
