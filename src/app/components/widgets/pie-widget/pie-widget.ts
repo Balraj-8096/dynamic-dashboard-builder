@@ -10,9 +10,15 @@ import {
   Input,
   OnChanges,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  effect,
+  untracked,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgApexchartsModule } from 'ng-apexcharts';
+import { QueryService } from '../../../services/query.service';
+import { mapPieResult } from '../../../core/query-result-mapper';
 
 import {
   ApexNonAxisChartSeries,
@@ -24,6 +30,7 @@ import {
   ApexStroke,
 } from 'ng-apexcharts';
 import { PieConfig, Widget } from '../../../core/interfaces';
+import { CHART_COLORS } from '../../../core/constants';
 
 
 
@@ -51,7 +58,17 @@ export class PieWidget implements OnChanges {
   @Input({ required: true }) widget!: Widget;
   @Input() contentH: number = 200;
 
-  chartOptions!: PieChartOptions;
+  chartOptions?: PieChartOptions;
+
+  private readonly qsvc = inject(QueryService);
+  private readonly cdr  = inject(ChangeDetectorRef);
+
+  constructor() {
+    effect(() => {
+      this.qsvc.globalFilters();
+      untracked(() => { if (this.widget) { this.buildChart(); this.cdr.markForCheck(); } });
+    });
+  }
 
   get cfg(): PieConfig {
     return this.widget.config as PieConfig;
@@ -63,12 +80,19 @@ export class PieWidget implements OnChanges {
 
   private buildChart(): void {
     const cfg = this.cfg;
-    if (!cfg?.data?.length) return;
 
-    const data = cfg.data || [];
+    let activeData = cfg?.data ?? [];
+    if (cfg?.queryConfig) {
+      try {
+        activeData = mapPieResult(this.qsvc.executePieQuery(cfg.queryConfig));
+      } catch { /* keep static */ }
+    }
+    if (!activeData.length) { this.chartOptions = undefined; return; }
+
+    const data   = activeData;
     const series = data.map(d => d.value);
     const labels = data.map(d => d.name);
-    const colors = data.map(d => d.color);
+    const colors = data.map((d, i) => d.color ?? CHART_COLORS[i % CHART_COLORS.length]);
 
     this.chartOptions = {
       series,

@@ -12,9 +12,15 @@ import {
   Input,
   OnChanges,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  effect,
+  untracked,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgApexchartsModule } from 'ng-apexcharts';
+import { QueryService } from '../../../services/query.service';
+import { mapChartResult } from '../../../core/query-result-mapper';
 
 import {
   ApexAxisChartSeries,
@@ -62,7 +68,17 @@ export class BarWidget implements OnChanges {
   @Input({ required: true }) widget!: Widget;
   @Input() contentH: number = 200;
 
-  chartOptions!: BarChartOptions;
+  chartOptions?: BarChartOptions;
+
+  private readonly qsvc = inject(QueryService);
+  private readonly cdr  = inject(ChangeDetectorRef);
+
+  constructor() {
+    effect(() => {
+      this.qsvc.globalFilters(); // reactive dependency
+      untracked(() => { if (this.widget) { this.buildChart(); this.cdr.markForCheck(); } });
+    });
+  }
 
   // ── Config accessor ──────────────────────────────────────────
   get cfg(): BarConfig {
@@ -76,19 +92,28 @@ export class BarWidget implements OnChanges {
   // ── Chart builder ────────────────────────────────────────────
   private buildChart(): void {
     const cfg = this.cfg;
-    if (!cfg?.series?.length) return;
 
-    // Build ApexCharts series from our ChartSeries format
-    const series: ApexAxisChartSeries = cfg.series.map(s => ({
+    // Resolve series + categories: query result OR static config
+    let activeSeries = cfg?.series ?? [];
+    let activeCategories: string[] = activeSeries[0]?.data.map(d => d.n) ?? [];
+
+    if (cfg?.queryConfig) {
+      try {
+        const result = this.qsvc.executeChartQuery(cfg.queryConfig);
+        const mapped = mapChartResult(result);
+        activeSeries     = mapped.series;
+        activeCategories = mapped.labels;
+      } catch { /* keep static */ }
+    }
+
+    const series: ApexAxisChartSeries = activeSeries.map(s => ({
       name: s.key,
       data: s.data.map(d => d.v),
     }));
 
-    // Categories from first series
-    const categories = cfg.series[0].data.map(d => d.n);
+    const categories = activeCategories;
 
-    // Colors from series definitions
-    const colors = cfg.series.map(
+    const colors = activeSeries.map(
       (s, i) => s.color || CHART_COLORS[i % CHART_COLORS.length]
     );
 

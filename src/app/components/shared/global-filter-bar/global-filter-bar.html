@@ -1,0 +1,46 @@
+@if (product()) {
+  <div class="filter-bar">
+
+    <span class="filter-label">Filters</span>
+    <div class="filter-divider"></div>
+
+    @for (dim of dimensions; track dimKey(dim)) {
+
+      <!-- Site filter -->
+      @if (dim.type === GlobalFilterType.Site) {
+        <div class="filter-group">
+          <label class="filter-group__label">{{ dim.label }}</label>
+          <select class="filter-select"
+            [(ngModel)]="siteSelections[dimKey(dim)]"
+            (ngModelChange)="onFilterChange()">
+            <option value="">All sites</option>
+            @for (val of siteValues(dim); track val) {
+              <option [value]="val">{{ val }}</option>
+            }
+          </select>
+        </div>
+      }
+
+      <!-- Date filter -->
+      @if (dim.type === GlobalFilterType.Date) {
+        <div class="filter-group">
+          <label class="filter-group__label">{{ dim.label }}</label>
+          <select class="filter-select"
+            [(ngModel)]="datePresets[dimKey(dim)]"
+            (ngModelChange)="onFilterChange()">
+            <option value="">All time</option>
+            @for (opt of presetOptions; track opt.value) {
+              <option [value]="opt.value">{{ opt.label }}</option>
+            }
+          </select>
+        </div>
+      }
+
+    }
+
+    @if (hasActiveFilters) {
+      <button class="btn-clear" (click)="clearFilters()">✕ Clear</button>
+    }
+
+  </div>
+}

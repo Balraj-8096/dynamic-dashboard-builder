@@ -36,10 +36,11 @@ import { ImportModal } from '../modals/import-modal/import-modal';
 import { HelpModal } from '../modals/help-modal/help-modal';
 import { Minimap } from "../minimap/minimap";
 import { ContextMenu } from "../modals/context-menu/context-menu";
+import { GlobalFilterBarComponent } from "../shared/global-filter-bar/global-filter-bar";
 
 @Component({
   selector: 'app-canvas',
-  imports: [CommonModule, WidgetCard, Sidebar, Toolbar, Minimap, ContextMenu],
+  imports: [CommonModule, WidgetCard, Sidebar, Toolbar, Minimap, ContextMenu, GlobalFilterBarComponent],
   templateUrl: './canvas.html',
   styleUrl: './canvas.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

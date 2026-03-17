@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { CATALOG } from '../../../core/catalog';
-import { FIELD_POOL_MAP, hasFieldPool, DATA_SCHEMA, buildConfigFromFields } from '../../../core/data-schema';
 import { FACTORIES } from '../../../core/factories';
 import { WidgetType, WidgetConfig } from '../../../core/interfaces';
 import { DashboardService } from '../../../services/dashboard.service';
@@ -15,8 +14,8 @@ import { EditNoteConfig } from "../../shared/edit-note-config/edit-note-config";
 import { EditProgressConfig } from "../../shared/edit-progress-config/edit-progress-config";
 import { EditSectionConfig } from "../../shared/edit-section-config/edit-section-config";
 import { WidgetMiniPreview } from "../../shared/widget-mini-preview/widget-mini-preview";
-import { FieldSelector } from "../../shared/field-selector/field-selector";
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { QueryBuilder, AnyQueryConfig } from "../../shared/query-builder/query-builder";
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 export interface WizardDialogData {
   /** Pre-selected type from Ctrl+1-9 or sidebar click. null = open at Step 1. */
@@ -25,46 +24,41 @@ export interface WizardDialogData {
 
 @Component({
   selector: 'app-add-widget-wizard',
-  imports: [CommonModule,
-    ReactiveFormsModule, EditStatConfig, EditAnalyticsConfig, EditSeriesConfig, EditPieConfig, EditTableConfig, EditNoteConfig, EditProgressConfig, EditSectionConfig, WidgetMiniPreview, FieldSelector, MatDialogContent, MatDialogActions],
+  imports: [
+    CommonModule, ReactiveFormsModule, QueryBuilder,
+    EditStatConfig, EditAnalyticsConfig, EditSeriesConfig, EditPieConfig,
+    EditTableConfig, EditNoteConfig, EditProgressConfig, EditSectionConfig,
+    WidgetMiniPreview,
+  ],
   templateUrl: './add-widget-wizard.html',
   styleUrl: './add-widget-wizard.scss',
 })
 export class AddWidgetWizard implements OnInit {
   private readonly dialogRef = inject(MatDialogRef<AddWidgetWizard>);
-  private readonly data = inject<WizardDialogData>(MAT_DIALOG_DATA);
-  private readonly svc = inject(DashboardService);
-  private readonly fb = inject(FormBuilder);
+  private readonly data      = inject<WizardDialogData>(MAT_DIALOG_DATA);
+  private readonly svc       = inject(DashboardService);
+  private readonly fb        = inject(FormBuilder);
 
   readonly catalog = CATALOG;
+  readonly WidgetType = WidgetType;
 
   // ── Wizard state ──────────────────────────────────────────────
   step = 1;
   selectedType: WidgetType | null = null;
   cfg: WidgetConfig | null = null;
-  selectedFields: string[] = [];
 
   titleForm = this.fb.group({ title: ['', Validators.required] });
 
   // ── Derived ───────────────────────────────────────────────────
-  get cat() { return this.catalog.find(c => c.type === this.selectedType) ?? null; }
-  get poolMap() { return this.selectedType ? (FIELD_POOL_MAP as any)[this.selectedType] ?? null : null; }
-  get hasFields(): boolean { return hasFieldPool(this.selectedType!); }
-  get totalSteps(): number { return this.hasFields ? 3 : 2; }
-  get stepLabels(): string[] {
-    return this.hasFields
-      ? ['Choose Type', 'Select Fields', 'Configure']
-      : ['Choose Type', 'Configure'];
-  }
-  get isConfigStep(): boolean { return this.step === this.totalSteps; }
-  get isFieldsStep(): boolean { return this.hasFields && this.step === 2; }
+  get cat()           { return this.catalog.find(c => c.type === this.selectedType) ?? null; }
+  get isConfigStep()  { return this.step === 2; }
+  readonly stepLabels = ['Choose Type', 'Configure'];
 
   // ── Lifecycle ─────────────────────────────────────────────────
   ngOnInit(): void {
     const initType = this.data?.initType ?? null;
     if (initType) {
       this._initForType(initType);
-      // Skip step 1 — type already chosen
       this.step = 2;
     }
   }
@@ -78,41 +72,32 @@ export class AddWidgetWizard implements OnInit {
   private _initForType(type: WidgetType): void {
     this.selectedType = type;
     const base = FACTORIES[type]?.(0, 0);
-    const allIds = this.poolMap
-      ? (DATA_SCHEMA as any)[this.poolMap.pool].map((f: any) => f.id)
-      : [];
-    const preIds = allIds.slice(0, 3);
-
-    this.selectedFields = preIds;
-    this.cfg = preIds.length
-      ? buildConfigFromFields(type, preIds, base?.config ?? {})
-      : (base?.config ?? null);
-
+    this.cfg = base?.config ?? null;
     this.titleForm.setValue({ title: base?.title ?? '' });
   }
 
-  // ── Step 2: field selection ───────────────────────────────────
-  onFieldsChange(ids: string[]): void {
-    this.selectedFields = ids;
-    if (this.selectedType && this.cfg) {
-      this.cfg = buildConfigFromFields(this.selectedType, ids, this.cfg);
-    }
+  // ── Query support ─────────────────────────────────────────────
+  get hasQuery(): boolean {
+    return ![WidgetType.Note, WidgetType.Section].includes(this.selectedType!);
   }
 
-  // ── Config panel output ───────────────────────────────────────
+  get queryCfg(): AnyQueryConfig | null {
+    return (this.cfg as any)?.queryConfig ?? null;
+  }
+
+  onQueryCfgChange(qcfg: AnyQueryConfig): void {
+    this.cfg = { ...this.cfg, queryConfig: qcfg } as any;
+  }
+
+  // ── Display config panel output ───────────────────────────────
   onCfgChange(newCfg: WidgetConfig): void {
     this.cfg = newCfg;
   }
 
   // ── Navigation ────────────────────────────────────────────────
-  canNext(): boolean {
-    if (this.step === 1) return !!this.selectedType;
-    if (this.isFieldsStep) return this.selectedFields.length > 0;
-    return true;
-  }
-
-  nextStep(): void { if (this.canNext()) this.step++; }
-  prevStep(): void { if (this.step > 1) this.step--; }
+  canNext(): boolean { return this.step === 1 ? !!this.selectedType : true; }
+  nextStep(): void   { if (this.canNext()) this.step++; }
+  prevStep(): void   { if (this.step > 1) this.step--; }
 
   // ── Add to dashboard ─────────────────────────────────────────
   addToDashboard(): void {
@@ -124,7 +109,7 @@ export class AddWidgetWizard implements OnInit {
 
     this.svc.addWidget({
       ...base,
-      title: this.titleForm.value.title ?? base.title,
+      title:  this.titleForm.value.title ?? base.title,
       config: { ...this.cfg },
     });
     this.dialogRef.close();
@@ -137,33 +122,24 @@ export class AddWidgetWizard implements OnInit {
 
   get summaryRows(): { k: string; v: string }[] {
     if (!this.selectedType) return [];
+    const qcfg = this.queryCfg as any;
     return [
-      { k: 'Type', v: this.cat?.label ?? '' },
-      { k: 'Fields', v: this.hasFields ? `${this.selectedFields.length} selected` : 'N/A' },
-      { k: 'Title', v: this.previewTitle || '—' },
+      { k: 'Type',    v: this.cat?.label ?? '' },
+      { k: 'Title',   v: this.previewTitle || '—' },
+      ...(qcfg?.product  ? [{ k: 'Product',  v: qcfg.product }] : []),
+      ...(qcfg?.entities?.length
+        ? [{ k: 'Entities', v: (qcfg.entities as string[]).join(' → ') }]
+        : []),
     ];
   }
 
-  // Selected field chips for the preview panel on step 2
-  get selectedFieldChips(): { label: string; color: string }[] {
-    if (!this.isFieldsStep || !this.poolMap) return [];
-    const pool: any[] = (DATA_SCHEMA as any)[this.poolMap.pool] ?? [];
-    return this.selectedFields
-      .map(id => pool.find((f: any) => f.id === id))
-      .filter(Boolean)
-      .map((f: any) => ({
-        label: f.label || f.name || f.key,
-        color: f.accent || f.color || 'var(--acc)',
-      }));
-  }
-
-  // Config panel type casts (for template binding)
-  get cfgAsStat() { return this.cfg as any; }
+  // Config panel type casts for template binding
+  get cfgAsStat()      { return this.cfg as any; }
   get cfgAsAnalytics() { return this.cfg as any; }
-  get cfgAsSeries() { return this.cfg as any; }
-  get cfgAsPie() { return this.cfg as any; }
-  get cfgAsTable() { return this.cfg as any; }
-  get cfgAsProgress() { return this.cfg as any; }
-  get cfgAsNote() { return this.cfg as any; }
-  get cfgAsSection() { return this.cfg as any; }
+  get cfgAsSeries()    { return this.cfg as any; }
+  get cfgAsPie()       { return this.cfg as any; }
+  get cfgAsTable()     { return this.cfg as any; }
+  get cfgAsProgress()  { return this.cfg as any; }
+  get cfgAsNote()      { return this.cfg as any; }
+  get cfgAsSection()   { return this.cfg as any; }
 }

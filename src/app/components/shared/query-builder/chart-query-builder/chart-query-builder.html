@@ -1,0 +1,123 @@
+<!-- Primary Entity -->
+<div class="section-hdr" style="padding-top:0">Primary Entity</div>
+<div class="field-row" style="margin-bottom:12px">
+  <label class="field-label">Entity</label>
+  <select class="sel"
+    [value]="primaryEntity"
+    (change)="onPrimaryEntityChange($any($event.target).value)">
+    @for (e of entities; track e.name) {
+      <option [value]="e.name">{{ e.name }}</option>
+    }
+  </select>
+</div>
+
+<!-- Date Axis -->
+<div class="section-hdr">Date Axis</div>
+<div class="three-col">
+  <div class="field-row">
+    <label class="field-label">Entity</label>
+    <select class="sel sel--sm"
+      [value]="dateAxisEntity"
+      (change)="onDateAxisEntityChange($any($event.target).value)">
+      @for (e of reachableEntities; track e.name) {
+        <option [value]="e.name">{{ e.name }}</option>
+      }
+    </select>
+  </div>
+  <div class="field-row">
+    <label class="field-label">Date Field</label>
+    <select class="sel sel--sm"
+      [value]="dateAxisField"
+      (change)="dateAxisField = $any($event.target).value; emit()">
+      @for (f of dateFields(dateAxisEntity); track f.name) {
+        <option [value]="f.name">{{ f.name }}</option>
+      }
+    </select>
+  </div>
+  <div class="field-row">
+    <label class="field-label">Interval</label>
+    <select class="sel sel--sm"
+      [value]="dateAxisInterval"
+      (change)="dateAxisInterval = $any($event.target).value; emit()">
+      @for (i of dateIntervals(); track i) {
+        <option [value]="i">{{ i }}</option>
+      }
+    </select>
+  </div>
+</div>
+
+<!-- Value Aggregation -->
+<div class="section-hdr">Value Aggregation</div>
+<div class="three-col">
+  <div class="field-row">
+    <label class="field-label">Entity</label>
+    <select class="sel sel--sm"
+      [value]="valueAggEntity"
+      (change)="onValueAggEntityChange($any($event.target).value)">
+      @for (e of valueAggEntities; track e.name) {
+        <option [value]="e.name">{{ e.name }}</option>
+      }
+    </select>
+  </div>
+  <div class="field-row">
+    <label class="field-label">Field</label>
+    <select class="sel sel--sm"
+      [value]="valueAggField"
+      (change)="valueAggField = $any($event.target).value; emit()">
+      @for (f of aggFields(valueAggEntity); track f.name) {
+        <option [value]="f.name">{{ f.name }}</option>
+      }
+    </select>
+  </div>
+  <div class="field-row">
+    <label class="field-label">Function</label>
+    <select class="sel sel--sm"
+      [value]="valueAggFunction"
+      (change)="valueAggFunction = $any($event.target).value; emit()">
+      @for (fn of aggFunctions(); track fn) {
+        <option [value]="fn">{{ fn }}</option>
+      }
+    </select>
+  </div>
+</div>
+
+<!-- Group By -->
+<div class="section-hdr">Group By (Series Split)</div>
+<div class="toggle-row" style="margin-bottom:10px">
+  <label class="toggle-wrap" (click)="groupByEnabled = !groupByEnabled; emit()">
+    <div class="toggle-box" [class.is-on]="groupByEnabled"></div>
+    <span class="toggle-label">Split into multiple series by field</span>
+  </label>
+</div>
+
+@if (groupByEnabled) {
+  <div class="two-col" style="margin-bottom:12px">
+    <div class="field-row">
+      <label class="field-label">Entity</label>
+      <select class="sel sel--sm"
+        [value]="groupByEntity"
+        (change)="onGroupByEntityChange($any($event.target).value)">
+        @for (e of reachableEntities; track e.name) {
+          <option [value]="e.name">{{ e.name }}</option>
+        }
+      </select>
+    </div>
+    <div class="field-row">
+      <label class="field-label">Field</label>
+      <select class="sel sel--sm"
+        [value]="groupByField"
+        (change)="groupByField = $any($event.target).value; emit()">
+        @for (f of fieldsFor(groupByEntity); track f.name) {
+          <option [value]="f.name">{{ f.name }}</option>
+        }
+      </select>
+    </div>
+  </div>
+}
+
+<!-- Filters -->
+<app-filter-builder
+  [product]="product"
+  [entityScope]="filterScope"
+  [filters]="filters"
+  (filtersChange)="filters = $event; emit()" />

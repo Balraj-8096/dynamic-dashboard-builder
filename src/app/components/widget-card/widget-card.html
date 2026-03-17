@@ -65,11 +65,11 @@
   <!-- ── RESIZE HANDLES (hidden when locked) ───────────────── -->
   @if (!isLocked) {
     <div class="resize-handle resize-handle--e"
-      (mousedown)="onResizeMousedown($event, 'e')"></div>
+      (mousedown)="onResizeMousedown($event, RD.E)"></div>
     <div class="resize-handle resize-handle--s"
-      (mousedown)="onResizeMousedown($event, 's')"></div>
+      (mousedown)="onResizeMousedown($event, RD.S)"></div>
     <div class="resize-handle resize-handle--se"
-      (mousedown)="onResizeMousedown($event, 'se')">
+      (mousedown)="onResizeMousedown($event, RD.SE)">
       <div class="resize-corner-dot"></div>
     </div>
   }

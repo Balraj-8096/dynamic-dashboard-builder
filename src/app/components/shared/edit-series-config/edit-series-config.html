@@ -1,4 +1,4 @@
-<div class="section-hdr">Display Options</div>
+<div class="section-hdr" style="padding-top:0">Display Options</div>
 <div class="two-col">
   @if (typeLabel === 'bar') {
     <div class="field-row">
@@ -67,28 +67,3 @@
     </div>
   </div>
 </div>
-
-<div class="section-hdr">Data Series</div>
-@for (s of series; track $index) {
-  <div class="item-card">
-    <div class="item-card-header">
-      <span class="item-card-title">Series {{ $index + 1 }}</span>
-      @if (series.length > 1) {
-        <button class="btn-remove" (click)="removeSeries($index)">Remove</button>
-      }
-    </div>
-    <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:8px">
-      <input class="inp inp--sm" placeholder="Series name"
-        [value]="s.key"
-        (input)="updateSeriesField($index, 'key', $any($event.target).value)" />
-      <input type="color" class="inp inp--w44"
-        [value]="chartColor($index, s.color)"
-        (input)="updateSeriesField($index, 'color', $any($event.target).value)" />
-    </div>
-    <textarea class="ta"
-      [value]="seriesDataToStr(s)"
-      (change)="updateSeriesData($index, $any($event.target).value)"
-      placeholder="Label:Value&#10;Jan:420&#10;Feb:380&#10;..."></textarea>
-  </div>
-}
-<button class="btn-add-dashed" (click)="addSeries()">+ Add Series</button>

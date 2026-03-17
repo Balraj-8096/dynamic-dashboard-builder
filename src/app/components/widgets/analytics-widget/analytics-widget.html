@@ -8,88 +8,48 @@
     <!-- ── Top: value + change badge ─────────────────────── -->
     <div class="analytics-top">
 
-      <!-- Primary value -->
-      <div
-        class="analytics-value"
-        [style.color]="accent">
-        {{ cfg.value }}
+      <div class="analytics-value" [style.color]="accent">
+        {{ displayValue }}
       </div>
 
-      <!-- Change badge -->
-      @if (cfg.changeValue) {
-        <div
-          class="change-badge"
-          [class.change--up]="cfg.trendUp"
-          [class.change--down]="!cfg.trendUp">
-
-          <span class="change-arrow">
-            {{ cfg.trendUp ? '▲' : '▼' }}
-          </span>
-
-          <span class="change-value">
-            {{ cfg.changeValue }}
-          </span>
-
-          @if (cfg.changeLabel) {
-            <span class="change-label">
-              {{ cfg.changeLabel }}
-            </span>
+      @if (displayChangeValue) {
+        <div class="change-badge"
+          [class.change--up]="displayTrendUp"
+          [class.change--down]="!displayTrendUp">
+          <span class="change-arrow">{{ displayTrendUp ? '▲' : '▼' }}</span>
+          <span class="change-value">{{ displayChangeValue }}</span>
+          @if (displayChangeLabel) {
+            <span class="change-label">{{ displayChangeLabel }}</span>
           }
-
         </div>
       }
 
     </div>
 
     <!-- ── Middle: area chart ─────────────────────────────── -->
-    @if (cfg.data?.length) {
+    @if (displayData.length) {
       <div class="chart-wrapper">
-        <svg
-          [attr.viewBox]="'0 0 ' + svgW + ' ' + svgH"
-          width="100%"
-          [attr.height]="svgH"
-          overflow="visible"
-          preserveAspectRatio="none">
-
+        <svg [attr.viewBox]="'0 0 ' + svgW + ' ' + svgH"
+          width="100%" [attr.height]="svgH"
+          overflow="visible" preserveAspectRatio="none">
           <defs>
-            <linearGradient
-              [attr.id]="gradientId"
-              x1="0" y1="0"
-              x2="0" y2="1">
-              <stop
-                offset="0%"
-                [attr.stop-color]="accent"
-                stop-opacity="0.35" />
-              <stop
-                offset="100%"
-                [attr.stop-color]="accent"
-                stop-opacity="0.02" />
+            <linearGradient [attr.id]="gradientId" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   [attr.stop-color]="accent" stop-opacity="0.35" />
+              <stop offset="100%" [attr.stop-color]="accent" stop-opacity="0.02" />
             </linearGradient>
           </defs>
-
-          <!-- Area fill -->
-          <path
-            [attr.d]="getAreaPaths(cfg.data).fillPath"
+          <path [attr.d]="getAreaPaths(displayData).fillPath"
             [attr.fill]="'url(#' + gradientId + ')'" />
-
-          <!-- Line -->
-          <path
-            [attr.d]="getAreaPaths(cfg.data).linePath"
-            fill="none"
-            [attr.stroke]="accent"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round" />
-
+          <path [attr.d]="getAreaPaths(displayData).linePath"
+            fill="none" [attr.stroke]="accent"
+            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
       </div>
     }
 
     <!-- ── Bottom: period label ───────────────────────────── -->
-    @if (cfg.period) {
-      <div class="period-label">
-        {{ cfg.period }}
-      </div>
+    @if (displayPeriod) {
+      <div class="period-label">{{ displayPeriod }}</div>
     }
 
   </div>

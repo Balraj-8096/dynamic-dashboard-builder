@@ -6,10 +6,11 @@ import { computeColW, computeCanvasH } from '../../core/layout.utils';
 import { DashboardService } from '../../services/dashboard.service';
 import { ViewWidgetCard } from "../shared/view-widget-card/view-widget-card";
 import { Minimap } from "../minimap/minimap";
+import { GlobalFilterBarComponent } from "../shared/global-filter-bar/global-filter-bar";
 
 @Component({
   selector: 'app-dashboard-view',
-  imports: [ViewWidgetCard, Minimap],
+  imports: [ViewWidgetCard, Minimap, GlobalFilterBarComponent],
   templateUrl: './dashboard-view.html',
   styleUrl: './dashboard-view.scss',
 })

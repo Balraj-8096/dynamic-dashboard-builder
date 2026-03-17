@@ -1,0 +1,37 @@
+<!-- Product selector -->
+<div class="section-hdr" style="padding-top:0">Data Source</div>
+<div class="field-row" style="margin-bottom:16px">
+  <label class="field-label">Product</label>
+  <select class="sel"
+    [value]="selectedProduct"
+    (change)="onProductChange($any($event.target).value)">
+    @for (p of products; track p.slug) {
+      <option [value]="p.slug">{{ p.display_name }}</option>
+    }
+  </select>
+</div>
+
+<!-- Sub-builder routed by widget type -->
+@if (selectedProduct) {
+  @if (isStat || isProgress) {
+    <app-stat-query-builder
+      [product]="selectedProduct"
+      [config]="statConfig"
+      (configChange)="onQueryConfigChange($event)" />
+  } @else if (isChart) {
+    <app-chart-query-builder
+      [product]="selectedProduct"
+      [config]="chartConfig"
+      (configChange)="onQueryConfigChange($event)" />
+  } @else if (isPie) {
+    <app-pie-query-builder
+      [product]="selectedProduct"
+      [config]="pieConfig"
+      (configChange)="onQueryConfigChange($event)" />
+  } @else if (isTable) {
+    <app-table-query-builder
+      [product]="selectedProduct"
+      [config]="tableConfig"
+      (configChange)="onQueryConfigChange($event)" />
+  }
+}

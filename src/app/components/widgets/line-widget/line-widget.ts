@@ -12,9 +12,15 @@ import {
   Input,
   OnChanges,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  effect,
+  untracked,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgApexchartsModule } from 'ng-apexcharts';
+import { QueryService } from '../../../services/query.service';
+import { mapChartResult } from '../../../core/query-result-mapper';
 
 import {
   ApexAxisChartSeries,
@@ -62,7 +68,17 @@ export class LineWidget implements OnChanges {
   @Input({ required: true }) widget!: Widget;
   @Input() contentH: number = 200;
 
-  chartOptions!: LineChartOptions;
+  chartOptions?: LineChartOptions;
+
+  private readonly qsvc = inject(QueryService);
+  private readonly cdr  = inject(ChangeDetectorRef);
+
+  constructor() {
+    effect(() => {
+      this.qsvc.globalFilters();
+      untracked(() => { if (this.widget) { this.buildChart(); this.cdr.markForCheck(); } });
+    });
+  }
 
   get cfg(): LineConfig {
     return this.widget.config as LineConfig;
@@ -74,16 +90,27 @@ export class LineWidget implements OnChanges {
 
   private buildChart(): void {
     const cfg = this.cfg;
-    if (!cfg?.series?.length) return;
 
-    const series: ApexAxisChartSeries = cfg.series.map(s => ({
+    let activeSeries     = cfg?.series ?? [];
+    let activeCategories = activeSeries[0]?.data.map(d => d.n) ?? [];
+
+    if (cfg?.queryConfig) {
+      try {
+        const result = this.qsvc.executeChartQuery(cfg.queryConfig);
+        const mapped = mapChartResult(result);
+        activeSeries     = mapped.series;
+        activeCategories = mapped.labels;
+      } catch { /* keep static */ }
+    }
+
+    const series: ApexAxisChartSeries = activeSeries.map(s => ({
       name: s.key,
       data: s.data.map(d => d.v),
     }));
 
-    const categories = cfg.series[0].data.map(d => d.n);
+    const categories = activeCategories;
 
-    const colors = cfg.series.map(
+    const colors = activeSeries.map(
       (s, i) => s.color || CHART_COLORS[i % CHART_COLORS.length]
     );
 

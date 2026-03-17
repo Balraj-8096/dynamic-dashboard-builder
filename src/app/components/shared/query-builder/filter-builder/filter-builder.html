@@ -1,0 +1,72 @@
+<div class="section-hdr">Filters</div>
+
+@for (f of filters; track $index) {
+  <div class="item-card" style="margin-bottom:8px">
+
+    <!-- Entity / Field / Operator row -->
+    <div class="three-col" style="margin-bottom:8px">
+      <div class="field-row">
+        <label class="field-label">Entity</label>
+        <select class="sel sel--sm"
+          [value]="f.entity"
+          (change)="onEntityChange($index, $any($event.target).value)">
+          @for (e of entities; track e.name) {
+            <option [value]="e.name">{{ e.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="field-row">
+        <label class="field-label">Field</label>
+        <select class="sel sel--sm"
+          [value]="f.field"
+          (change)="updateFilter($index, { field: $any($event.target).value })">
+          @for (fd of filterableFields(f.entity); track fd.name) {
+            <option [value]="fd.name">{{ fd.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="field-row">
+        <label class="field-label">Operator</label>
+        <select class="sel sel--sm"
+          [value]="f.operator"
+          (change)="onOperatorChange($index, $any($event.target).value)">
+          @for (op of operators(f.entity, f.field); track op) {
+            <option [value]="op">{{ op }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <!-- Value row -->
+    <div style="display:flex; gap:8px; align-items:center">
+      @if (!isNoValue(f.operator)) {
+        @if (isDateRange(f.operator)) {
+          <select class="sel sel--sm" style="flex:1"
+            [value]="f.dateRange?.preset ?? ''"
+            (change)="updateFilter($index, { dateRange: { preset: $any($event.target).value } })">
+            <option value="">— custom range —</option>
+            @for (p of presetList(); track p) {
+              <option [value]="p">{{ p }}</option>
+            }
+          </select>
+        } @else if (isMultiValue(f.operator)) {
+          <input class="inp inp--sm" style="flex:1" type="text"
+            placeholder="val1, val2, …"
+            [value]="valuesStr(f)"
+            (change)="setValues($index, $any($event.target).value)" />
+        } @else {
+          <input class="inp inp--sm" style="flex:1" type="text"
+            placeholder="value"
+            [value]="$any(f.value) ?? ''"
+            (change)="updateFilter($index, { value: $any($event.target).value })" />
+        }
+      } @else {
+        <span style="flex:1; font-size:11px; color:var(--txt2); font-style:italic">no value needed</span>
+      }
+      <button class="btn-remove-sm" (click)="removeFilter($index)">✕</button>
+    </div>
+
+  </div>
+}
+
+<button class="btn-add-dashed" (click)="addFilter()">+ Add Filter</button>

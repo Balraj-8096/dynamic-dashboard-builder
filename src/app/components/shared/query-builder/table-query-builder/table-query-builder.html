@@ -1,0 +1,125 @@
+<!-- Entities -->
+<div class="section-hdr" style="padding-top:0">Entities</div>
+<div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px">
+  @for (e of entityList; track e) {
+    <span style="display:inline-flex; align-items:center; gap:4px;
+      background:var(--bg3); border:1px solid var(--bdr); border-radius:4px;
+      padding:3px 8px; font-size:12px; font-family:var(--font-mono)">
+      {{ e }}
+      @if (entityList.length > 1) {
+        <button class="btn-remove" style="padding:0 2px; font-size:10px"
+          (click)="removeEntity(e)">✕</button>
+      }
+    </span>
+  }
+</div>
+<div style="display:flex; gap:8px; margin-bottom:12px">
+  <select class="sel sel--sm" style="flex:1"
+    [(ngModel)]="newAddEntity">
+    <option value="">— add entity —</option>
+    @for (e of availableEntities; track e.name) {
+      <option [value]="e.name">{{ e.name }}</option>
+    }
+  </select>
+  <button class="btn-add-dashed"
+    style="width:auto; padding:5px 14px; margin-top:0"
+    (click)="addEntity(newAddEntity)">
+    + Add
+  </button>
+</div>
+
+<!-- Columns -->
+<div class="section-hdr">Columns</div>
+@for (col of columns; track $index) {
+  <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px">
+    <span style="flex:1; font-size:12px; font-family:var(--font-mono); color:var(--txt1)">
+      {{ col.entity }}.{{ col.field }}
+    </span>
+    <button class="btn-remove-sm" (click)="removeColumn($index)">✕</button>
+  </div>
+}
+<div style="display:flex; gap:8px; margin-bottom:12px">
+  <select class="sel sel--sm" style="flex:1"
+    [value]="newColEntity"
+    (change)="onNewColEntityChange($any($event.target).value)">
+    @for (e of entityList; track e) {
+      <option [value]="e">{{ e }}</option>
+    }
+  </select>
+  <select class="sel sel--sm" style="flex:1"
+    [value]="newColField"
+    (change)="newColField = $any($event.target).value">
+    @for (f of fieldsFor(newColEntity); track f.name) {
+      <option [value]="f.name">{{ f.name }}</option>
+    }
+  </select>
+  <button class="btn-add-dashed"
+    style="width:auto; padding:5px 14px; margin-top:0"
+    (click)="addColumn()">
+    + Add
+  </button>
+</div>
+
+<!-- Sort -->
+<div class="section-hdr">Sort</div>
+<div class="toggle-row" style="margin-bottom:8px">
+  <label class="toggle-wrap" (click)="sortEnabled = !sortEnabled; emit()">
+    <div class="toggle-box" [class.is-on]="sortEnabled"></div>
+    <span class="toggle-label">Enable default sort</span>
+  </label>
+</div>
+@if (sortEnabled) {
+  <div class="three-col" style="margin-bottom:12px">
+    <div class="field-row">
+      <label class="field-label">Entity</label>
+      <select class="sel sel--sm"
+        [value]="sortEntity"
+        (change)="onSortEntityChange($any($event.target).value)">
+        @for (e of entityList; track e) {
+          <option [value]="e">{{ e }}</option>
+        }
+      </select>
+    </div>
+    <div class="field-row">
+      <label class="field-label">Field</label>
+      <select class="sel sel--sm"
+        [value]="sortField"
+        (change)="sortField = $any($event.target).value; emit()">
+        @for (f of fieldsFor(sortEntity); track f.name) {
+          <option [value]="f.name">{{ f.name }}</option>
+        }
+      </select>
+    </div>
+    <div class="field-row">
+      <label class="field-label">Direction</label>
+      <select class="sel sel--sm"
+        [value]="sortDirection"
+        (change)="sortDirection = $any($event.target).value; emit()">
+        @for (d of sortDirections(); track d) {
+          <option [value]="d">{{ d }}</option>
+        }
+      </select>
+    </div>
+  </div>
+}
+
+<!-- Pagination -->
+<div class="section-hdr">Pagination</div>
+<div class="field-row" style="margin-bottom:12px">
+  <label class="field-label">Page Size</label>
+  <select class="sel sel--sm"
+    [value]="pageSize"
+    (change)="pageSize = +$any($event.target).value; emit()">
+    <option [value]="10">10</option>
+    <option [value]="20">20</option>
+    <option [value]="50">50</option>
+    <option [value]="100">100</option>
+  </select>
+</div>
+
+<!-- Filters -->
+<app-filter-builder
+  [product]="product"
+  [entityScope]="filterScope"
+  [filters]="filters"
+  (filtersChange)="filters = $event; emit()" />

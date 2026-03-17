@@ -4,6 +4,44 @@
 //  Every component, service, and utility imports from here
 // ═══════════════════════════════════════════════════════════════
 
+import {
+  StatQueryConfig, ChartQueryConfig, PieQueryConfig,
+  TableQueryConfig, QueryWarning, StatusValueDef, FieldType,
+} from './query-types';
+
+// ───────────────────────────────────────────────────────────────
+//  ENUMS
+// ───────────────────────────────────────────────────────────────
+
+export enum WidgetType {
+  Stat      = 'stat',
+  Analytics = 'analytics',
+  Bar       = 'bar',
+  Line      = 'line',
+  Pie       = 'pie',
+  Table     = 'table',
+  Progress  = 'progress',
+  Note      = 'note',
+  Section   = 'section',
+}
+
+export enum ResizeDirection {
+  E  = 'e',
+  S  = 's',
+  SE = 'se',
+}
+
+export enum PageState {
+  Builder = 'builder',
+  View    = 'view',
+}
+
+export enum TextAlign {
+  Left   = 'left',
+  Center = 'center',
+  Right  = 'right',
+}
+
 
 // ───────────────────────────────────────────────────────────────
 //  GRID SYSTEM
@@ -55,6 +93,9 @@ export interface StatConfig {
   showSparkline:  boolean;
   sparkData:      number[];
   selectedFields: string[];
+  // ── Query integration ──
+  queryConfig?:   StatQueryConfig;
+  queryWarnings?: QueryWarning[];
 }
 
 /**
@@ -75,6 +116,9 @@ export interface AnalyticsConfig {
    * Single-element array (analytics is single-select).
    */
   selectedFields: string[];
+  // ── Query integration ──
+  queryConfig?:   StatQueryConfig;
+  queryWarnings?: QueryWarning[];
 }
 
 /**
@@ -111,6 +155,11 @@ export interface BarConfig {
    * Required so Edit Modal fields tab can pre-check the right boxes.
    */
   selectedFields: string[];
+  // ── Query integration ──
+  queryConfig?:   ChartQueryConfig;
+  queryWarnings?: QueryWarning[];
+  /** X-axis labels from query result (parallel to series[].data) */
+  queryLabels?:   string[];
 }
 
 /**
@@ -128,6 +177,10 @@ export interface LineConfig {
    * Required so Edit Modal fields tab can pre-check the right boxes.
    */
   selectedFields: string[];
+  // ── Query integration ──
+  queryConfig?:   ChartQueryConfig;
+  queryWarnings?: QueryWarning[];
+  queryLabels?:   string[];
 }
 
 /**
@@ -152,23 +205,29 @@ export interface PieConfig {
    * Required so Edit Modal fields tab can pre-check the right boxes.
    */
   selectedFields: string[];
+  // ── Query integration ──
+  queryConfig?:   PieQueryConfig;
+  queryWarnings?: QueryWarning[];
 }
 
 /**
  * Single column definition for data table
  */
 export interface TableColumn {
-  key:   string;
-  label: string;
-  width: string;
+  key:           string;
+  label:         string;
+  width:         string;
+  type?:         FieldType;
+  statusValues?: StatusValueDef[];
 }
 
 /**
- * Single row for data table
- * Dynamic key-value pairs
+ * Single row for data table — dynamic key/value pairs.
+ * Values are unknown to support numbers, booleans and dates
+ * returned by the query engine (not just strings).
  */
 export interface TableRow {
-  [key: string]: string;
+  [key: string]: unknown;
 }
 
 /**
@@ -185,6 +244,11 @@ export interface TableConfig {
    * Required so Edit Modal fields tab can pre-check the right boxes.
    */
   selectedFields: string[];
+  // ── Query integration ──
+  queryConfig?:   TableQueryConfig;
+  queryWarnings?: QueryWarning[];
+  /** Total row count from query (used for server-side pagination display) */
+  totalRows?:     number;
 }
 
 /**
@@ -201,14 +265,17 @@ export interface ProgressItem {
  * Progress Bars config
  */
 export interface ProgressConfig {
-  items:          ProgressItem[];
-  showValues:     boolean;
-  animated:       boolean;
+  items:           ProgressItem[];
+  showValues:      boolean;
+  animated:        boolean;
   /**
    * B6 fix: tracks which DATA_SCHEMA.items IDs are selected.
    * Required so Edit Modal fields tab can pre-check the right boxes.
    */
-  selectedFields: string[];
+  selectedFields:  string[];
+  // ── Query integration ──
+  progressQueries?: StatQueryConfig[];  // one per item
+  queryWarnings?:   QueryWarning[];
 }
 
 /**
@@ -228,7 +295,7 @@ export interface SectionConfig {
   label:    string;
   accent:   string;
   showLine: boolean;
-  align:    'left' | 'center' | 'right';
+  align:    TextAlign;
 }
 
 /**
@@ -250,20 +317,6 @@ export type WidgetConfig =
 // ───────────────────────────────────────────────────────────────
 //  WIDGET TYPE
 // ───────────────────────────────────────────────────────────────
-
-/**
- * All valid widget type strings
- */
-export type WidgetType =
-  | 'stat'
-  | 'analytics'
-  | 'bar'
-  | 'line'
-  | 'pie'
-  | 'table'
-  | 'progress'
-  | 'note'
-  | 'section';
 
 /**
  * Core Widget object — the main data model
@@ -442,14 +495,6 @@ export interface DragRef {
 }
 
 /**
- * Resize direction handles
- * e  = right edge (width only)
- * s  = bottom edge (height only)
- * se = corner (width and height)
- */
-export type ResizeDirection = 'e' | 's' | 'se';
-
-/**
  * Resize operation state stored in ref during resize
  */
 export interface ResizeRef {
@@ -479,17 +524,10 @@ export interface StatusStyle {
 }
 
 /**
- * All possible status values for the table widget
+ * Re-export for backwards compatibility.
+ * Prefer StatusValueDef from query-types for new code.
  */
-export type StatusValue =
-  | 'paid'
-  | 'pending'
-  | 'failed'
-  | 'active'
-  | 'inactive'
-  | 'shipped'
-  | 'refunded'
-  | 'draft';
+export type { StatusValueDef } from './query-types';
 
 
 // ───────────────────────────────────────────────────────────────
@@ -501,12 +539,6 @@ export type StatusValue =
  * Each entry is a complete, independent copy
  */
 export type HistoryEntry = Widget[];
-
-/**
- * Dashboard page state
- * Controls which page is currently rendered
- */
-export type PageState = 'builder' | 'view';
 
 
 // ───────────────────────────────────────────────────────────────
@@ -552,4 +584,7 @@ export interface DashboardState {
 
   // Title editing
   editingTitle:   boolean;
+
+  // Page state
+  pageState:      PageState;
 }

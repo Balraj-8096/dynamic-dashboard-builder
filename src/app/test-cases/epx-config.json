@@ -1,0 +1,514 @@
+{
+  "product": {
+    "slug": "epx",
+    "display_name": "EPX",
+    "version": "1.0.0"
+  },
+  "connection": {
+    "type": "",
+    "host": "",
+    "database": "",
+    "username": "",
+    "password": ""
+  },
+
+  "global_filter_dimensions": [
+    { "type": "site", "entity": "appointment", "field": "site_id",    "label": "Site"       },
+    { "type": "date", "entity": "appointment", "field": "start_date", "label": "Date Range"  }
+  ],
+
+  "joins": [
+    {
+      "name": "appointment_to_appointment_patient",
+      "from": { "entity": "appointment",         "column": "id"            },
+      "to":   { "entity": "appointment_patient",  "column": "appointmentid" },
+      "type": "INNER"
+    },
+    {
+      "name": "appointment_patient_to_patient",
+      "from": { "entity": "appointment_patient",  "column": "patientid"     },
+      "to":   { "entity": "patient",              "column": "id"            },
+      "type": "INNER"
+    },
+    {
+      "name": "patient_to_contact",
+      "from": { "entity": "patient",              "column": "id"            },
+      "to":   { "entity": "contact",              "column": "id"            },
+      "type": "INNER"
+    },
+    {
+      "name": "contact_to_contact_telecom",
+      "from": { "entity": "contact",              "column": "id"            },
+      "to":   { "entity": "contact_telecom",      "column": "contactid"     },
+      "type": "LEFT"
+    },
+    {
+      "name": "contact_telecom_to_telecom",
+      "from": { "entity": "contact_telecom",      "column": "telecomid"     },
+      "to":   { "entity": "telecom",              "column": "id"            },
+      "type": "LEFT"
+    },
+    {
+      "name": "contact_to_contact_address",
+      "from": { "entity": "contact",              "column": "id"            },
+      "to":   { "entity": "contact_address",      "column": "contactid"     },
+      "type": "LEFT"
+    },
+    {
+      "name": "contact_address_to_address",
+      "from": { "entity": "contact_address",      "column": "addressid"     },
+      "to":   { "entity": "address",              "column": "id"            },
+      "type": "LEFT"
+    }
+  ],
+
+  "entities": [
+    {
+      "name": "appointment",
+      "schema": "epx",
+      "table": "appointment",
+      "is_view": false,
+      "display_field": "identifier",
+      "default_date_field": "start_date",
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "is_primary_key": true
+        },
+        {
+          "name": "site_id",
+          "column": "siteid",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false
+        },
+        {
+          "name": "start_date",
+          "column": "startdate",
+          "type": "datetime",
+          "filterable": true,
+          "aggregatable": true,
+          "description": "Appointment start date and time — primary date axis for charts"
+        },
+        {
+          "name": "end_date",
+          "column": "enddate",
+          "type": "datetime",
+          "filterable": true,
+          "aggregatable": false
+        },
+        {
+          "name": "status",
+          "column": "status",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "status_values": [
+            { "value": "scheduled",  "label": "Scheduled",  "color": "#3b82f6" },
+            { "value": "confirmed",  "label": "Confirmed",  "color": "#22c55e" },
+            { "value": "completed",  "label": "Completed",  "color": "#10b981" },
+            { "value": "cancelled",  "label": "Cancelled",  "color": "#6b7280" },
+            { "value": "no_show",    "label": "No Show",    "color": "#ef4444" }
+          ]
+        },
+        {
+          "name": "is_remote",
+          "column": "isremoteappointment",
+          "type": "boolean",
+          "filterable": true,
+          "aggregatable": false,
+          "description": "True if this is a telehealth/video consultation"
+        },
+        {
+          "name": "invoiced",
+          "column": "invoiced",
+          "type": "boolean",
+          "filterable": true,
+          "aggregatable": false,
+          "description": "True if an invoice has been raised for this appointment"
+        },
+        {
+          "name": "identifier",
+          "column": "identifier",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "description": "Human-readable booking reference (e.g. APT-20260106-001)"
+        },
+        {
+          "name": "created_on",
+          "column": "createdon",
+          "type": "datetime",
+          "filterable": true,
+          "aggregatable": false
+        },
+        {
+          "name": "last_updated_on",
+          "column": "lastupdatedon",
+          "type": "datetime",
+          "filterable": true,
+          "aggregatable": false
+        }
+      ]
+    },
+
+    {
+      "name": "appointment_patient",
+      "schema": "epx",
+      "table": "appointment_patient",
+      "is_view": false,
+      "display_field": "patient_id",
+      "fields": [
+        {
+          "name": "appointment_id",
+          "column": "appointmentid",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": true
+        },
+        {
+          "name": "patient_id",
+          "column": "patientid",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false
+        },
+        {
+          "name": "price",
+          "column": "price",
+          "type": "number",
+          "filterable": true,
+          "aggregatable": true,
+          "description": "Consultation fee charged to the patient for this appointment"
+        },
+        {
+          "name": "payor_type",
+          "column": "payortype",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "status_values": [
+            { "value": "self_pay",   "label": "Self Pay",   "color": "#3b82f6" },
+            { "value": "insurance",  "label": "Insurance",  "color": "#22c55e" },
+            { "value": "nhs",        "label": "NHS",        "color": "#06b6d4" },
+            { "value": "corporate",  "label": "Corporate",  "color": "#a78bfa" }
+          ]
+        },
+        {
+          "name": "status",
+          "column": "status",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "status_values": [
+            { "value": "booked",    "label": "Booked",     "color": "#3b82f6" },
+            { "value": "attended",  "label": "Attended",   "color": "#10b981" },
+            { "value": "dna",       "label": "Did Not Attend", "color": "#ef4444" },
+            { "value": "cancelled", "label": "Cancelled",  "color": "#6b7280" }
+          ]
+        },
+        {
+          "name": "video_consultation_url",
+          "column": "videoconsultationurl",
+          "type": "string",
+          "filterable": false,
+          "aggregatable": false,
+          "description": "Video call link — only populated for remote appointments (is_remote = true)"
+        },
+        {
+          "name": "created_on",
+          "column": "createdon",
+          "type": "datetime",
+          "filterable": true,
+          "aggregatable": false
+        }
+      ]
+    },
+
+    {
+      "name": "patient",
+      "schema": "patient",
+      "table": "patient",
+      "is_view": false,
+      "display_field": "mrn",
+      "default_date_field": "date_of_birth",
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "is_primary_key": true
+        },
+        {
+          "name": "date_of_birth",
+          "column": "dateofbirth",
+          "type": "datetime",
+          "filterable": true,
+          "aggregatable": false,
+          "description": "Patient date of birth — use DATEDIFF(NOW, date_of_birth) to calculate age"
+        },
+        {
+          "name": "sex",
+          "column": "sex",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "status_values": [
+            { "value": "M", "label": "Male",    "color": "#3b82f6" },
+            { "value": "F", "label": "Female",  "color": "#ec4899" },
+            { "value": "O", "label": "Other",   "color": "#8b5cf6" }
+          ]
+        },
+        {
+          "name": "deceased",
+          "column": "deceased",
+          "type": "boolean",
+          "filterable": true,
+          "aggregatable": false,
+          "description": "True if the patient is deceased — rows with deceased=true should be treated carefully in active-patient reports"
+        },
+        {
+          "name": "status",
+          "column": "status",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "status_values": [
+            { "value": "active",   "label": "Active",   "color": "#22c55e" },
+            { "value": "inactive", "label": "Inactive", "color": "#6b7280" },
+            { "value": "deceased", "label": "Deceased", "color": "#374151" },
+            { "value": "merged",   "label": "Merged",   "color": "#8b5cf6" }
+          ]
+        },
+        {
+          "name": "mrn",
+          "column": "mrn",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "description": "Medical Record Number — unique clinical identifier for this patient"
+        },
+        {
+          "name": "created_on",
+          "column": "createdon",
+          "type": "datetime",
+          "filterable": true,
+          "aggregatable": false
+        }
+      ]
+    },
+
+    {
+      "name": "contact",
+      "schema": "patient",
+      "table": "contact",
+      "is_view": false,
+      "display_field": "lastname",
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "is_primary_key": true
+        },
+        {
+          "name": "title",
+          "column": "title",
+          "type": "string",
+          "filterable": false,
+          "aggregatable": false,
+          "description": "Patient title (Mr, Mrs, Ms, Dr, Prof, etc.) — not filterable"
+        },
+        {
+          "name": "firstname",
+          "column": "firstname",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false
+        },
+        {
+          "name": "lastname",
+          "column": "lastname",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false
+        },
+        {
+          "name": "status",
+          "column": "status",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "status_values": [
+            { "value": "active",   "label": "Active",   "color": "#22c55e" },
+            { "value": "inactive", "label": "Inactive", "color": "#6b7280" },
+            { "value": "merged",   "label": "Merged",   "color": "#8b5cf6" }
+          ]
+        },
+        {
+          "name": "created_on",
+          "column": "createdon",
+          "type": "datetime",
+          "filterable": true,
+          "aggregatable": false
+        }
+      ]
+    },
+
+    {
+      "name": "contact_telecom",
+      "schema": "patient",
+      "table": "contact_telecom",
+      "is_view": false,
+      "fields": [
+        {
+          "name": "contact_id",
+          "column": "contactid",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false
+        },
+        {
+          "name": "telecom_id",
+          "column": "telecomid",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false
+        },
+        {
+          "name": "is_primary",
+          "column": "isprimary",
+          "type": "boolean",
+          "filterable": true,
+          "aggregatable": false,
+          "description": "True if this is the patient's primary contact number — filter is_primary=true to avoid duplicate rows per patient"
+        }
+      ]
+    },
+
+    {
+      "name": "telecom",
+      "schema": "patient",
+      "table": "telecom",
+      "is_view": false,
+      "display_field": "value",
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "is_primary_key": true
+        },
+        {
+          "name": "value",
+          "column": "value",
+          "type": "string",
+          "filterable": false,
+          "aggregatable": false,
+          "description": "Phone number or email address — not filterable (PII, stored encrypted)"
+        },
+        {
+          "name": "telecom_type",
+          "column": "telecomtypetype",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "status_values": [
+            { "value": "phone",  "label": "Phone",  "color": "#3b82f6" },
+            { "value": "mobile", "label": "Mobile", "color": "#22c55e" },
+            { "value": "email",  "label": "Email",  "color": "#f59e0b" },
+            { "value": "fax",    "label": "Fax",    "color": "#6b7280" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "name": "contact_address",
+      "schema": "patient",
+      "table": "contact_address",
+      "is_view": false,
+      "fields": [
+        {
+          "name": "contact_id",
+          "column": "contactid",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false
+        },
+        {
+          "name": "address_id",
+          "column": "addressid",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false
+        },
+        {
+          "name": "is_primary",
+          "column": "isprimary",
+          "type": "boolean",
+          "filterable": true,
+          "aggregatable": false,
+          "description": "True if this is the patient's primary address — filter is_primary=true to avoid duplicate rows per patient"
+        }
+      ]
+    },
+
+    {
+      "name": "address",
+      "schema": "patient",
+      "table": "address",
+      "is_view": false,
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "string",
+          "filterable": false,
+          "aggregatable": false,
+          "is_primary_key": true
+        },
+        {
+          "name": "address1",
+          "column": "address1",
+          "type": "string",
+          "filterable": false,
+          "aggregatable": false,
+          "description": "First line of address (house number and street)"
+        },
+        {
+          "name": "address2",
+          "column": "address2",
+          "type": "string",
+          "filterable": false,
+          "aggregatable": false
+        },
+        {
+          "name": "address3",
+          "column": "address3",
+          "type": "string",
+          "filterable": false,
+          "aggregatable": false
+        },
+        {
+          "name": "postcode",
+          "column": "postcode",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "description": "Postal code — use for geographic area filtering and grouping"
+        }
+      ]
+    }
+  ]
+}

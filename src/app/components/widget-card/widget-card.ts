@@ -65,6 +65,8 @@ import { SectionWidget } from "../widgets/section-widget/section-widget";
 })
 export class WidgetCard implements OnDestroy {
   @Input({ required: true }) widget!: Widget;
+
+  readonly RD = ResizeDirection;
  
   readonly svc = inject(DashboardService);
  

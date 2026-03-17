@@ -55,6 +55,15 @@ export class DashboardService {
    */
   readonly dashTitle = signal<string>('My Dashboard');
 
+  /** Infers the active product slug from the first widget that has a queryConfig. */
+  readonly activeProduct = computed<string | null>(() => {
+    for (const w of this.widgets()) {
+      const p = (w.config as unknown as Record<string, unknown>)?.['queryConfig'] as Record<string, unknown> | undefined;
+      if (p?.['product']) return p['product'] as string;
+    }
+    return null;
+  });
+
   /**
    * Title edit mode — toolbar title becomes an input field.
    */

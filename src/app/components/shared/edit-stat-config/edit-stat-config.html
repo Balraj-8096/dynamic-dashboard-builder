@@ -1,13 +1,5 @@
-<div class="section-hdr">Values</div>
+<div class="section-hdr" style="padding-top:0">Display Options</div>
 <div class="two-col">
-  <div class="field-row">
-    <label class="field-label">Primary Value</label>
-    <input class="inp" [value]="cfg.value" (input)="upd('value', $any($event.target).value)" />
-  </div>
-  <div class="field-row">
-    <label class="field-label">Sub-label</label>
-    <input class="inp" [value]="cfg.subValue || ''" (input)="upd('subValue', $any($event.target).value)" />
-  </div>
   <div class="field-row">
     <label class="field-label">Prefix (e.g. $)</label>
     <input class="inp" [value]="cfg.prefix || ''" (input)="upd('prefix', $any($event.target).value)" />
@@ -16,29 +8,6 @@
     <label class="field-label">Suffix (e.g. %)</label>
     <input class="inp" [value]="cfg.suffix || ''" (input)="upd('suffix', $any($event.target).value)" />
   </div>
-</div>
-<div class="field-row" style="margin-bottom:10px">
-  <label class="field-label">Description</label>
-  <input class="inp" [value]="cfg.description || ''" (input)="upd('description', $any($event.target).value)" />
-</div>
-
-<div class="section-hdr">Trend</div>
-<div class="two-col">
-  <div class="field-row">
-    <label class="field-label">Trend Value</label>
-    <input class="inp" [value]="cfg.trend || ''" (input)="upd('trend', $any($event.target).value)" />
-  </div>
-  <div class="field-row">
-    <label class="field-label">Direction</label>
-    <select class="sel" [value]="cfg.trendUp ? 'up' : 'down'" (change)="upd('trendUp', $any($event.target).value === 'up')">
-      <option value="up">↑ Positive (green)</option>
-      <option value="down">↓ Negative (red)</option>
-    </select>
-  </div>
-</div>
-
-<div class="section-hdr">Appearance</div>
-<div class="two-col">
   <div class="field-row">
     <label class="field-label">Accent Color</label>
     <input type="color" class="inp" [value]="cfg.accent || '#3b82f6'" (input)="upd('accent', $any($event.target).value)" />
@@ -53,10 +22,7 @@
     </div>
   </div>
 </div>
-
-@if (cfg.showSparkline) {
-  <div class="field-row">
-    <label class="field-label">Sparkline Data <span class="field-hint">comma-separated numbers</span></label>
-    <input class="inp" [value]="sparkDataStr" (change)="setSparkData($any($event.target).value)" />
-  </div>
-}
+<div class="field-row">
+  <label class="field-label">Description</label>
+  <input class="inp" [value]="cfg.description || ''" (input)="upd('description', $any($event.target).value)" />
+</div>

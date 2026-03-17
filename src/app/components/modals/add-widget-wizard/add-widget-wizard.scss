@@ -411,3 +411,10 @@
 }
 
 .btn-add-plus { font-size: 15px; }
+
+// Divider between Query Builder and Display Options
+.panel-divider {
+  height: 1px;
+  background: var(--bdr);
+  margin: 14px 0;
+}

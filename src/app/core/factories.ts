@@ -17,7 +17,7 @@
 //  Direct port from React FACTORIES object
 // ═══════════════════════════════════════════════════════════════
 
-import { Widget } from './interfaces';
+import { Widget, WidgetType, TextAlign } from './interfaces';
 import { uid } from './constants';
 
 
@@ -33,7 +33,7 @@ import { uid } from './constants';
 export function createStat(x: number, y: number): Widget {
     return {
         id: uid(),
-        type: 'stat',
+        type: WidgetType.Stat,
         x, y,
         w: 3,
         h: 2,
@@ -63,7 +63,7 @@ export function createStat(x: number, y: number): Widget {
 export function createAnalytics(x: number, y: number): Widget {
     return {
         id: uid(),
-        type: 'analytics',
+        type: WidgetType.Analytics,
         x, y,
         w: 3,
         h: 2,
@@ -90,7 +90,7 @@ export function createAnalytics(x: number, y: number): Widget {
 export function createBar(x: number, y: number): Widget {
     return {
         id: uid(),
-        type: 'bar',
+        type: WidgetType.Bar,
         x, y,
         w: 5,
         h: 3,
@@ -141,7 +141,7 @@ export function createBar(x: number, y: number): Widget {
 export function createLine(x: number, y: number): Widget {
     return {
         id: uid(),
-        type: 'line',
+        type: WidgetType.Line,
         x, y,
         w: 5,
         h: 3,
@@ -194,7 +194,7 @@ export function createLine(x: number, y: number): Widget {
 export function createPie(x: number, y: number): Widget {
     return {
         id: uid(),
-        type: 'pie',
+        type: WidgetType.Pie,
         x, y,
         w: 4,
         h: 3,
@@ -224,7 +224,7 @@ export function createPie(x: number, y: number): Widget {
 export function createTable(x: number, y: number): Widget {
     return {
         id: uid(),
-        type: 'table',
+        type: WidgetType.Table,
         x, y,
         w: 7,
         h: 3,
@@ -263,7 +263,7 @@ export function createTable(x: number, y: number): Widget {
 export function createProgress(x: number, y: number): Widget {
     return {
         id: uid(),
-        type: 'progress',
+        type: WidgetType.Progress,
         x, y,
         w: 4,
         h: 3,
@@ -292,7 +292,7 @@ export function createProgress(x: number, y: number): Widget {
 export function createNote(x: number, y: number): Widget {
     return {
         id: uid(),
-        type: 'note',
+        type: WidgetType.Note,
         x, y,
         w: 3,
         h: 2,
@@ -316,7 +316,7 @@ export function createNote(x: number, y: number): Widget {
 export function createSection(x: number, y: number): Widget {
     return {
         id: uid(),
-        type: 'section',
+        type: WidgetType.Section,
         x, y,
         w: 12,
         h: 1,
@@ -326,7 +326,7 @@ export function createSection(x: number, y: number): Widget {
             label: 'New Section',
             accent: '#3b82f6',
             showLine: true,
-            align: 'left',
+            align: TextAlign.Left,
         },
     };
 }
@@ -345,16 +345,16 @@ export function createSection(x: number, y: number): Widget {
  *   const widget = FACTORIES['stat'](0, 0);
  *   const widget = FACTORIES[catalogItem.type](x, y);
  */
-export const FACTORIES: Record<string, (x: number, y: number) => Widget> = {
-    stat: createStat,
-    analytics: createAnalytics,
-    bar: createBar,
-    line: createLine,
-    pie: createPie,
-    table: createTable,
-    progress: createProgress,
-    note: createNote,
-    section: createSection,
+export const FACTORIES: Record<WidgetType, (x: number, y: number) => Widget> = {
+    [WidgetType.Stat]:      createStat,
+    [WidgetType.Analytics]: createAnalytics,
+    [WidgetType.Bar]:       createBar,
+    [WidgetType.Line]:      createLine,
+    [WidgetType.Pie]:       createPie,
+    [WidgetType.Table]:     createTable,
+    [WidgetType.Progress]:  createProgress,
+    [WidgetType.Note]:      createNote,
+    [WidgetType.Section]:   createSection,
 };
 
 
@@ -376,7 +376,7 @@ export const FACTORIES: Record<string, (x: number, y: number) => Widget> = {
  * // → full bar chart widget at column 0, row 3
  */
 export function createWidget(
-    type: string,
+    type: WidgetType,
     x: number,
     y: number
 ): Widget | null {

@@ -15,14 +15,14 @@
 //  Order matters — Ctrl+1 = index 0, Ctrl+9 = index 8
 // ═══════════════════════════════════════════════════════════════
 
-import { CatalogItem } from './interfaces';
+import { CatalogItem, WidgetType } from './interfaces';
 
 
 export const CATALOG: CatalogItem[] = [
 
   // ── Index 0 → Ctrl+1 ──────────────────────────────────────
   {
-    type:        'stat',
+    type:        WidgetType.Stat,
     label:       'Stat Card',
     icon:        '◈',
     color:       '#3b82f6',
@@ -32,7 +32,7 @@ export const CATALOG: CatalogItem[] = [
 
   // ── Index 1 → Ctrl+2 ──────────────────────────────────────
   {
-    type:        'analytics',
+    type:        WidgetType.Analytics,
     label:       'Analytics Card',
     icon:        '▲',
     color:       '#22c55e',
@@ -42,7 +42,7 @@ export const CATALOG: CatalogItem[] = [
 
   // ── Index 2 → Ctrl+3 ──────────────────────────────────────
   {
-    type:        'bar',
+    type:        WidgetType.Bar,
     label:       'Bar Chart',
     icon:        '▐',
     color:       '#f59e0b',
@@ -52,7 +52,7 @@ export const CATALOG: CatalogItem[] = [
 
   // ── Index 3 → Ctrl+4 ──────────────────────────────────────
   {
-    type:        'line',
+    type:        WidgetType.Line,
     label:       'Line / Area Chart',
     icon:        '∿',
     color:       '#06b6d4',
@@ -62,7 +62,7 @@ export const CATALOG: CatalogItem[] = [
 
   // ── Index 4 → Ctrl+5 ──────────────────────────────────────
   {
-    type:        'pie',
+    type:        WidgetType.Pie,
     label:       'Donut Chart',
     icon:        '◎',
     color:       '#a78bfa',
@@ -72,7 +72,7 @@ export const CATALOG: CatalogItem[] = [
 
   // ── Index 5 → Ctrl+6 ──────────────────────────────────────
   {
-    type:        'table',
+    type:        WidgetType.Table,
     label:       'Data Table',
     icon:        '⊞',
     color:       '#38bdf8',
@@ -82,7 +82,7 @@ export const CATALOG: CatalogItem[] = [
 
   // ── Index 6 → Ctrl+7 ──────────────────────────────────────
   {
-    type:        'progress',
+    type:        WidgetType.Progress,
     label:       'Progress Bars',
     icon:        '≡',
     color:       '#f97316',
@@ -92,7 +92,7 @@ export const CATALOG: CatalogItem[] = [
 
   // ── Index 7 → Ctrl+8 ──────────────────────────────────────
   {
-    type:        'note',
+    type:        WidgetType.Note,
     label:       'Text / Note',
     icon:        '✎',
     color:       '#94a3b8',
@@ -102,7 +102,7 @@ export const CATALOG: CatalogItem[] = [
 
   // ── Index 8 → Ctrl+9 ──────────────────────────────────────
   {
-    type:        'section',
+    type:        WidgetType.Section,
     label:       'Section Label',
     icon:        '▬',
     color:       '#64748b',
@@ -118,65 +118,39 @@ export const CATALOG: CatalogItem[] = [
 // ───────────────────────────────────────────────────────────────
 
 /**
- * Get a catalog item by widget type string
+ * Get a catalog item by widget type
  * Returns undefined if type not found
- *
- * @example
- * getCatalogItem('bar') // → { type: 'bar', label: 'Bar Chart', ... }
  */
-export function getCatalogItem(
-  type: string
-): CatalogItem | undefined {
+export function getCatalogItem(type: WidgetType): CatalogItem | undefined {
   return CATALOG.find(c => c.type === type);
 }
 
 /**
  * Get a catalog item by its keyboard shortcut index
  * Ctrl+1 = index 0, Ctrl+9 = index 8
- * Returns undefined if index out of range
- *
- * @example
- * getCatalogByIndex(0) // → stat (Ctrl+1)
- * getCatalogByIndex(8) // → section (Ctrl+9)
  */
-export function getCatalogByIndex(
-  index: number
-): CatalogItem | undefined {
+export function getCatalogByIndex(index: number): CatalogItem | undefined {
   return CATALOG[index];
 }
 
 /**
  * Get the accent color for a widget type
  * Falls back to default border color if type not found
- *
- * @example
- * getCatalogColor('bar') // → '#f59e0b'
  */
-export function getCatalogColor(type: string): string {
+export function getCatalogColor(type: WidgetType): string {
   return getCatalogItem(type)?.color ?? '#1e2d42';
 }
 
 /**
  * Get the icon character for a widget type
- *
- * @example
- * getCatalogIcon('stat') // → '◈'
  */
-export function getCatalogIcon(type: string): string {
+export function getCatalogIcon(type: WidgetType): string {
   return getCatalogItem(type)?.icon ?? '◈';
 }
 
 /**
  * Filter catalog items by search query
  * Matches against both label and desc (case-insensitive)
- * Used by sidebar search — Ctrl+1-9 is NOT affected by this
- *
- * Edge case C18: keyboard shortcuts always use full CATALOG,
- * never the filtered result
- *
- * @example
- * filterCatalog('chart')
- * // → [bar, line, donut] entries
  */
 export function filterCatalog(query: string): CatalogItem[] {
   if (!query.trim()) return CATALOG;
@@ -191,13 +165,9 @@ export function filterCatalog(query: string): CatalogItem[] {
 /**
  * Get widget type breakdown counts from a widget array
  * Used by Dashboard View topbar type chips
- *
- * @example
- * getTypeBreakdown(widgets)
- * // → [{ label: 'Stat Card', color: '#3b82f6', count: 4 }, ...]
  */
 export function getTypeBreakdown(
-  widgets: { type: string }[]
+  widgets: { type: WidgetType }[]
 ): { label: string; color: string; count: number }[] {
   return CATALOG
     .map(c => ({

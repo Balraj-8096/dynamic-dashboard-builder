@@ -13,10 +13,17 @@
 import {
   Component,
   Input,
+  OnChanges,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  effect,
+  untracked,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AnalyticsConfig, Widget } from '../../../core/interfaces';
+import { QueryService } from '../../../services/query.service';
+import { mapStatResult } from '../../../core/query-result-mapper';
 
 @Component({
   selector: 'app-analytics-widget',
@@ -25,14 +32,59 @@ import { AnalyticsConfig, Widget } from '../../../core/interfaces';
   styleUrl: './analytics-widget.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AnalyticsWidget {
+export class AnalyticsWidget implements OnChanges {
 
   @Input({ required: true }) widget!: Widget;
   @Input() contentH: number = 120;
 
+  private readonly qsvc = inject(QueryService);
+  private readonly cdr  = inject(ChangeDetectorRef);
+
+  constructor() {
+    effect(() => {
+      this.qsvc.globalFilters();
+      untracked(() => { if (this.widget) { this.refresh(); this.cdr.markForCheck(); } });
+    });
+  }
+
+  // ── Display state ────────────────────────────────────────────
+  displayValue       = '';
+  displayChangeValue = '';
+  displayChangeLabel = '';
+  displayTrendUp     = true;
+  displayData:       number[] = [];
+  displayPeriod      = '';
+
   // ── Config accessor ──────────────────────────────────────────
   get cfg(): AnalyticsConfig {
     return this.widget.config as AnalyticsConfig;
+  }
+
+  ngOnChanges(): void { this.refresh(); }
+
+  private refresh(): void {
+    const qcfg = this.cfg?.queryConfig;
+    if (qcfg) {
+      try {
+        const result = this.qsvc.executeStatQuery(qcfg);
+        const mapped = mapStatResult(result, qcfg.periodLabel);
+        this.displayValue       = mapped.value;
+        this.displayChangeValue = mapped.trend;
+        this.displayChangeLabel = mapped.changeLabel;
+        this.displayTrendUp     = mapped.trendUp;
+        this.displayData        = mapped.sparkData;
+        this.displayPeriod      = mapped.periodLabel;
+      } catch {
+        this.displayValue = 'Error';
+      }
+    } else {
+      this.displayValue       = this.cfg?.value       ?? '';
+      this.displayChangeValue = this.cfg?.changeValue ?? '';
+      this.displayChangeLabel = this.cfg?.changeLabel ?? '';
+      this.displayTrendUp     = this.cfg?.trendUp     ?? true;
+      this.displayData        = this.cfg?.data        ?? [];
+      this.displayPeriod      = this.cfg?.period      ?? '';
+    }
   }
 
   // ── SVG area chart ───────────────────────────────────────────

@@ -9,11 +9,17 @@ import {
   Input,
   OnChanges,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  effect,
+  untracked,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { TableColumn, TableConfig, TableRow, Widget } from '../../../core/interfaces';
 import { STATUS_FALLBACK, STATUS_MAP } from '../../../core/constants';
+import { QueryService } from '../../../services/query.service';
+import { mapTableResult } from '../../../core/query-result-mapper';
 
 @Component({
   selector: 'app-table-widget',
@@ -29,20 +35,47 @@ export class TableWidget implements OnChanges {
   // Displayed column keys for MatTable
   displayedColumns: string[] = [];
 
+  private readonly qsvc = inject(QueryService);
+  private readonly cdr  = inject(ChangeDetectorRef);
+
+  constructor() {
+    effect(() => {
+      this.qsvc.globalFilters();
+      untracked(() => { if (this.widget) { this.refresh(); this.cdr.markForCheck(); } });
+    });
+  }
+
+  private _displayCols: TableColumn[] | null = null;
+  private _displayRows: TableRow[]   | null = null;
+
   get cfg(): TableConfig {
     return this.widget.config as TableConfig;
   }
 
-  // Guard against undefined (Bug fix #6 React source)
   get cols(): TableColumn[] {
-    return this.cfg?.columns || [];
+    return this._displayCols ?? this.cfg?.columns ?? [];
   }
 
   get rows(): TableRow[] {
-    return this.cfg?.rows || [];
+    return this._displayRows ?? this.cfg?.rows ?? [];
   }
 
-  ngOnChanges(): void {
+  ngOnChanges(): void { this.refresh(); }
+
+  private refresh(): void {
+    if (this.cfg?.queryConfig) {
+      try {
+        const mapped = mapTableResult(this.qsvc.executeTableQuery(this.cfg.queryConfig));
+        this._displayCols = mapped.columns;
+        this._displayRows = mapped.rows;
+      } catch {
+        this._displayCols = null;
+        this._displayRows = null;
+      }
+    } else {
+      this._displayCols = null;
+      this._displayRows = null;
+    }
     this.displayedColumns = this.cols.map(c => c.key);
   }
 
@@ -51,12 +84,12 @@ export class TableWidget implements OnChanges {
    * Only applied when cfg.statusColumn === true
    * and the column key is 'status'.
    */
-  getStatusStyle(value: string): {
+  getStatusStyle(value: unknown): {
     bg: string;
     fg: string;
     label: string;
   } {
-    const key = String(value).toLowerCase();
+    const key = String(value ?? '').toLowerCase();
     return STATUS_MAP[key] || {
       ...STATUS_FALLBACK,
       label: value,
@@ -74,7 +107,7 @@ export class TableWidget implements OnChanges {
   /**
    * Get cell value from row by column key.
    */
-  getCellValue(row: TableRow, key: string): string {
+  getCellValue(row: TableRow, key: string): unknown {
     return row[key] ?? '';
   }
 }

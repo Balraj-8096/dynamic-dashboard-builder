@@ -16,8 +16,9 @@
 //  └── Sets dashTitle to template name
 // ═══════════════════════════════════════════════════════════════
 
-import { DashboardTemplate, Widget } from './interfaces';
-import { FACTORIES }                 from './factories';
+import { DashboardTemplate, Widget, WidgetType, TextAlign } from './interfaces';
+import { FACTORIES }                                        from './factories';
+import { PRODUCT_TEMPLATES }                               from './ProductTemplates';
 
 
 // ───────────────────────────────────────────────────────────────
@@ -28,7 +29,7 @@ function buildSales(): Widget[] {
   return [
     // Row 0 — 4 stat cards
     {
-      ...FACTORIES['stat'](0, 0),
+      ...FACTORIES[WidgetType.Stat](0, 0),
       title:  'Total Revenue',
       config: {
         value: '$124,580', subValue: 'vs last month',
@@ -40,7 +41,7 @@ function buildSales(): Widget[] {
       },
     },
     {
-      ...FACTORIES['stat'](3, 0),
+      ...FACTORIES[WidgetType.Stat](3, 0),
       title:  'Total Orders',
       config: {
         value: '2,847', subValue: 'this month',
@@ -52,7 +53,7 @@ function buildSales(): Widget[] {
       },
     },
     {
-      ...FACTORIES['stat'](6, 0),
+      ...FACTORIES[WidgetType.Stat](6, 0),
       title:  'Conversion Rate',
       config: {
         value: '3.84', subValue: 'checkout rate',
@@ -64,7 +65,7 @@ function buildSales(): Widget[] {
       },
     },
     {
-      ...FACTORIES['stat'](9, 0),
+      ...FACTORIES[WidgetType.Stat](9, 0),
       title:  'Avg. Order Value',
       config: {
         value: '127.40', subValue: 'per transaction',
@@ -77,13 +78,13 @@ function buildSales(): Widget[] {
     },
 
     // Row 2 — line chart + 2 analytics
-    FACTORIES['line'](0, 2),
+    FACTORIES[WidgetType.Line](0, 2),
     {
-      ...FACTORIES['analytics'](7, 2),
+      ...FACTORIES[WidgetType.Analytics](7, 2),
       w: 2,
     },
     {
-      ...FACTORIES['analytics'](9, 2),
+      ...FACTORIES[WidgetType.Analytics](9, 2),
       w: 3,
       title:  'Bounce Rate',
       config: {
@@ -97,13 +98,13 @@ function buildSales(): Widget[] {
     },
 
     // Row 5 — bar + pie + progress
-    FACTORIES['bar'](0, 5),
-    { ...FACTORIES['pie'](5, 5), w: 3 },
-    { ...FACTORIES['progress'](8, 5), w: 4 },
+    FACTORIES[WidgetType.Bar](0, 5),
+    { ...FACTORIES[WidgetType.Pie](5, 5), w: 3 },
+    { ...FACTORIES[WidgetType.Progress](8, 5), w: 4 },
 
     // Row 8 — table + note
-    FACTORIES['table'](0, 8),
-    { ...FACTORIES['note'](8, 8), w: 4 },
+    FACTORIES[WidgetType.Table](0, 8),
+    { ...FACTORIES[WidgetType.Note](8, 8), w: 4 },
   ];
 }
 
@@ -111,19 +112,19 @@ function buildMarketing(): Widget[] {
   return [
     // Section header
     {
-      ...FACTORIES['section'](0, 0),
+      ...FACTORIES[WidgetType.Section](0, 0),
       title: 'Section',
       config: {
         label: 'Marketing KPIs',
         accent: '#22c55e',
         showLine: true,
-        align: 'left' as const,
+        align: TextAlign.Left,
       },
     },
 
     // Row 1 — stat cards
     {
-      ...FACTORIES['stat'](0, 1),
+      ...FACTORIES[WidgetType.Stat](0, 1),
       title: 'Sessions',
       config: {
         value: '54,219', subValue: 'this month',
@@ -135,7 +136,7 @@ function buildMarketing(): Widget[] {
       },
     },
     {
-      ...FACTORIES['stat'](3, 1),
+      ...FACTORIES[WidgetType.Stat](3, 1),
       title: 'Bounce Rate',
       config: {
         value: '38.4%', subValue: 'avg session',
@@ -147,7 +148,7 @@ function buildMarketing(): Widget[] {
       },
     },
     {
-      ...FACTORIES['stat'](6, 1),
+      ...FACTORIES[WidgetType.Stat](6, 1),
       title: 'Conversion',
       config: {
         value: '3.84%', subValue: 'conversion rate',
@@ -159,7 +160,7 @@ function buildMarketing(): Widget[] {
       },
     },
     {
-      ...FACTORIES['stat'](9, 1),
+      ...FACTORIES[WidgetType.Stat](9, 1),
       title: 'New Signups',
       config: {
         value: '1,820', subValue: 'this quarter',
@@ -172,15 +173,15 @@ function buildMarketing(): Widget[] {
     },
 
     // Row 3 — line + pie
-    { ...FACTORIES['line'](0, 3),  w: 7 },
-    { ...FACTORIES['pie'](7, 3),   w: 5 },
+    { ...FACTORIES[WidgetType.Line](0, 3),  w: 7 },
+    { ...FACTORIES[WidgetType.Pie](7, 3),   w: 5 },
 
     // Row 6 — bar + progress
-    { ...FACTORIES['bar'](0, 6),   w: 7 },
-    { ...FACTORIES['progress'](7, 6), w: 5 },
+    { ...FACTORIES[WidgetType.Bar](0, 6),   w: 7 },
+    { ...FACTORIES[WidgetType.Progress](7, 6), w: 5 },
 
     // Row 9 — table
-    FACTORIES['table'](0, 9),
+    FACTORIES[WidgetType.Table](0, 9),
   ];
 }
 
@@ -188,18 +189,18 @@ function buildDevOps(): Widget[] {
   return [
     // Section header
     {
-      ...FACTORIES['section'](0, 0),
+      ...FACTORIES[WidgetType.Section](0, 0),
       config: {
         label: 'DevOps Health',
         accent: '#06b6d4',
         showLine: true,
-        align: 'left' as const,
+        align: TextAlign.Left,
       },
     },
 
     // Row 1 — stat cards
     {
-      ...FACTORIES['stat'](0, 1),
+      ...FACTORIES[WidgetType.Stat](0, 1),
       title: 'Uptime',
       config: {
         value: '99.97%', subValue: 'last 30 days',
@@ -211,7 +212,7 @@ function buildDevOps(): Widget[] {
       },
     },
     {
-      ...FACTORIES['stat'](3, 1),
+      ...FACTORIES[WidgetType.Stat](3, 1),
       title: 'Deployments',
       config: {
         value: '142', subValue: 'this month',
@@ -223,7 +224,7 @@ function buildDevOps(): Widget[] {
       },
     },
     {
-      ...FACTORIES['stat'](6, 1),
+      ...FACTORIES[WidgetType.Stat](6, 1),
       title: 'Error Rate',
       config: {
         value: '0.42%', subValue: 'avg error rate',
@@ -235,7 +236,7 @@ function buildDevOps(): Widget[] {
       },
     },
     {
-      ...FACTORIES['stat'](9, 1),
+      ...FACTORIES[WidgetType.Stat](9, 1),
       title: 'MTTR',
       config: {
         value: '12m', subValue: 'mean time to resolve',
@@ -248,12 +249,12 @@ function buildDevOps(): Widget[] {
     },
 
     // Row 3 — line + progress
-    { ...FACTORIES['line'](0, 3),     w: 7 },
-    { ...FACTORIES['progress'](7, 3), w: 5 },
+    { ...FACTORIES[WidgetType.Line](0, 3),     w: 7 },
+    { ...FACTORIES[WidgetType.Progress](7, 3), w: 5 },
 
     // Row 6 — bar + pie
-    { ...FACTORIES['bar'](0, 6),  w: 7 },
-    { ...FACTORIES['pie'](7, 6),  w: 5 },
+    { ...FACTORIES[WidgetType.Bar](0, 6),  w: 7 },
+    { ...FACTORIES[WidgetType.Pie](7, 6),  w: 5 },
   ];
 }
 
@@ -261,18 +262,18 @@ function buildFinance(): Widget[] {
   return [
     // Section header
     {
-      ...FACTORIES['section'](0, 0),
+      ...FACTORIES[WidgetType.Section](0, 0),
       config: {
         label: 'Finance Summary',
         accent: '#10b981',
         showLine: true,
-        align: 'left' as const,
+        align: TextAlign.Left,
       },
     },
 
     // Row 1 — stat cards
     {
-      ...FACTORIES['stat'](0, 1),
+      ...FACTORIES[WidgetType.Stat](0, 1),
       title: 'MRR',
       config: {
         value: '$48,290', subValue: 'monthly recurring',
@@ -284,7 +285,7 @@ function buildFinance(): Widget[] {
       },
     },
     {
-      ...FACTORIES['stat'](3, 1),
+      ...FACTORIES[WidgetType.Stat](3, 1),
       title: 'ARR',
       config: {
         value: '$579,480', subValue: 'annual recurring',
@@ -296,7 +297,7 @@ function buildFinance(): Widget[] {
       },
     },
     {
-      ...FACTORIES['stat'](6, 1),
+      ...FACTORIES[WidgetType.Stat](6, 1),
       title: 'Avg. LTV',
       config: {
         value: '$1,240', subValue: 'per customer',
@@ -308,7 +309,7 @@ function buildFinance(): Widget[] {
       },
     },
     {
-      ...FACTORIES['stat'](9, 1),
+      ...FACTORIES[WidgetType.Stat](9, 1),
       title: 'Churn Rate',
       config: {
         value: '2.1%', subValue: 'monthly churn',
@@ -321,12 +322,12 @@ function buildFinance(): Widget[] {
     },
 
     // Row 3 — line + pie
-    { ...FACTORIES['line'](0, 3),  w: 7 },
-    { ...FACTORIES['pie'](7, 3),   w: 5 },
+    { ...FACTORIES[WidgetType.Line](0, 3),  w: 7 },
+    { ...FACTORIES[WidgetType.Pie](7, 3),   w: 5 },
 
     // Row 6 — bar + table
-    { ...FACTORIES['bar'](0, 6),   w: 5 },
-    { ...FACTORIES['table'](5, 6), w: 7 },
+    { ...FACTORIES[WidgetType.Bar](0, 6),   w: 5 },
+    { ...FACTORIES[WidgetType.Table](5, 6), w: 7 },
   ];
 }
 
@@ -336,6 +337,7 @@ function buildFinance(): Widget[] {
 // ───────────────────────────────────────────────────────────────
 
 export const TEMPLATES: DashboardTemplate[] = [
+  ...PRODUCT_TEMPLATES,
   {
     id:          'sales',
     name:        'Sales Overview',
@@ -383,9 +385,9 @@ export const TEMPLATES: DashboardTemplate[] = [
 export function buildSalesDemo(): Widget[] {
   return [
     // Row 0 — 4 stat cards (custom configs)
-    FACTORIES['stat'](0, 0),
+    FACTORIES[WidgetType.Stat](0, 0),
     {
-      ...FACTORIES['stat'](3, 0),
+      ...FACTORIES[WidgetType.Stat](3, 0),
       title:  'Active Users',
       config: {
         value: '8,291', subValue: 'Daily active',
@@ -397,7 +399,7 @@ export function buildSalesDemo(): Widget[] {
       },
     },
     {
-      ...FACTORIES['stat'](6, 0),
+      ...FACTORIES[WidgetType.Stat](6, 0),
       title:  'Conversion Rate',
       config: {
         value: '3.84', subValue: 'Checkout rate',
@@ -409,7 +411,7 @@ export function buildSalesDemo(): Widget[] {
       },
     },
     {
-      ...FACTORIES['stat'](9, 0),
+      ...FACTORIES[WidgetType.Stat](9, 0),
       title:  'Avg. Order Value',
       config: {
         value: '127.40', subValue: 'Per transaction',
@@ -423,13 +425,13 @@ export function buildSalesDemo(): Widget[] {
 
     // Row 2 — line chart + 2 analytics cards
     // Analytics cards deliberately narrow to showcase the widget type
-    FACTORIES['line'](0, 2),
+    FACTORIES[WidgetType.Line](0, 2),
     {
-      ...FACTORIES['analytics'](7, 2),
+      ...FACTORIES[WidgetType.Analytics](7, 2),
       w: 2,
     },
     {
-      ...FACTORIES['analytics'](9, 2),
+      ...FACTORIES[WidgetType.Analytics](9, 2),
       w: 3,
       title:  'Bounce Rate',
       config: {
@@ -443,13 +445,13 @@ export function buildSalesDemo(): Widget[] {
     },
 
     // Row 5 — bar + pie + progress
-    FACTORIES['bar'](0, 5),
-    { ...FACTORIES['pie'](5, 5),      w: 3 },
-    { ...FACTORIES['progress'](8, 5), w: 4 },
+    FACTORIES[WidgetType.Bar](0, 5),
+    { ...FACTORIES[WidgetType.Pie](5, 5),      w: 3 },
+    { ...FACTORIES[WidgetType.Progress](8, 5), w: 4 },
 
     // Row 8 — table + note
     // Note widget is unique to the demo (not in the Sales template)
-    FACTORIES['table'](0, 8),
-    { ...FACTORIES['note'](8, 8),     w: 4 },
+    FACTORIES[WidgetType.Table](0, 8),
+    { ...FACTORIES[WidgetType.Note](8, 8),     w: 4 },
   ];
 }

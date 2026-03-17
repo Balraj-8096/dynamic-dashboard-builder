@@ -292,44 +292,44 @@ export const DATA_SCHEMA: DataSchema = {
  * - null means no field selection step (Note, Section)
  */
 export const FIELD_POOL_MAP: Partial<Record<WidgetType, FieldPoolEntry | null>> = {
-  stat: {
+  [WidgetType.Stat]: {
     pool:  'kpi',
     multi: true,
     hint:  'Select one or more KPI metrics to display',
   },
-  analytics: {
+  [WidgetType.Analytics]: {
     pool:  'kpi',
     multi: false,
     hint:  'Select a single metric to track',
   },
-  bar: {
+  [WidgetType.Bar]: {
     pool:  'series',
     multi: true,
     hint:  'Select one or more data series to chart',
   },
-  line: {
+  [WidgetType.Line]: {
     pool:  'series',
     multi: true,
     hint:  'Select one or more data series to chart',
   },
-  pie: {
+  [WidgetType.Pie]: {
     pool:  'segments',
     multi: true,
     hint:  'Select segments to include in the chart',
   },
-  table: {
+  [WidgetType.Table]: {
     pool:  'columns',
     multi: true,
     hint:  'Select columns to display in the table',
   },
-  progress: {
+  [WidgetType.Progress]: {
     pool:  'items',
     multi: true,
     hint:  'Select metrics to show as progress bars',
   },
   // Note and Section have no field selection step
-  note:    null,
-  section: null,
+  [WidgetType.Note]:    null,
+  [WidgetType.Section]: null,
 };
 
 
@@ -364,7 +364,7 @@ export function buildConfigFromFields(
 ): WidgetConfig {
 
   // No field pool for note and section — return unchanged
-  if (type === 'note' || type === 'section') {
+  if (type === WidgetType.Note || type === WidgetType.Section) {
     return existingConfig;
   }
 
@@ -378,7 +378,7 @@ export function buildConfigFromFields(
     // ── Stat ────────────────────────────────────────────────
     // B3 fix: was missing subValue (field.category) and
     // description (field.label) — both visible in the stat card UI
-    case 'stat': {
+    case WidgetType.Stat: {
       const fields = selectedIds
         .map(id => DATA_SCHEMA.kpi.find(f => f.id === id))
         .filter(Boolean) as typeof DATA_SCHEMA.kpi;
@@ -405,7 +405,7 @@ export function buildConfigFromFields(
     // B2 fix: was missing changeLabel (field.category)
     // B9 fix: was missing selectedFields — edit modal radio
     //         couldn't determine which KPI was selected
-    case 'analytics': {
+    case WidgetType.Analytics: {
       const field = DATA_SCHEMA.kpi.find(f => f.id === selectedIds[0]);
       if (!field) return existingConfig;
 
@@ -426,7 +426,7 @@ export function buildConfigFromFields(
     // ── Bar ─────────────────────────────────────────────────
     // B6 fix: was missing selectedFields — edit modal checkboxes
     //         had no way to know which series were selected
-    case 'bar': {
+    case WidgetType.Bar: {
       const series = selectedIds
         .map(id => DATA_SCHEMA.series.find(s => s.id === id))
         .filter(Boolean) as typeof DATA_SCHEMA.series;
@@ -448,7 +448,7 @@ export function buildConfigFromFields(
 
     // ── Line ────────────────────────────────────────────────
     // B6 fix: same as bar — selectedFields needed for re-edit
-    case 'line': {
+    case WidgetType.Line: {
       const series = selectedIds
         .map(id => DATA_SCHEMA.series.find(s => s.id === id))
         .filter(Boolean) as typeof DATA_SCHEMA.series;
@@ -470,7 +470,7 @@ export function buildConfigFromFields(
 
     // ── Pie ─────────────────────────────────────────────────
     // B6 fix: selectedFields needed for edit modal re-selection
-    case 'pie': {
+    case WidgetType.Pie: {
       const segments = selectedIds
         .map(id => DATA_SCHEMA.segments.find(s => s.id === id))
         .filter(Boolean) as typeof DATA_SCHEMA.segments;
@@ -496,7 +496,7 @@ export function buildConfigFromFields(
     //         data for keys that remain. Without this, MatTable
     //         renders blank cells for new columns.
     // B6 fix: selectedFields needed for edit modal re-selection
-    case 'table': {
+    case WidgetType.Table: {
       const cols = selectedIds
         .map(id => DATA_SCHEMA.columns.find(c => c.id === id))
         .filter(Boolean) as typeof DATA_SCHEMA.columns;
@@ -515,7 +515,7 @@ export function buildConfigFromFields(
       }));
 
       const updatedRows = (base.rows ?? []).map(row => {
-        const newRow: Record<string, string> = {};
+        const newRow: Record<string, unknown> = {};
         visibleCols.forEach(col => {
           // Keep existing value if present, otherwise blank
           newRow[col.key] = col.key in row ? row[col.key] : '';
@@ -533,7 +533,7 @@ export function buildConfigFromFields(
 
     // ── Progress ────────────────────────────────────────────
     // B6 fix: selectedFields needed for edit modal re-selection
-    case 'progress': {
+    case WidgetType.Progress: {
       const items = selectedIds
         .map(id => DATA_SCHEMA.items.find(i => i.id === id))
         .filter(Boolean) as typeof DATA_SCHEMA.items;

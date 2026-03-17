@@ -58,7 +58,7 @@
           <span
             class="value-main"
             [style.color]="cfg.accent">
-            {{ cfg.value }}
+            {{ displayValue }}
           </span>
           @if (cfg.suffix) {
             <span
@@ -69,26 +69,19 @@
           }
         </div>
 
-        <!-- Sub value label -->
-        @if (cfg.subValue) {
-          <div class="sub-value">
-            {{ cfg.subValue }}
-          </div>
-        }
-
         <!-- Trend badge -->
-        @if (cfg.trend) {
+        @if (displayTrend) {
           <div
             class="trend-badge"
-            [class.trend--up]="cfg.trendUp"
-            [class.trend--down]="!cfg.trendUp"
-            [style.border-color]="cfg.trendUp
+            [class.trend--up]="displayTrendUp"
+            [class.trend--down]="!displayTrendUp"
+            [style.border-color]="displayTrendUp
               ? 'rgba(34,197,94,0.3)'
               : 'rgba(239,68,68,0.3)'">
             <span class="trend-arrow">
-              {{ cfg.trendUp ? '▲' : '▼' }}
+              {{ displayTrendUp ? '▲' : '▼' }}
             </span>
-            {{ cfg.trend }}
+            {{ displayTrend }}
           </div>
         }
 
@@ -101,14 +94,19 @@
 
       </div>
 
+      <!-- Period label -->
+      @if (displayPeriod) {
+        <div class="period-label">{{ displayPeriod }}</div>
+      }
+
       <!-- Bottom: sparkline -->
-      @if (cfg.showSparkline && cfg.sparkData?.length) {
+      @if (cfg.showSparkline && displaySparkData.length) {
         <div class="sparkline-wrapper">
 
           <!-- Bar sparkline -->
           <div class="sparkline-bars">
             @for (
-              bar of getSparkBars(cfg.sparkData);
+              bar of getSparkBars(displaySparkData);
               track $index
             ) {
               <div

@@ -1,0 +1,513 @@
+{
+  "product": {
+    "slug": "prescriptions",
+    "display_name": "Prescriptions",
+    "version": "1.0.0"
+  },
+  "connection": {
+    "type": "",
+    "host": "",
+    "database": "",
+    "username": "",
+    "password": ""
+  },
+
+  "global_filter_dimensions": [
+    { "type": "site", "entity": "prescription", "field": "site_id",          "label": "Site"           },
+    { "type": "date", "entity": "prescription", "field": "prescribed_date",  "label": "Prescribed Date" },
+    { "type": "date", "entity": "dispense",     "field": "dispensed_date",   "label": "Dispensed Date"  }
+  ],
+
+  "joins": [
+    {
+      "name": "prescription_to_prescription_item",
+      "from": { "entity": "prescription",      "column": "id"              },
+      "to":   { "entity": "prescription_item", "column": "prescriptionid"  },
+      "type": "INNER"
+    },
+    {
+      "name": "prescription_item_to_medication",
+      "from": { "entity": "prescription_item", "column": "medicationid"    },
+      "to":   { "entity": "medication",        "column": "id"              },
+      "type": "INNER"
+    },
+    {
+      "name": "prescription_to_dispense",
+      "from": { "entity": "prescription",      "column": "id"              },
+      "to":   { "entity": "dispense",          "column": "prescriptionid"  },
+      "type": "LEFT"
+    },
+    {
+      "name": "prescription_to_prescriber",
+      "from": { "entity": "prescription",      "column": "prescriberid"    },
+      "to":   { "entity": "prescriber",        "column": "id"              },
+      "type": "INNER"
+    }
+  ],
+
+  "entities": [
+    {
+      "name": "prescription",
+      "schema": "rx",
+      "table": "prescription",
+      "is_view": false,
+      "display_field": "prescription_number",
+      "default_date_field": "prescribed_date",
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "is_primary_key": true
+        },
+        {
+          "name": "prescription_number",
+          "column": "prescriptionnumber",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "description": "Human-readable prescription reference (e.g. RX-2026-001)"
+        },
+        {
+          "name": "prescribed_date",
+          "column": "prescribeddate",
+          "type": "datetime",
+          "filterable": true,
+          "aggregatable": true,
+          "description": "Date the prescription was issued — primary date axis for prescription-activity charts"
+        },
+        {
+          "name": "expiry_date",
+          "column": "expirydate",
+          "type": "datetime",
+          "filterable": true,
+          "aggregatable": false,
+          "description": "Date after which the prescription can no longer be dispensed — filter expiry_date < NOW() to find expired prescriptions"
+        },
+        {
+          "name": "status",
+          "column": "status",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "status_values": [
+            { "value": "active",    "label": "Active",    "color": "#3b82f6" },
+            { "value": "dispensed", "label": "Dispensed", "color": "#10b981" },
+            { "value": "partial",   "label": "Partial",   "color": "#f59e0b" },
+            { "value": "expired",   "label": "Expired",   "color": "#f97316" },
+            { "value": "cancelled", "label": "Cancelled", "color": "#6b7280" }
+          ]
+        },
+        {
+          "name": "patient_id",
+          "column": "patientid",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "description": "References the same patient IDs as EPX patient.id — cross-product joins are NOT supported in a single widget"
+        },
+        {
+          "name": "prescriber_id",
+          "column": "prescriberid",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false
+        },
+        {
+          "name": "site_id",
+          "column": "siteid",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false
+        },
+        {
+          "name": "is_repeat",
+          "column": "isrepeat",
+          "type": "boolean",
+          "filterable": true,
+          "aggregatable": false,
+          "description": "True if this is a repeat prescription — repeat_count is only meaningful when is_repeat=true"
+        },
+        {
+          "name": "repeat_count",
+          "column": "repeatcount",
+          "type": "number",
+          "filterable": true,
+          "aggregatable": true,
+          "description": "Number of repeats authorised — WARNING: AVG(repeat_count) includes non-repeat rows (is_repeat=false, count=0) which dilutes the average. Add filter is_repeat=true for a meaningful average"
+        },
+        {
+          "name": "notes",
+          "column": "notes",
+          "type": "string",
+          "filterable": false,
+          "aggregatable": false
+        },
+        {
+          "name": "created_on",
+          "column": "createdon",
+          "type": "datetime",
+          "filterable": true,
+          "aggregatable": false
+        },
+        {
+          "name": "last_updated_on",
+          "column": "lastupdatedon",
+          "type": "datetime",
+          "filterable": true,
+          "aggregatable": false
+        }
+      ]
+    },
+
+    {
+      "name": "prescription_item",
+      "schema": "rx",
+      "table": "prescription_item",
+      "is_view": false,
+      "display_field": "medication_id",
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "is_primary_key": true
+        },
+        {
+          "name": "prescription_id",
+          "column": "prescriptionid",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": true
+        },
+        {
+          "name": "medication_id",
+          "column": "medicationid",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false
+        },
+        {
+          "name": "quantity",
+          "column": "quantity",
+          "type": "number",
+          "filterable": true,
+          "aggregatable": true,
+          "description": "Number of units prescribed (tablets, capsules, ml, etc.)"
+        },
+        {
+          "name": "unit",
+          "column": "unit",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "status_values": [
+            { "value": "tablet",    "label": "Tablet",    "color": "#3b82f6" },
+            { "value": "capsule",   "label": "Capsule",   "color": "#22c55e" },
+            { "value": "ml",        "label": "ml",        "color": "#06b6d4" },
+            { "value": "inhaler",   "label": "Inhaler",   "color": "#f59e0b" },
+            { "value": "patch",     "label": "Patch",     "color": "#a78bfa" },
+            { "value": "injection", "label": "Injection", "color": "#ef4444" },
+            { "value": "drops",     "label": "Drops",     "color": "#10b981" }
+          ]
+        },
+        {
+          "name": "duration_days",
+          "column": "durationdays",
+          "type": "number",
+          "filterable": true,
+          "aggregatable": true,
+          "description": "Length of the treatment course in days"
+        },
+        {
+          "name": "status",
+          "column": "status",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "status_values": [
+            { "value": "active",        "label": "Active",        "color": "#3b82f6" },
+            { "value": "discontinued",  "label": "Discontinued",  "color": "#f97316" },
+            { "value": "completed",     "label": "Completed",     "color": "#10b981" }
+          ]
+        },
+        {
+          "name": "dosage",
+          "column": "dosage",
+          "type": "string",
+          "filterable": false,
+          "aggregatable": false,
+          "description": "Free-text dosage instruction (e.g. '10mg twice daily') — not filterable"
+        },
+        {
+          "name": "instructions",
+          "column": "instructions",
+          "type": "string",
+          "filterable": false,
+          "aggregatable": false,
+          "description": "Free-text dispensing instructions (e.g. 'Take with food') — not filterable"
+        },
+        {
+          "name": "created_on",
+          "column": "createdon",
+          "type": "datetime",
+          "filterable": true,
+          "aggregatable": false
+        }
+      ]
+    },
+
+    {
+      "name": "medication",
+      "schema": "rx",
+      "table": "medication",
+      "is_view": false,
+      "display_field": "name",
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "is_primary_key": true
+        },
+        {
+          "name": "name",
+          "column": "name",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "description": "Generic (INN) medication name — grouping by name combines all brands of the same drug"
+        },
+        {
+          "name": "brand_name",
+          "column": "brandname",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "description": "Brand/trade name — WARNING: the same drug may appear as multiple brand names; grouping by brand_name splits what grouping by name combines"
+        },
+        {
+          "name": "drug_class",
+          "column": "drugclass",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "description": "Therapeutic drug class (e.g. antibiotic, statin, antihypertensive) — may have 30+ distinct values; consider grouping into top-N + Other"
+        },
+        {
+          "name": "form",
+          "column": "form",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "status_values": [
+            { "value": "tablet",    "label": "Tablet",    "color": "#3b82f6" },
+            { "value": "capsule",   "label": "Capsule",   "color": "#22c55e" },
+            { "value": "liquid",    "label": "Liquid",    "color": "#06b6d4" },
+            { "value": "injection", "label": "Injection", "color": "#ef4444" },
+            { "value": "inhaler",   "label": "Inhaler",   "color": "#f59e0b" },
+            { "value": "patch",     "label": "Patch",     "color": "#a78bfa" },
+            { "value": "drops",     "label": "Drops",     "color": "#10b981" },
+            { "value": "cream",     "label": "Cream",     "color": "#f97316" }
+          ]
+        },
+        {
+          "name": "strength",
+          "column": "strength",
+          "type": "string",
+          "filterable": false,
+          "aggregatable": false,
+          "description": "Dosage strength as free text (e.g. '500mg', '10mcg/dose') — not filterable"
+        },
+        {
+          "name": "is_controlled",
+          "column": "iscontrolled",
+          "type": "boolean",
+          "filterable": true,
+          "aggregatable": false,
+          "description": "True if this is a controlled/scheduled substance (opioids, benzodiazepines, etc.) — NULL means unknown (legacy records predating this field); treat NULL as unknown, not as false"
+        },
+        {
+          "name": "is_active",
+          "column": "isactive",
+          "type": "boolean",
+          "filterable": true,
+          "aggregatable": false,
+          "description": "True if this medication is currently on the active formulary"
+        },
+        {
+          "name": "created_on",
+          "column": "createdon",
+          "type": "datetime",
+          "filterable": true,
+          "aggregatable": false
+        }
+      ]
+    },
+
+    {
+      "name": "dispense",
+      "schema": "rx",
+      "table": "dispense",
+      "is_view": false,
+      "default_date_field": "dispensed_date",
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "is_primary_key": true
+        },
+        {
+          "name": "prescription_id",
+          "column": "prescriptionid",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": true
+        },
+        {
+          "name": "dispensed_date",
+          "column": "dispenseddate",
+          "type": "datetime",
+          "filterable": true,
+          "aggregatable": true,
+          "description": "Date prescription was dispensed — only present when dispense record exists (LEFT join); NULL = not yet dispensed"
+        },
+        {
+          "name": "dispensed_quantity",
+          "column": "dispensedquantity",
+          "type": "number",
+          "filterable": true,
+          "aggregatable": true,
+          "description": "Actual quantity dispensed — may differ from prescription_item.quantity (partial dispense)"
+        },
+        {
+          "name": "status",
+          "column": "status",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "status_values": [
+            { "value": "dispensed", "label": "Dispensed", "color": "#10b981" },
+            { "value": "partial",   "label": "Partial",   "color": "#f59e0b" },
+            { "value": "returned",  "label": "Returned",  "color": "#f97316" }
+          ]
+        },
+        {
+          "name": "site_id",
+          "column": "siteid",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false
+        },
+        {
+          "name": "dispensed_by",
+          "column": "dispensedby",
+          "type": "string",
+          "filterable": false,
+          "aggregatable": false,
+          "description": "Staff ID of the dispensing pharmacist — not filterable (use prescriber entity for filtering by clinician)"
+        },
+        {
+          "name": "created_on",
+          "column": "createdon",
+          "type": "datetime",
+          "filterable": true,
+          "aggregatable": false
+        }
+      ]
+    },
+
+    {
+      "name": "prescriber",
+      "schema": "staff",
+      "table": "prescriber",
+      "is_view": false,
+      "display_field": "lastname",
+      "fields": [
+        {
+          "name": "id",
+          "column": "id",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "is_primary_key": true
+        },
+        {
+          "name": "firstname",
+          "column": "firstname",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false
+        },
+        {
+          "name": "lastname",
+          "column": "lastname",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false
+        },
+        {
+          "name": "prescriber_type",
+          "column": "prescribertype",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "status_values": [
+            { "value": "doctor",             "label": "Doctor",             "color": "#3b82f6" },
+            { "value": "nurse_practitioner", "label": "Nurse Practitioner", "color": "#22c55e" },
+            { "value": "dentist",            "label": "Dentist",            "color": "#06b6d4" },
+            { "value": "specialist",         "label": "Specialist",         "color": "#a78bfa" },
+            { "value": "pharmacist",         "label": "Pharmacist",         "color": "#f59e0b" }
+          ]
+        },
+        {
+          "name": "specialty",
+          "column": "specialty",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "description": "Clinical specialty (e.g. GP, Cardiology, Oncology) — WARNING: may have 20+ distinct values; use horizontal bar chart or Top-N grouping for pie charts"
+        },
+        {
+          "name": "registration_number",
+          "column": "registrationnumber",
+          "type": "string",
+          "filterable": false,
+          "aggregatable": false,
+          "description": "Regulatory body registration number (e.g. GMC number) — not filterable (sensitive)"
+        },
+        {
+          "name": "is_active",
+          "column": "isactive",
+          "type": "boolean",
+          "filterable": true,
+          "aggregatable": false,
+          "description": "True if this prescriber is currently licensed and practicing — filter is_active=true to exclude leavers from active reporting"
+        },
+        {
+          "name": "site_id",
+          "column": "siteid",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false
+        },
+        {
+          "name": "created_on",
+          "column": "createdon",
+          "type": "datetime",
+          "filterable": true,
+          "aggregatable": false
+        }
+      ]
+    }
+  ]
+}

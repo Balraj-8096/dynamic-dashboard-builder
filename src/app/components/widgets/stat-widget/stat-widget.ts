@@ -13,29 +13,77 @@
 import {
   Component,
   Input,
-  computed,
+  OnChanges,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  effect,
+  untracked,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StatConfig, Widget } from '../../../core/interfaces';
 import { DATA_SCHEMA } from '../../../core/data-schema';
+import { QueryService } from '../../../services/query.service';
+import { mapStatResult, StatDisplayData } from '../../../core/query-result-mapper';
 
 
 @Component({
   selector: 'app-stat-widget',
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './stat-widget.html',
   styleUrl: './stat-widget.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class StatWidget {
+export class StatWidget implements OnChanges {
 
   @Input({ required: true }) widget!: Widget;
   @Input() contentH: number = 120;
 
+  private readonly qsvc = inject(QueryService);
+  private readonly cdr  = inject(ChangeDetectorRef);
+
+  constructor() {
+    effect(() => {
+      this.qsvc.globalFilters();
+      untracked(() => { if (this.widget) { this.refresh(); this.cdr.markForCheck(); } });
+    });
+  }
+
+  // ── Display state (query result OR static config) ────────────
+  displayValue     = '';
+  displayTrend     = '';
+  displayTrendUp   = true;
+  displaySparkData: number[] = [];
+  displayPeriod    = '';
+
   // ── Config accessor ──────────────────────────────────────────
   get cfg(): StatConfig {
     return this.widget.config as StatConfig;
+  }
+
+  ngOnChanges(): void { this.refresh(); }
+
+  private refresh(): void {
+    const qcfg = this.cfg?.queryConfig;
+    if (qcfg) {
+      try {
+        const result = this.qsvc.executeStatQuery(qcfg);
+        const mapped: StatDisplayData = mapStatResult(result, qcfg.periodLabel);
+        this.displayValue     = mapped.value;
+        this.displayTrend     = mapped.trend;
+        this.displayTrendUp   = mapped.trendUp;
+        this.displaySparkData = mapped.sparkData;
+        this.displayPeriod    = mapped.periodLabel;
+      } catch {
+        this.displayValue = 'Error';
+        this.displayTrend = '';
+      }
+    } else {
+      this.displayValue     = this.cfg?.value       ?? '';
+      this.displayTrend     = this.cfg?.trend        ?? '';
+      this.displayTrendUp   = this.cfg?.trendUp      ?? true;
+      this.displaySparkData = this.cfg?.sparkData    ?? [];
+    }
   }
 
   // ── Multi-field mode ─────────────────────────────────────────
