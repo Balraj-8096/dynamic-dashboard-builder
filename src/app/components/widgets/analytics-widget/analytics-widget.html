@@ -47,8 +47,17 @@
       </div>
     }
 
-    <!-- ── Bottom: period label ───────────────────────────── -->
-    @if (displayPeriod) {
+    <!-- ── Bottom: period picker / label ─────────────────── -->
+    @if (cfg.queryConfig?.dateRangeField; as drf) {
+      <div class="period-picker">
+        <app-widget-date-picker
+          [entity]="drf.entity"
+          [field]="drf.field"
+          [preset]="localDatePreset"
+          (presetChange)="onDateChange($event)">
+        </app-widget-date-picker>
+      </div>
+    } @else if (displayPeriod) {
       <div class="period-label">{{ displayPeriod }}</div>
     }
 

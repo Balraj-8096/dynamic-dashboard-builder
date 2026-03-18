@@ -1,6 +1,7 @@
 import { Component, ElementRef, inject, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { DashboardService } from '../../services/dashboard.service';
+import { ThemeService } from '../../services/theme.service';
 
 @Component({
   selector: 'app-toolbar',
@@ -10,6 +11,7 @@ import { DashboardService } from '../../services/dashboard.service';
 })
 export class Toolbar {
   readonly svc = inject(DashboardService);
+  readonly themeSvc = inject(ThemeService);
   private readonly router = inject(Router);
 
   @ViewChild('titleInput') titleInputRef?: ElementRef<HTMLInputElement>;

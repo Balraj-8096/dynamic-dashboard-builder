@@ -4,7 +4,11 @@
 //  Every color in the app references these variables
 // ═══════════════════════════════════════════════════════════════
 
-:root {
+// Dark theme is the default (no attribute needed)
+// Light theme activates when <html data-theme="light">
+
+:root,
+[data-theme="dark"] {
 
   // ── Backgrounds ─────────────────────────────────────────────
   --bg0:  #070b12;   // darkest — canvas background
@@ -116,4 +120,61 @@
   --status-refunded-fg:  #a78bfa;
   --status-draft-bg:     #1c1c1c;
   --status-draft-fg:     #64748b;
+
+  // ── Color-mix base (used for hover tints) ───────────────────
+  --mix-base: #000000;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  LIGHT THEME OVERRIDES
+// ═══════════════════════════════════════════════════════════════
+[data-theme="light"] {
+
+  // ── Backgrounds ─────────────────────────────────────────────
+  --bg0:  #eef1f6;   // canvas background
+  --bg1:  #ffffff;   // card / sidebar background
+  --bg2:  #f4f6fa;   // widget header
+  --bg3:  #e8edf6;   // input background, hover states
+  --bg4:  #dce3ef;   // button hover
+
+  // ── Borders ─────────────────────────────────────────────────
+  --bdr:  #cdd5e0;
+  --bdrH: #93b4d4;
+  --bdrA: #1d4ed8;
+
+  // ── Text ────────────────────────────────────────────────────
+  --txt0: #0f172a;
+  --txt1: #475569;
+  --txt2: #94a3b8;
+
+  // ── Shadows ─────────────────────────────────────────────────
+  --shadow-card:  0 2px 12px rgba(0, 0, 0, 0.10);
+  --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.22);
+  --shadow-ctx:   0 16px 40px rgba(0, 0, 0, 0.14),
+                  0 0 0 1px #cdd5e0;
+
+  // ── Widget State Colors ──────────────────────────────────────
+  --widget-border-front:     #7c3aed55;
+  --widget-border-animating: #22c55e99;
+
+  // ── Status Badge Colors ─────────────────────────────────────
+  --status-paid-bg:      #dcfce7;
+  --status-paid-fg:      #16a34a;
+  --status-pending-bg:   #fef3c7;
+  --status-pending-fg:   #d97706;
+  --status-failed-bg:    #fee2e2;
+  --status-failed-fg:    #dc2626;
+  --status-active-bg:    #dbeafe;
+  --status-active-fg:    #1d4ed8;
+  --status-inactive-bg:  #f1f5f9;
+  --status-inactive-fg:  #64748b;
+  --status-shipped-bg:   #d1fae5;
+  --status-shipped-fg:   #059669;
+  --status-refunded-bg:  #ede9fe;
+  --status-refunded-fg:  #7c3aed;
+  --status-draft-bg:     #f1f5f9;
+  --status-draft-fg:     #64748b;
+
+  // ── Color-mix base (used for hover tints) ───────────────────
+  --mix-base: #ffffff;
 }

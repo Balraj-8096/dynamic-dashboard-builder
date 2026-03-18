@@ -155,6 +155,29 @@
           "aggregatable": false
         },
         {
+          "name": "invoice_type",
+          "column": "invoicetype",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "description": "Category of service billed — use for groupBy and IN/NOT_IN filters",
+          "status_values": [
+            { "value": "consultation",    "label": "Consultation",     "color": "#3b82f6" },
+            { "value": "procedure",       "label": "Procedure",        "color": "#a78bfa" },
+            { "value": "package",         "label": "Package",          "color": "#f59e0b" },
+            { "value": "nhs",             "label": "NHS",              "color": "#06b6d4" },
+            { "value": "insurance_auth",  "label": "Insurance Auth",   "color": "#22c55e" }
+          ]
+        },
+        {
+          "name": "write_off_amount",
+          "column": "writeoffamount",
+          "type": "number",
+          "filterable": true,
+          "aggregatable": true,
+          "description": "Amount written off as bad debt — NULL for most invoices; only populated when the invoice is partially or fully written off. Use IS_NULL/IS_NOT_NULL to distinguish written-off from normal invoices"
+        },
+        {
           "name": "is_void",
           "column": "isvoid",
           "type": "boolean",

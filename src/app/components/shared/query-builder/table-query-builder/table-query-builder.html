@@ -40,15 +40,14 @@
 }
 <div style="display:flex; gap:8px; margin-bottom:12px">
   <select class="sel sel--sm" style="flex:1"
-    [value]="newColEntity"
-    (change)="onNewColEntityChange($any($event.target).value)">
+    [(ngModel)]="newColEntity"
+    (ngModelChange)="onNewColEntityChange($event)">
     @for (e of entityList; track e) {
       <option [value]="e">{{ e }}</option>
     }
   </select>
   <select class="sel sel--sm" style="flex:1"
-    [value]="newColField"
-    (change)="newColField = $any($event.target).value">
+    [(ngModel)]="newColField">
     @for (f of fieldsFor(newColEntity); track f.name) {
       <option [value]="f.name">{{ f.name }}</option>
     }
@@ -73,8 +72,8 @@
     <div class="field-row">
       <label class="field-label">Entity</label>
       <select class="sel sel--sm"
-        [value]="sortEntity"
-        (change)="onSortEntityChange($any($event.target).value)">
+        [(ngModel)]="sortEntity"
+        (ngModelChange)="onSortEntityChange($event)">
         @for (e of entityList; track e) {
           <option [value]="e">{{ e }}</option>
         }
@@ -83,8 +82,8 @@
     <div class="field-row">
       <label class="field-label">Field</label>
       <select class="sel sel--sm"
-        [value]="sortField"
-        (change)="sortField = $any($event.target).value; emit()">
+        [(ngModel)]="sortField"
+        (ngModelChange)="emit()">
         @for (f of fieldsFor(sortEntity); track f.name) {
           <option [value]="f.name">{{ f.name }}</option>
         }
@@ -93,8 +92,8 @@
     <div class="field-row">
       <label class="field-label">Direction</label>
       <select class="sel sel--sm"
-        [value]="sortDirection"
-        (change)="sortDirection = $any($event.target).value; emit()">
+        [(ngModel)]="sortDirection"
+        (ngModelChange)="emit()">
         @for (d of sortDirections(); track d) {
           <option [value]="d">{{ d }}</option>
         }
@@ -108,8 +107,8 @@
 <div class="field-row" style="margin-bottom:12px">
   <label class="field-label">Page Size</label>
   <select class="sel sel--sm"
-    [value]="pageSize"
-    (change)="pageSize = +$any($event.target).value; emit()">
+    [(ngModel)]="pageSize"
+    (ngModelChange)="emit()">
     <option [value]="10">10</option>
     <option [value]="20">20</option>
     <option [value]="50">50</option>
@@ -121,5 +120,5 @@
 <app-filter-builder
   [product]="product"
   [entityScope]="filterScope"
-  [filters]="filters"
-  (filtersChange)="filters = $event; emit()" />
+  [filterGroups]="filterGroups"
+  (filterGroupsChange)="filterGroups = $event; emit()" />

@@ -3,8 +3,8 @@
 <div class="field-row" style="margin-bottom:16px">
   <label class="field-label">Product</label>
   <select class="sel"
-    [value]="selectedProduct"
-    (change)="onProductChange($any($event.target).value)">
+    [(ngModel)]="selectedProduct"
+    (ngModelChange)="onProductChange($event)">
     @for (p of products; track p.slug) {
       <option [value]="p.slug">{{ p.display_name }}</option>
     }

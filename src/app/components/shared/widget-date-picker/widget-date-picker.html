@@ -1,0 +1,17 @@
+<!-- ═══════════════════════════════════════════════════════════
+     Widget Date Picker — compact period preset selector
+     ═══════════════════════════════════════════════════════════ -->
+
+<div class="wdp">
+  <span class="wdp__icon">&#128197;</span>
+  <select
+    class="wdp__select"
+    [value]="preset"
+    (change)="onSelect($event)"
+    title="Date range">
+    @for (opt of options; track opt.value) {
+      <option [value]="opt.value">{{ opt.label }}</option>
+    }
+  </select>
+  <span class="wdp__chevron">&#8964;</span>
+</div>

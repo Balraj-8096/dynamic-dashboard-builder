@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { QueryService } from '../../../../services/query.service';
 import {
-  EntityDef, FieldDef, FilterCondition,
+  EntityDef, FieldDef, FilterGroup,
   StatQueryConfig, AggregationFunction, DateInterval, FieldType,
 } from '../../../../core/query-types';
 import { FilterBuilder } from '../filter-builder/filter-builder';
@@ -52,7 +52,7 @@ export class StatQueryBuilder implements OnInit {
   trendField     = '';
   trendInterval: DateInterval = DateInterval.Month;
   trendPeriods   = 1;
-  filters: FilterCondition[] = [];
+  filterGroups: FilterGroup[] = [];
 
   ngOnInit(): void {
     if (this.config) {
@@ -75,7 +75,13 @@ export class StatQueryBuilder implements OnInit {
       this.trendField     = this.config.trend?.field  ?? '';
       this.trendInterval  = this.config.trend?.interval ?? DateInterval.Month;
       this.trendPeriods   = this.config.trend?.periods  ?? 1;
-      this.filters        = [...(this.config.filters ?? [])];
+      if (this.config.filterGroups?.length) {
+        this.filterGroups = [...this.config.filterGroups];
+      } else if (this.config.filters?.length) {
+        this.filterGroups = [{ id: 'legacy', logic: 'AND', conditions: [...this.config.filters] }];
+      } else {
+        this.filterGroups = [];
+      }
     } else {
       const first = this.entities[0]?.name ?? '';
       this.primaryEntity = first;
@@ -191,7 +197,7 @@ export class StatQueryBuilder implements OnInit {
         function: this.aggFunction,
       },
       periodLabel: this.periodLabel || undefined,
-      filters: this.filters.length ? this.filters : undefined,
+      filterGroups: this.filterGroups.length ? this.filterGroups : undefined,
       trend: this.trendEnabled && this.trendEntity && this.trendField ? {
         entity:   this.trendEntity,
         field:    this.trendField,

@@ -158,6 +158,19 @@
           "type": "datetime",
           "filterable": true,
           "aggregatable": false
+        },
+        {
+          "name": "priority",
+          "column": "priority",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "description": "Clinical urgency of the prescription — use EQ/IN/NOT_IN filters to isolate emergency/urgent workloads; emergency rows are rare (rx-005, rx-019, rx-032) making this ideal for EQ-returns-few-rows demos",
+          "status_values": [
+            { "value": "routine",   "label": "Routine",   "color": "#22c55e" },
+            { "value": "urgent",    "label": "Urgent",    "color": "#f59e0b" },
+            { "value": "emergency", "label": "Emergency", "color": "#ef4444" }
+          ]
         }
       ]
     },

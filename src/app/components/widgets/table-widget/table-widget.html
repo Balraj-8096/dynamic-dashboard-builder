@@ -1,3 +1,14 @@
+@if (cfg.queryConfig?.dateRangeField; as drf) {
+  <div class="widget-date-toolbar">
+    <app-widget-date-picker
+      [entity]="drf.entity"
+      [field]="drf.field"
+      [preset]="localDatePreset"
+      (presetChange)="onDateChange($event)">
+    </app-widget-date-picker>
+  </div>
+}
+
 @if (cfg && cols.length) {
   <div
     class="table-wrapper"

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { QueryService } from '../../../../services/query.service';
 import {
-  EntityDef, FieldDef, FilterCondition,
+  EntityDef, FieldDef, FilterGroup,
   ChartQueryConfig, AggregationFunction, DateInterval, FieldType,
 } from '../../../../core/query-types';
 import { FilterBuilder } from '../filter-builder/filter-builder';
@@ -25,6 +25,7 @@ export class ChartQueryBuilder implements OnInit {
   private readonly qsvc = inject(QueryService);
 
   primaryEntity      = '';
+  dateAxisEnabled    = false;
   dateAxisEntity     = '';
   dateAxisField      = '';
   dateAxisInterval: DateInterval = DateInterval.Month;
@@ -34,11 +35,12 @@ export class ChartQueryBuilder implements OnInit {
   groupByEnabled     = false;
   groupByEntity      = '';
   groupByField       = '';
-  filters: FilterCondition[] = [];
+  filterGroups: FilterGroup[] = [];
 
   ngOnInit(): void {
     if (this.config) {
       this.primaryEntity      = this.config.entities[0]          ?? '';
+      this.dateAxisEnabled    = !!this.config.dateAxis;
       this.dateAxisEntity     = this.config.dateAxis?.entity     ?? this.config.entities[0] ?? '';
       this.dateAxisField      = this.config.dateAxis?.field      ?? '';
       this.dateAxisInterval   = this.config.dateAxis?.interval   ?? DateInterval.Month;
@@ -48,10 +50,17 @@ export class ChartQueryBuilder implements OnInit {
       this.groupByEnabled     = !!this.config.groupBy;
       this.groupByEntity      = this.config.groupBy?.entity   ?? '';
       this.groupByField       = this.config.groupBy?.field    ?? '';
-      this.filters            = [...(this.config.filters ?? [])];
+      if (this.config.filterGroups?.length) {
+        this.filterGroups = [...this.config.filterGroups];
+      } else if (this.config.filters?.length) {
+        this.filterGroups = [{ id: 'legacy', logic: 'AND', conditions: [...this.config.filters] }];
+      } else {
+        this.filterGroups = [];
+      }
     } else {
       const first = this.entities[0]?.name ?? '';
       this.primaryEntity    = first;
+      this.dateAxisEnabled  = true;
       this.dateAxisEntity   = first;
       this.dateAxisField    = this.dateFields(first)[0]?.name ?? '';
       this.valueAggEntity   = first;
@@ -133,10 +142,19 @@ export class ChartQueryBuilder implements OnInit {
   get filterScope(): string[] {
     return [...new Set([
       this.primaryEntity,
-      this.dateAxisEntity,
+      ...(this.dateAxisEnabled && this.dateAxisEntity ? [this.dateAxisEntity] : []),
       this.valueAggEntity,
       ...(this.groupByEnabled && this.groupByEntity ? [this.groupByEntity] : []),
     ].filter(Boolean))];
+  }
+
+  onDateAxisToggle(): void {
+    this.dateAxisEnabled = !this.dateAxisEnabled;
+    if (this.dateAxisEnabled && !this.dateAxisEntity) {
+      this.dateAxisEntity = this.primaryEntity;
+      this.dateAxisField  = this.dateFields(this.dateAxisEntity)[0]?.name ?? '';
+    }
+    this.emit();
   }
 
   emit(): void {
@@ -144,15 +162,13 @@ export class ChartQueryBuilder implements OnInit {
       product:  this.product,
       entities: this.qsvc.buildEntityPath(this.product, [
         this.primaryEntity,
-        this.dateAxisEntity,
+        ...(this.dateAxisEnabled && this.dateAxisEntity ? [this.dateAxisEntity] : []),
         this.valueAggEntity,
         ...(this.groupByEnabled && this.groupByEntity ? [this.groupByEntity] : []),
       ]),
-      dateAxis: {
-        entity:   this.dateAxisEntity,
-        field:    this.dateAxisField,
-        interval: this.dateAxisInterval,
-      },
+      dateAxis: this.dateAxisEnabled && this.dateAxisField
+        ? { entity: this.dateAxisEntity, field: this.dateAxisField, interval: this.dateAxisInterval }
+        : undefined,
       valueAgg: {
         entity:   this.valueAggEntity,
         field:    this.valueAggField,
@@ -161,7 +177,7 @@ export class ChartQueryBuilder implements OnInit {
       groupBy: this.groupByEnabled && this.groupByEntity && this.groupByField
         ? { entity: this.groupByEntity, field: this.groupByField }
         : undefined,
-      filters: this.filters.length ? this.filters : undefined,
+      filterGroups: this.filterGroups.length ? this.filterGroups : undefined,
     };
     this.configChange.emit(cfg);
   }

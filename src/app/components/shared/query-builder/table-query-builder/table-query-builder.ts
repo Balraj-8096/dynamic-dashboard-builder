@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { QueryService } from '../../../../services/query.service';
 import {
-  EntityDef, FieldDef, FilterCondition,
+  EntityDef, FieldDef, FilterGroup,
   TableQueryConfig, SortDirection,
 } from '../../../../core/query-types';
 import { FilterBuilder } from '../filter-builder/filter-builder';
@@ -30,7 +30,7 @@ export class TableQueryBuilder implements OnInit {
   sortField     = '';
   sortDirection: SortDirection = SortDirection.Desc;
   pageSize      = 20;
-  filters: FilterCondition[] = [];
+  filterGroups: FilterGroup[] = [];
 
   // New-column picker
   newColEntity = '';
@@ -48,7 +48,13 @@ export class TableQueryBuilder implements OnInit {
       this.sortField    = this.config.sort?.field     ?? '';
       this.sortDirection = this.config.sort?.direction ?? SortDirection.Desc;
       this.pageSize     = this.config.pageSize        ?? 20;
-      this.filters      = [...(this.config.filters    ?? [])];
+      if (this.config.filterGroups?.length) {
+        this.filterGroups = [...this.config.filterGroups];
+      } else if (this.config.filters?.length) {
+        this.filterGroups = [{ id: 'legacy', logic: 'AND', conditions: [...this.config.filters] }];
+      } else {
+        this.filterGroups = [];
+      }
     } else {
       const first = this.allEntities[0]?.name ?? '';
       this.entityList  = first ? [first] : [];
@@ -139,7 +145,7 @@ export class TableQueryBuilder implements OnInit {
       product:  this.product,
       entities: this.qsvc.buildEntityPath(this.product, this.entityList),
       columns:  this.columns,
-      filters:  this.filters.length ? this.filters : undefined,
+      filterGroups: this.filterGroups.length ? this.filterGroups : undefined,
       sort: this.sortEnabled && this.sortEntity && this.sortField
         ? { entity: this.sortEntity, field: this.sortField, direction: this.sortDirection }
         : undefined,

@@ -3,8 +3,8 @@
 <div class="field-row" style="margin-bottom:12px">
   <label class="field-label">Entity</label>
   <select class="sel"
-    [value]="primaryEntity"
-    (change)="onPrimaryEntityChange($any($event.target).value)">
+    [(ngModel)]="primaryEntity"
+    (ngModelChange)="onPrimaryEntityChange($event)">
     @for (e of entities; track e.name) {
       <option [value]="e.name">{{ e.name }}</option>
     }
@@ -17,8 +17,8 @@
   <div class="field-row">
     <label class="field-label">Entity</label>
     <select class="sel sel--sm"
-      [value]="aggEntity"
-      (change)="onAggEntityChange($any($event.target).value)">
+      [(ngModel)]="aggEntity"
+      (ngModelChange)="onAggEntityChange($event)">
       @for (e of aggEntities; track e.name) {
         <option [value]="e.name">{{ e.name }}</option>
       }
@@ -27,8 +27,8 @@
   <div class="field-row">
     <label class="field-label">Function</label>
     <select class="sel sel--sm"
-      [value]="aggFunction"
-      (change)="aggFunction = $any($event.target).value; emit()">
+      [(ngModel)]="aggFunction"
+      (ngModelChange)="emit()">
       @for (fn of aggFunctions(); track fn) {
         <option [value]="fn">{{ fn }}</option>
       }
@@ -38,8 +38,8 @@
     <div class="field-row">
       <label class="field-label">Field</label>
       <select class="sel sel--sm"
-        [value]="aggField"
-        (change)="aggField = $any($event.target).value; emit()">
+        [(ngModel)]="aggField"
+        (ngModelChange)="emit()">
         @for (f of aggFields(aggEntity); track f.name) {
           <option [value]="f.name">{{ f.name }}</option>
         }
@@ -62,8 +62,8 @@
     <div class="field-row">
       <label class="field-label">Entity</label>
       <select class="sel sel--sm"
-        [value]="trendEntity"
-        (change)="onTrendEntityChange($any($event.target).value)">
+        [(ngModel)]="trendEntity"
+        (ngModelChange)="onTrendEntityChange($event)">
         @for (e of trendEntities; track e.name) {
           <option [value]="e.name">{{ e.name }}</option>
         }
@@ -72,8 +72,8 @@
     <div class="field-row">
       <label class="field-label">Date Field</label>
       <select class="sel sel--sm"
-        [value]="trendField"
-        (change)="trendField = $any($event.target).value; emit()">
+        [(ngModel)]="trendField"
+        (ngModelChange)="emit()">
         @for (f of dateFields(trendEntity); track f.name) {
           <option [value]="f.name">{{ f.name }}</option>
         }
@@ -82,8 +82,8 @@
     <div class="field-row">
       <label class="field-label">Interval</label>
       <select class="sel sel--sm"
-        [value]="trendInterval"
-        (change)="trendInterval = $any($event.target).value; emit()">
+        [(ngModel)]="trendInterval"
+        (ngModelChange)="emit()">
         @for (i of dateIntervals(); track i) {
           <option [value]="i">{{ i }}</option>
         }
@@ -101,16 +101,16 @@
 <app-filter-builder
   [product]="product"
   [entityScope]="filterScope"
-  [filters]="filters"
-  (filtersChange)="filters = $event; emit()" />
+  [filterGroups]="filterGroups"
+  (filterGroupsChange)="filterGroups = $event; emit()" />
 
 <!-- Period Label -->
 <div class="section-hdr">Period Label</div>
 <div class="field-row" [style.margin-bottom]="periodLabelPreset === '_custom' ? '6px' : '12px'">
   <label class="field-label">Preset</label>
   <select class="sel"
-    [value]="periodLabelPreset"
-    (change)="onPeriodLabelPresetChange($any($event.target).value)">
+    [(ngModel)]="periodLabelPreset"
+    (ngModelChange)="onPeriodLabelPresetChange($event)">
     @for (opt of periodLabelOptions; track opt.value) {
       <option [value]="opt.value">{{ opt.label }}</option>
     }

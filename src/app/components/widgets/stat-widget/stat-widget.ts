@@ -25,11 +25,13 @@ import { StatConfig, Widget } from '../../../core/interfaces';
 import { DATA_SCHEMA } from '../../../core/data-schema';
 import { QueryService } from '../../../services/query.service';
 import { mapStatResult, StatDisplayData } from '../../../core/query-result-mapper';
+import { WidgetDatePickerComponent, DatePickerChange } from '../../shared/widget-date-picker/widget-date-picker';
+import { FilterCondition } from '../../../core/query-types';
 
 
 @Component({
   selector: 'app-stat-widget',
-  imports: [CommonModule],
+  imports: [CommonModule, WidgetDatePickerComponent],
   templateUrl: './stat-widget.html',
   styleUrl: './stat-widget.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -56,6 +58,17 @@ export class StatWidget implements OnChanges {
   displaySparkData: number[] = [];
   displayPeriod    = '';
 
+  // ── Per-widget date filter ────────────────────────────────────
+  localDatePreset = '';
+  private localDateFilter: FilterCondition | null = null;
+
+  onDateChange(e: DatePickerChange): void {
+    this.localDateFilter = e.filter;
+    this.localDatePreset  = e.preset;
+    this.refresh();
+    this.cdr.markForCheck();
+  }
+
   // ── Config accessor ──────────────────────────────────────────
   get cfg(): StatConfig {
     return this.widget.config as StatConfig;
@@ -67,7 +80,10 @@ export class StatWidget implements OnChanges {
     const qcfg = this.cfg?.queryConfig;
     if (qcfg) {
       try {
-        const result = this.qsvc.executeStatQuery(qcfg);
+        const effectiveQcfg = this.localDateFilter
+          ? { ...qcfg, filters: [...(qcfg.filters ?? []), this.localDateFilter] }
+          : qcfg;
+        const result = this.qsvc.executeStatQuery(effectiveQcfg);
         const mapped: StatDisplayData = mapStatResult(result, qcfg.periodLabel);
         this.displayValue     = mapped.value;
         this.displayTrend     = mapped.trend;

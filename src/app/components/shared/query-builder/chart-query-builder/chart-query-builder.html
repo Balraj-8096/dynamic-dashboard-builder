@@ -3,8 +3,8 @@
 <div class="field-row" style="margin-bottom:12px">
   <label class="field-label">Entity</label>
   <select class="sel"
-    [value]="primaryEntity"
-    (change)="onPrimaryEntityChange($any($event.target).value)">
+    [(ngModel)]="primaryEntity"
+    (ngModelChange)="onPrimaryEntityChange($event)">
     @for (e of entities; track e.name) {
       <option [value]="e.name">{{ e.name }}</option>
     }
@@ -13,38 +13,47 @@
 
 <!-- Date Axis -->
 <div class="section-hdr">Date Axis</div>
-<div class="three-col">
-  <div class="field-row">
-    <label class="field-label">Entity</label>
-    <select class="sel sel--sm"
-      [value]="dateAxisEntity"
-      (change)="onDateAxisEntityChange($any($event.target).value)">
-      @for (e of reachableEntities; track e.name) {
-        <option [value]="e.name">{{ e.name }}</option>
-      }
-    </select>
-  </div>
-  <div class="field-row">
-    <label class="field-label">Date Field</label>
-    <select class="sel sel--sm"
-      [value]="dateAxisField"
-      (change)="dateAxisField = $any($event.target).value; emit()">
-      @for (f of dateFields(dateAxisEntity); track f.name) {
-        <option [value]="f.name">{{ f.name }}</option>
-      }
-    </select>
-  </div>
-  <div class="field-row">
-    <label class="field-label">Interval</label>
-    <select class="sel sel--sm"
-      [value]="dateAxisInterval"
-      (change)="dateAxisInterval = $any($event.target).value; emit()">
-      @for (i of dateIntervals(); track i) {
-        <option [value]="i">{{ i }}</option>
-      }
-    </select>
-  </div>
+<div class="toggle-row" style="margin-bottom:10px">
+  <label class="toggle-wrap" (click)="onDateAxisToggle()">
+    <div class="toggle-box" [class.is-on]="dateAxisEnabled"></div>
+    <span class="toggle-label">Group x-axis by date/time field</span>
+  </label>
 </div>
+
+@if (dateAxisEnabled) {
+  <div class="three-col">
+    <div class="field-row">
+      <label class="field-label">Entity</label>
+      <select class="sel sel--sm"
+        [(ngModel)]="dateAxisEntity"
+        (ngModelChange)="onDateAxisEntityChange($event)">
+        @for (e of reachableEntities; track e.name) {
+          <option [value]="e.name">{{ e.name }}</option>
+        }
+      </select>
+    </div>
+    <div class="field-row">
+      <label class="field-label">Date Field</label>
+      <select class="sel sel--sm"
+        [(ngModel)]="dateAxisField"
+        (ngModelChange)="emit()">
+        @for (f of dateFields(dateAxisEntity); track f.name) {
+          <option [value]="f.name">{{ f.name }}</option>
+        }
+      </select>
+    </div>
+    <div class="field-row">
+      <label class="field-label">Interval</label>
+      <select class="sel sel--sm"
+        [(ngModel)]="dateAxisInterval"
+        (ngModelChange)="emit()">
+        @for (i of dateIntervals(); track i) {
+          <option [value]="i">{{ i }}</option>
+        }
+      </select>
+    </div>
+  </div>
+}
 
 <!-- Value Aggregation -->
 <div class="section-hdr">Value Aggregation</div>
@@ -52,8 +61,8 @@
   <div class="field-row">
     <label class="field-label">Entity</label>
     <select class="sel sel--sm"
-      [value]="valueAggEntity"
-      (change)="onValueAggEntityChange($any($event.target).value)">
+      [(ngModel)]="valueAggEntity"
+      (ngModelChange)="onValueAggEntityChange($event)">
       @for (e of valueAggEntities; track e.name) {
         <option [value]="e.name">{{ e.name }}</option>
       }
@@ -62,8 +71,8 @@
   <div class="field-row">
     <label class="field-label">Field</label>
     <select class="sel sel--sm"
-      [value]="valueAggField"
-      (change)="valueAggField = $any($event.target).value; emit()">
+      [(ngModel)]="valueAggField"
+      (ngModelChange)="emit()">
       @for (f of aggFields(valueAggEntity); track f.name) {
         <option [value]="f.name">{{ f.name }}</option>
       }
@@ -72,8 +81,8 @@
   <div class="field-row">
     <label class="field-label">Function</label>
     <select class="sel sel--sm"
-      [value]="valueAggFunction"
-      (change)="valueAggFunction = $any($event.target).value; emit()">
+      [(ngModel)]="valueAggFunction"
+      (ngModelChange)="emit()">
       @for (fn of aggFunctions(); track fn) {
         <option [value]="fn">{{ fn }}</option>
       }
@@ -95,8 +104,8 @@
     <div class="field-row">
       <label class="field-label">Entity</label>
       <select class="sel sel--sm"
-        [value]="groupByEntity"
-        (change)="onGroupByEntityChange($any($event.target).value)">
+        [(ngModel)]="groupByEntity"
+        (ngModelChange)="onGroupByEntityChange($event)">
         @for (e of reachableEntities; track e.name) {
           <option [value]="e.name">{{ e.name }}</option>
         }
@@ -105,8 +114,8 @@
     <div class="field-row">
       <label class="field-label">Field</label>
       <select class="sel sel--sm"
-        [value]="groupByField"
-        (change)="groupByField = $any($event.target).value; emit()">
+        [(ngModel)]="groupByField"
+        (ngModelChange)="emit()">
         @for (f of fieldsFor(groupByEntity); track f.name) {
           <option [value]="f.name">{{ f.name }}</option>
         }
@@ -119,5 +128,5 @@
 <app-filter-builder
   [product]="product"
   [entityScope]="filterScope"
-  [filters]="filters"
-  (filtersChange)="filters = $event; emit()" />
+  [filterGroups]="filterGroups"
+  (filterGroupsChange)="filterGroups = $event; emit()" />

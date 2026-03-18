@@ -1,72 +1,99 @@
 <div class="section-hdr">Filters</div>
 
-@for (f of filters; track $index) {
+@for (g of filterGroups; track g.id; let gi = $index) {
+
+  @if (gi > 0) {
+    <div class="filter-group-sep">AND</div>
+  }
+
   <div class="item-card" style="margin-bottom:8px">
 
-    <!-- Entity / Field / Operator row -->
-    <div class="three-col" style="margin-bottom:8px">
-      <div class="field-row">
-        <label class="field-label">Entity</label>
-        <select class="sel sel--sm"
-          [value]="f.entity"
-          (change)="onEntityChange($index, $any($event.target).value)">
-          @for (e of entities; track e.name) {
-            <option [value]="e.name">{{ e.name }}</option>
-          }
-        </select>
+    <!-- Group header: number + logic toggle + remove -->
+    <div class="item-card-header">
+      <div style="display:flex; align-items:center; gap:8px">
+        <span class="item-card-title">Group {{ gi + 1 }}</span>
+        <button class="btn-logic" [class.is-or]="g.logic === 'OR'"
+          (click)="toggleGroupLogic(gi)">{{ g.logic }}</button>
       </div>
-      <div class="field-row">
-        <label class="field-label">Field</label>
-        <select class="sel sel--sm"
-          [value]="f.field"
-          (change)="updateFilter($index, { field: $any($event.target).value })">
-          @for (fd of filterableFields(f.entity); track fd.name) {
-            <option [value]="fd.name">{{ fd.name }}</option>
-          }
-        </select>
-      </div>
-      <div class="field-row">
-        <label class="field-label">Operator</label>
-        <select class="sel sel--sm"
-          [value]="f.operator"
-          (change)="onOperatorChange($index, $any($event.target).value)">
-          @for (op of operators(f.entity, f.field); track op) {
-            <option [value]="op">{{ op }}</option>
-          }
-        </select>
-      </div>
+      <button class="btn-remove" (click)="removeGroup(gi)">✕</button>
     </div>
 
-    <!-- Value row -->
-    <div style="display:flex; gap:8px; align-items:center">
-      @if (!isNoValue(f.operator)) {
-        @if (isDateRange(f.operator)) {
-          <select class="sel sel--sm" style="flex:1"
-            [value]="f.dateRange?.preset ?? ''"
-            (change)="updateFilter($index, { dateRange: { preset: $any($event.target).value } })">
-            <option value="">— custom range —</option>
-            @for (p of presetList(); track p) {
-              <option [value]="p">{{ p }}</option>
-            }
-          </select>
-        } @else if (isMultiValue(f.operator)) {
-          <input class="inp inp--sm" style="flex:1" type="text"
-            placeholder="val1, val2, …"
-            [value]="valuesStr(f)"
-            (change)="setValues($index, $any($event.target).value)" />
-        } @else {
-          <input class="inp inp--sm" style="flex:1" type="text"
-            placeholder="value"
-            [value]="$any(f.value) ?? ''"
-            (change)="updateFilter($index, { value: $any($event.target).value })" />
-        }
-      } @else {
-        <span style="flex:1; font-size:11px; color:var(--txt2); font-style:italic">no value needed</span>
+    <!-- Conditions -->
+    @for (c of g.conditions; track $index; let ci = $index) {
+
+      @if (ci > 0) {
+        <div class="filter-cond-sep">{{ g.logic }}</div>
       }
-      <button class="btn-remove-sm" (click)="removeFilter($index)">✕</button>
-    </div>
+
+      <div style="margin-bottom:8px">
+        <!-- Entity / Field / Operator row -->
+        <div class="three-col" style="margin-bottom:6px">
+          <div class="field-row">
+            <label class="field-label">Entity</label>
+            <select class="sel sel--sm"
+              [ngModel]="c.entity"
+              (ngModelChange)="onEntityChange(gi, ci, $event)">
+              @for (e of entities; track e.name) {
+                <option [value]="e.name">{{ e.name }}</option>
+              }
+            </select>
+          </div>
+          <div class="field-row">
+            <label class="field-label">Field</label>
+            <select class="sel sel--sm"
+              [ngModel]="c.field"
+              (ngModelChange)="updateCondition(gi, ci, { field: $event })">
+              @for (fd of filterableFields(c.entity); track fd.name) {
+                <option [value]="fd.name">{{ fd.name }}</option>
+              }
+            </select>
+          </div>
+          <div class="field-row">
+            <label class="field-label">Operator</label>
+            <select class="sel sel--sm"
+              [ngModel]="c.operator"
+              (ngModelChange)="onOperatorChange(gi, ci, $event)">
+              @for (op of operators(c.entity, c.field); track op) {
+                <option [value]="op">{{ op }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <!-- Value row -->
+        <div style="display:flex; gap:8px; align-items:center">
+          @if (!isNoValue(c.operator)) {
+            @if (isDateRange(c.operator)) {
+              <select class="sel sel--sm" style="flex:1"
+                [ngModel]="c.dateRange?.preset ?? ''"
+                (ngModelChange)="updateCondition(gi, ci, { dateRange: { preset: $event } })">
+                <option value="">— custom range —</option>
+                @for (p of presetList(); track p) {
+                  <option [value]="p">{{ p }}</option>
+                }
+              </select>
+            } @else if (isMultiValue(c.operator)) {
+              <input class="inp inp--sm" style="flex:1" type="text"
+                placeholder="val1, val2, …"
+                [value]="valuesStr(c)"
+                (change)="setValues(gi, ci, $any($event.target).value)" />
+            } @else {
+              <input class="inp inp--sm" style="flex:1" type="text"
+                placeholder="value"
+                [value]="$any(c.value) ?? ''"
+                (change)="updateCondition(gi, ci, { value: $any($event.target).value })" />
+            }
+          } @else {
+            <span style="flex:1; font-size:11px; color:var(--txt2); font-style:italic">no value needed</span>
+          }
+          <button class="btn-remove-sm" (click)="removeCondition(gi, ci)">✕</button>
+        </div>
+      </div>
+    }
+
+    <button class="btn-add-dashed" style="margin-top:4px" (click)="addCondition(gi)">+ Add Condition</button>
 
   </div>
 }
 
-<button class="btn-add-dashed" (click)="addFilter()">+ Add Filter</button>
+<button class="btn-add-dashed" (click)="addGroup()">+ Add Filter Group</button>

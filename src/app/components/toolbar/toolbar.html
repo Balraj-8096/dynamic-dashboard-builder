@@ -99,6 +99,13 @@
     <!-- Help -->
     <button class="btn-icon" title="How to use (help)" (click)="svc.openHelp()">?</button>
 
+    <!-- Theme toggle -->
+    <button
+      class="btn-icon btn-theme"
+      [title]="themeSvc.theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+      (click)="themeSvc.toggle()"
+    >{{ themeSvc.theme() === 'dark' ? '☀' : '☾' }}</button>
+
     <div class="vdivider"></div>
 
     <!-- View Dashboard -->

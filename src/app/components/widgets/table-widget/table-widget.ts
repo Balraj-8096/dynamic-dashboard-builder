@@ -20,10 +20,12 @@ import { TableColumn, TableConfig, TableRow, Widget } from '../../../core/interf
 import { STATUS_FALLBACK, STATUS_MAP } from '../../../core/constants';
 import { QueryService } from '../../../services/query.service';
 import { mapTableResult } from '../../../core/query-result-mapper';
+import { WidgetDatePickerComponent, DatePickerChange } from '../../shared/widget-date-picker/widget-date-picker';
+import { FilterCondition } from '../../../core/query-types';
 
 @Component({
   selector: 'app-table-widget',
-  imports:         [CommonModule, MatTableModule],
+  imports:         [CommonModule, MatTableModule, WidgetDatePickerComponent],
   templateUrl: './table-widget.html',
   styleUrl: './table-widget.scss',
 })
@@ -43,6 +45,16 @@ export class TableWidget implements OnChanges {
       this.qsvc.globalFilters();
       untracked(() => { if (this.widget) { this.refresh(); this.cdr.markForCheck(); } });
     });
+  }
+
+  localDatePreset = '';
+  private localDateFilter: FilterCondition | null = null;
+
+  onDateChange(e: DatePickerChange): void {
+    this.localDateFilter = e.filter;
+    this.localDatePreset  = e.preset;
+    this.refresh();
+    this.cdr.markForCheck();
   }
 
   private _displayCols: TableColumn[] | null = null;
@@ -65,7 +77,10 @@ export class TableWidget implements OnChanges {
   private refresh(): void {
     if (this.cfg?.queryConfig) {
       try {
-        const mapped = mapTableResult(this.qsvc.executeTableQuery(this.cfg.queryConfig));
+        const effectiveQcfg = this.localDateFilter
+          ? { ...this.cfg.queryConfig, filters: [...(this.cfg.queryConfig.filters ?? []), this.localDateFilter] }
+          : this.cfg.queryConfig;
+        const mapped = mapTableResult(this.qsvc.executeTableQuery(effectiveQcfg));
         this._displayCols = mapped.columns;
         this._displayRows = mapped.rows;
       } catch {

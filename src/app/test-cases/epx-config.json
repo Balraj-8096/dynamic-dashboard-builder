@@ -140,11 +140,34 @@
           "description": "Human-readable booking reference (e.g. APT-20260106-001)"
         },
         {
+          "name": "duration_minutes",
+          "column": "durationminutes",
+          "type": "number",
+          "filterable": true,
+          "aggregatable": true,
+          "description": "Duration of the appointment in minutes (derived from end_date − start_date)"
+        },
+        {
           "name": "created_on",
           "column": "createdon",
           "type": "datetime",
           "filterable": true,
           "aggregatable": false
+        },
+        {
+          "name": "appointment_type",
+          "column": "appointmenttype",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "description": "Clinical type of appointment — use for category grouping and filtering",
+          "status_values": [
+            { "value": "consultation", "label": "Consultation",  "color": "#3b82f6" },
+            { "value": "follow_up",    "label": "Follow-Up",     "color": "#22c55e" },
+            { "value": "procedure",    "label": "Procedure",     "color": "#a78bfa" },
+            { "value": "emergency",    "label": "Emergency",     "color": "#ef4444" },
+            { "value": "screening",    "label": "Screening",     "color": "#f59e0b" }
+          ]
         },
         {
           "name": "last_updated_on",
@@ -218,6 +241,22 @@
           "filterable": false,
           "aggregatable": false,
           "description": "Video call link — only populated for remote appointments (is_remote = true)"
+        },
+        {
+          "name": "rating",
+          "column": "rating",
+          "type": "number",
+          "filterable": true,
+          "aggregatable": true,
+          "description": "Patient satisfaction rating 1–5 — null if not yet submitted (dna/cancelled/booked rows always null)"
+        },
+        {
+          "name": "notes",
+          "column": "notes",
+          "type": "string",
+          "filterable": true,
+          "aggregatable": false,
+          "description": "Optional free-text feedback submitted by the patient after the appointment — null when no feedback given"
         },
         {
           "name": "created_on",

@@ -129,7 +129,7 @@
   &--green {
     color: var(--grn);
     &:hover {
-      background: color-mix(in srgb, var(--grn) 8%, #000);
+      background: color-mix(in srgb, var(--grn) 12%, var(--mix-base));
       color: var(--grn);
     }
   }
@@ -138,7 +138,7 @@
     color: var(--red);
     border-color: color-mix(in srgb, var(--red) 18%, transparent);
     &:hover {
-      background: color-mix(in srgb, var(--red) 10%, #000);
+      background: color-mix(in srgb, var(--red) 14%, var(--mix-base));
       color: var(--red);
     }
   }
@@ -216,6 +216,15 @@
   &.is-non-default {
     background: color-mix(in srgb, var(--acc) 9%, transparent);
     color: var(--acc);
+  }
+}
+
+// ── Theme toggle button ───────────────────────────────────────
+.btn-theme {
+  font-size: 16px;
+
+  &:not(:disabled):hover {
+    color: var(--amb);
   }
 }
 

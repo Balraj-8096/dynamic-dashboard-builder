@@ -75,6 +75,8 @@ export enum SortDirection {
   Desc = 'desc',
 }
 
+export type FilterLogic = 'AND' | 'OR';
+
 // ── Product Config types (mirrors the JSON config schema) ──────────────────
 
 export interface ProductConfig {
@@ -153,6 +155,15 @@ export interface FilterCondition {
   label?: string;
 }
 
+/** A named group of filter conditions combined with a single AND/OR connector.
+ *  Multiple groups are always AND-ed together at the top level, giving:
+ *  group1(A AND B) AND group2(C OR D) */
+export interface FilterGroup {
+  id: string;
+  logic: FilterLogic;
+  conditions: FilterCondition[];
+}
+
 export interface AggConfig {
   entity: string;
   field: string;
@@ -183,10 +194,13 @@ export interface TableQueryConfig {
   product: string;                                    // product slug
   entities: string[];                                 // join order, first = root
   columns: Array<{ entity: string; field: string }>; // columns to display
-  filters?: FilterCondition[];
+  filters?: FilterCondition[];       // legacy flat AND list (backward-compat)
+  filterGroups?: FilterGroup[];      // structured AND/OR groups (takes precedence)
   sort?: { entity: string; field: string; direction: SortDirection };
   page?: number;     // 1-based (default 1)
   pageSize?: number; // default 20
+  /** When set, renders a per-widget date-range picker linked to this field */
+  dateRangeField?: { entity: string; field: string };
 }
 
 export interface TableQueryResult {
@@ -204,9 +218,12 @@ export interface StatQueryConfig {
   product: string;
   entities: string[];
   agg: AggConfig;
-  filters?: FilterCondition[];
+  filters?: FilterCondition[];       // legacy flat AND list (backward-compat)
+  filterGroups?: FilterGroup[];      // structured AND/OR groups (takes precedence)
   /** Human-readable label describing the time period (e.g. "Last 30 days") */
   periodLabel?: string;
+  /** When set, renders a per-widget date-range picker linked to this field */
+  dateRangeField?: { entity: string; field: string };
   /** Compare current period to previous period of the same length */
   trend?: {
     entity: string;
@@ -238,7 +255,10 @@ export interface ChartQueryConfig {
   /** Category grouping. When dateAxis is absent, used as x-axis labels.
    *  When dateAxis is present, splits into multiple series. */
   groupBy?: { entity: string; field: string };
-  filters?: FilterCondition[];
+  filters?: FilterCondition[];       // legacy flat AND list (backward-compat)
+  filterGroups?: FilterGroup[];      // structured AND/OR groups (takes precedence)
+  /** When set, renders a per-widget date-range picker linked to this field */
+  dateRangeField?: { entity: string; field: string };
 }
 
 export interface ChartQueryResult {
@@ -254,8 +274,11 @@ export interface PieQueryConfig {
   entities: string[];
   groupBy: { entity: string; field: string };
   valueAgg: AggConfig;
-  filters?: FilterCondition[];
+  filters?: FilterCondition[];       // legacy flat AND list (backward-compat)
+  filterGroups?: FilterGroup[];      // structured AND/OR groups (takes precedence)
   topN?: number;  // if set, groups beyond topN are collapsed into "Other"
+  /** When set, renders a per-widget date-range picker linked to this field */
+  dateRangeField?: { entity: string; field: string };
 }
 
 export interface PieQueryResult {

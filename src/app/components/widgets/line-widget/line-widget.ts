@@ -21,6 +21,8 @@ import { CommonModule } from '@angular/common';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { QueryService } from '../../../services/query.service';
 import { mapChartResult } from '../../../core/query-result-mapper';
+import { WidgetDatePickerComponent, DatePickerChange } from '../../shared/widget-date-picker/widget-date-picker';
+import { FilterCondition } from '../../../core/query-types';
 
 import {
   ApexAxisChartSeries,
@@ -58,7 +60,7 @@ export interface LineChartOptions {
 
 @Component({
   selector: 'app-line-widget',
-  imports: [CommonModule, NgApexchartsModule],
+  imports: [CommonModule, NgApexchartsModule, WidgetDatePickerComponent],
   templateUrl: './line-widget.html',
   styleUrl: './line-widget.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -70,8 +72,18 @@ export class LineWidget implements OnChanges {
 
   chartOptions?: LineChartOptions;
 
+  localDatePreset = '';
+  private localDateFilter: FilterCondition | null = null;
+
   private readonly qsvc = inject(QueryService);
   private readonly cdr  = inject(ChangeDetectorRef);
+
+  onDateChange(e: DatePickerChange): void {
+    this.localDateFilter = e.filter;
+    this.localDatePreset  = e.preset;
+    this.buildChart();
+    this.cdr.markForCheck();
+  }
 
   constructor() {
     effect(() => {
@@ -96,7 +108,10 @@ export class LineWidget implements OnChanges {
 
     if (cfg?.queryConfig) {
       try {
-        const result = this.qsvc.executeChartQuery(cfg.queryConfig);
+        const effectiveQcfg = this.localDateFilter
+          ? { ...cfg.queryConfig, filters: [...(cfg.queryConfig.filters ?? []), this.localDateFilter] }
+          : cfg.queryConfig;
+        const result = this.qsvc.executeChartQuery(effectiveQcfg);
         const mapped = mapChartResult(result);
         activeSeries     = mapped.series;
         activeCategories = mapped.labels;

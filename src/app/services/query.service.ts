@@ -14,7 +14,7 @@ import {
   StatQueryConfig, StatQueryResult,
   ChartQueryConfig, ChartQueryResult,
   PieQueryConfig, PieQueryResult,
-  FilterCondition, AggConfig,
+  FilterCondition, FilterGroup, AggConfig,
   QueryWarning, ResultColumn,
   DateInterval, DateRangeValue, DateRangePreset,
   AggregationFunction, FilterOperator, QueryWarningCode, JoinType, SortDirection,
@@ -24,8 +24,12 @@ import {
  *  Keys use the logical field name: "entityName.fieldName"   */
 type FlatRow = Record<string, unknown>;
 
-/** Simulated "today" for date_range preset calculations */
-const MOCK_TODAY = new Date('2026-03-17T00:00:00.000Z');
+/** Returns today as a local-midnight Date — always the real current date. */
+function localToday(): Date {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
 
 @Injectable({ providedIn: 'root' })
 export class QueryService {
@@ -77,7 +81,7 @@ export class QueryService {
     const config = this.getConfig(query.product);
 
     let rows = this.executeJoins(query.product, query.entities, warnings);
-    rows = this.applyFilters(rows, this.mergedFilters(query.entities, query.filters), config, warnings);
+    rows = this.applyFilterGroups(rows, this.mergedFilterGroups(query.entities, query.filterGroups, query.filters), config, warnings);
 
     if (query.sort) {
       const sortKey = `${query.sort.entity}.${query.sort.field}`;
@@ -116,7 +120,7 @@ export class QueryService {
     const config = this.getConfig(query.product);
 
     let rows = this.executeJoins(query.product, query.entities, warnings);
-    rows = this.applyFilters(rows, this.mergedFilters(query.entities, query.filters), config, warnings);
+    rows = this.applyFilterGroups(rows, this.mergedFilterGroups(query.entities, query.filterGroups, query.filters), config, warnings);
 
     this.checkAVGNulls(rows, query.agg, warnings);
     const value = this.aggregate(rows, query.agg);
@@ -139,7 +143,7 @@ export class QueryService {
 
       // All rows with other filters applied (no date filter — we need full history)
       let allRows = this.executeJoins(query.product, query.entities, []);
-      allRows = this.applyFilters(allRows, this.mergedFilters(query.entities, query.filters), config, []);
+      allRows = this.applyFilterGroups(allRows, this.mergedFilterGroups(query.entities, query.filterGroups, query.filters), config, []);
 
       const prevRows = allRows.filter(r => {
         const v = r[dateKey];
@@ -167,9 +171,10 @@ export class QueryService {
       trendHistory = sortedKeys.map(k => this.aggregate(buckets.get(k)!, query.agg));
     }
 
-    // Derive period label from the first date filter that carries a label
-    const allFilters = this.mergedFilters(query.entities, query.filters);
-    const computedPeriodLabel = allFilters.find(
+    // Derive period label from the first date_range filter that carries a label
+    const allGroups = this.mergedFilterGroups(query.entities, query.filterGroups, query.filters);
+    const allConditions = allGroups.flatMap(g => g.conditions);
+    const computedPeriodLabel = allConditions.find(
       f => f.operator === FilterOperator.DateRange && f.label
     )?.label;
 
@@ -189,7 +194,7 @@ export class QueryService {
     const config = this.getConfig(query.product);
 
     let rows = this.executeJoins(query.product, query.entities, warnings);
-    rows = this.applyFilters(rows, this.mergedFilters(query.entities, query.filters), config, warnings);
+    rows = this.applyFilterGroups(rows, this.mergedFilterGroups(query.entities, query.filterGroups, query.filters), config, warnings);
 
     this.checkAVGNulls(rows, query.valueAgg, warnings);
 
@@ -269,7 +274,7 @@ export class QueryService {
     const config = this.getConfig(query.product);
 
     let rows = this.executeJoins(query.product, query.entities, warnings);
-    rows = this.applyFilters(rows, this.mergedFilters(query.entities, query.filters), config, warnings);
+    rows = this.applyFilterGroups(rows, this.mergedFilterGroups(query.entities, query.filterGroups, query.filters), config, warnings);
 
     this.checkAVGNulls(rows, query.valueAgg, warnings);
     const groupKey = `${query.groupBy.entity}.${query.groupBy.field}`;
@@ -312,10 +317,27 @@ export class QueryService {
     return { segments, warnings };
   }
 
-  /** Prepend any active global filters whose entity is in the query's entity list. */
-  private mergedFilters(entities: string[], queryFilters?: FilterCondition[]): FilterCondition[] {
-    const relevant = this.globalFilters().filter(f => entities.includes(f.entity));
-    return [...relevant, ...(queryFilters ?? [])];
+  /** Normalise global + query-level filters into an ordered list of FilterGroups.
+   *  Global filters are prepended as a single AND group.
+   *  When queryFilterGroups is present it takes precedence over legacyFilters. */
+  private mergedFilterGroups(
+    entities: string[],
+    queryFilterGroups?: FilterGroup[],
+    legacyFilters?: FilterCondition[],
+  ): FilterGroup[] {
+    const globalConds = this.globalFilters().filter(f => entities.includes(f.entity));
+    const groups: FilterGroup[] = [];
+
+    if (globalConds.length) {
+      groups.push({ id: '__global__', logic: 'AND', conditions: globalConds });
+    }
+    if (queryFilterGroups?.length) {
+      groups.push(...queryFilterGroups);
+    } else if (legacyFilters?.length) {
+      // Backward-compat: existing flat arrays become a single AND group
+      groups.push({ id: '__legacy__', logic: 'AND', conditions: legacyFilters });
+    }
+    return groups;
   }
 
   // ── Join engine ──────────────────────────────────────────────────────────
@@ -424,24 +446,39 @@ export class QueryService {
 
   // ── Filter engine ────────────────────────────────────────────────────────
 
-  private applyFilters(
+  /** Applies a list of FilterGroups to rows.
+   *  Groups are ANDed together; conditions within each group use the group's logic (AND | OR). */
+  private applyFilterGroups(
     rows: FlatRow[],
-    filters: FilterCondition[],
+    groups: FilterGroup[],
     config: ProductConfig,
     warnings: QueryWarning[],
   ): FlatRow[] {
-    for (const filter of filters) {
-      const fieldDef = this.findField(config, filter.entity, filter.field);
-      if (fieldDef && !fieldDef.filterable) {
-        warnings.push({
-          code: QueryWarningCode.FilterOnNonFilterable,
-          message: `Field '${filter.entity}.${filter.field}' is not marked as filterable`,
-          detail: `Filtering may produce unexpected results or be unsupported in production`,
-        });
+    for (const group of groups) {
+      if (!group.conditions.length) continue;
+
+      // Warn for non-filterable fields once per unique field
+      for (const filter of group.conditions) {
+        const fieldDef = this.findField(config, filter.entity, filter.field);
+        if (fieldDef && !fieldDef.filterable) {
+          warnings.push({
+            code: QueryWarningCode.FilterOnNonFilterable,
+            message: `Field '${filter.entity}.${filter.field}' is not marked as filterable`,
+            detail: `Filtering may produce unexpected results or be unsupported in production`,
+          });
+        }
       }
 
-      const rowKey = `${filter.entity}.${filter.field}`;
-      rows = rows.filter(row => this.matchesFilter(row[rowKey], filter));
+      if (group.logic === 'OR') {
+        rows = rows.filter(row =>
+          group.conditions.some(f => this.matchesFilter(row[`${f.entity}.${f.field}`], f))
+        );
+      } else {
+        // AND (default)
+        rows = rows.filter(row =>
+          group.conditions.every(f => this.matchesFilter(row[`${f.entity}.${f.field}`], f))
+        );
+      }
     }
     return rows;
   }
@@ -488,26 +525,30 @@ export class QueryService {
       [from, to] = this.calculatePresetRange(range.preset);
     } else {
       from = range.from ? new Date(range.from) : new Date('1900-01-01');
-      to   = range.to   ? new Date(range.to + 'T23:59:59.999Z') : new Date('9999-12-31');
+      to   = range.to   ? new Date(range.to + 'T23:59:59.999') : new Date('9999-12-31');
     }
 
     return date >= from && date <= to;
   }
 
   private calculatePresetRange(preset: DateRangePreset): [Date, Date] {
-    const today = new Date(MOCK_TODAY);
-    today.setUTCHours(0, 0, 0, 0);
-    const todayEnd = new Date(MOCK_TODAY);
-    todayEnd.setUTCHours(23, 59, 59, 999);
-
+    const now  = new Date();
+    const y    = now.getFullYear();
+    const m    = now.getMonth();     // 0-based
+    const d    = now.getDate();
     const dayMs = 86_400_000;
+
+    // All bounds in LOCAL time — mock data strings also have no tz suffix so
+    // new Date("2026-03-12T09:00:00") is local, keeping comparisons consistent.
+    const today    = new Date(y, m, d, 0, 0, 0, 0);
+    const todayEnd = new Date(y, m, d, 23, 59, 59, 999);
 
     switch (preset) {
       case DateRangePreset.Today:
         return [today, todayEnd];
       case DateRangePreset.Yesterday: {
-        const y = new Date(today.getTime() - dayMs);
-        return [y, new Date(y.getTime() + dayMs - 1)];
+        const yest = new Date(today.getTime() - dayMs);
+        return [yest, new Date(yest.getFullYear(), yest.getMonth(), yest.getDate(), 23, 59, 59, 999)];
       }
       case DateRangePreset.Last7Days:
         return [new Date(today.getTime() - 6 * dayMs), todayEnd];
@@ -515,26 +556,14 @@ export class QueryService {
         return [new Date(today.getTime() - 29 * dayMs), todayEnd];
       case DateRangePreset.Last90Days:
         return [new Date(today.getTime() - 89 * dayMs), todayEnd];
-      case DateRangePreset.ThisMonth: {
-        const from = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 1));
-        const to   = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() + 1, 0, 23, 59, 59, 999));
-        return [from, to];
-      }
-      case DateRangePreset.LastMonth: {
-        const from = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - 1, 1));
-        const to   = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), 0, 23, 59, 59, 999));
-        return [from, to];
-      }
-      case DateRangePreset.ThisYear: {
-        const from = new Date(Date.UTC(today.getUTCFullYear(), 0, 1));
-        const to   = new Date(Date.UTC(today.getUTCFullYear(), 11, 31, 23, 59, 59, 999));
-        return [from, to];
-      }
-      case DateRangePreset.LastYear: {
-        const from = new Date(Date.UTC(today.getUTCFullYear() - 1, 0, 1));
-        const to   = new Date(Date.UTC(today.getUTCFullYear() - 1, 11, 31, 23, 59, 59, 999));
-        return [from, to];
-      }
+      case DateRangePreset.ThisMonth:
+        return [new Date(y, m, 1), new Date(y, m + 1, 0, 23, 59, 59, 999)];
+      case DateRangePreset.LastMonth:
+        return [new Date(y, m - 1, 1), new Date(y, m, 0, 23, 59, 59, 999)];
+      case DateRangePreset.ThisYear:
+        return [new Date(y, 0, 1), new Date(y, 11, 31, 23, 59, 59, 999)];
+      case DateRangePreset.LastYear:
+        return [new Date(y - 1, 0, 1), new Date(y - 1, 11, 31, 23, 59, 59, 999)];
     }
   }
 
@@ -618,11 +647,12 @@ export class QueryService {
       .map(v => new Date(v as string))
       .filter(d => !isNaN(d.getTime()));
 
-    if (!dates.length) return [MOCK_TODAY, MOCK_TODAY];
+    const fallback = localToday();
+    if (!dates.length) return [fallback, fallback];
     const min = new Date(Math.min(...dates.map(d => d.getTime())));
     const max = new Date(Math.max(...dates.map(d => d.getTime())));
-    min.setUTCHours(0, 0, 0, 0);
-    max.setUTCHours(23, 59, 59, 999);
+    min.setHours(0, 0, 0, 0);
+    max.setHours(23, 59, 59, 999);
     return [min, max];
   }
 

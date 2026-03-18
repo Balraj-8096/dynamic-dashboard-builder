@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { QueryService } from '../../../../services/query.service';
 import {
-  EntityDef, FieldDef, FilterCondition,
+  EntityDef, FieldDef, FilterGroup,
   PieQueryConfig, AggregationFunction,
 } from '../../../../core/query-types';
 import { FilterBuilder } from '../filter-builder/filter-builder';
@@ -31,7 +31,7 @@ export class PieQueryBuilder implements OnInit {
   valueAggFunction: AggregationFunction = AggregationFunction.Count;
   topNEnabled      = false;
   topN             = 5;
-  filters: FilterCondition[] = [];
+  filterGroups: FilterGroup[] = [];
 
   ngOnInit(): void {
     if (this.config) {
@@ -43,7 +43,13 @@ export class PieQueryBuilder implements OnInit {
       this.valueAggFunction = this.config.valueAgg.function;
       this.topNEnabled      = this.config.topN != null;
       this.topN             = this.config.topN ?? 5;
-      this.filters          = [...(this.config.filters ?? [])];
+      if (this.config.filterGroups?.length) {
+        this.filterGroups = [...this.config.filterGroups];
+      } else if (this.config.filters?.length) {
+        this.filterGroups = [{ id: 'legacy', logic: 'AND', conditions: [...this.config.filters] }];
+      } else {
+        this.filterGroups = [];
+      }
     } else {
       const first = this.entities[0]?.name ?? '';
       this.primaryEntity  = first;
@@ -130,7 +136,7 @@ export class PieQueryBuilder implements OnInit {
       groupBy:  { entity: this.groupByEntity, field: this.groupByField },
       valueAgg: { entity: this.valueAggEntity, field: this.valueAggField, function: this.valueAggFunction },
       topN:     this.topNEnabled ? this.topN : undefined,
-      filters:  this.filters.length ? this.filters : undefined,
+      filterGroups: this.filterGroups.length ? this.filterGroups : undefined,
     };
     this.configChange.emit(cfg);
   }

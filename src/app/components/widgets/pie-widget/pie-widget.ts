@@ -19,6 +19,8 @@ import { CommonModule } from '@angular/common';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { QueryService } from '../../../services/query.service';
 import { mapPieResult } from '../../../core/query-result-mapper';
+import { WidgetDatePickerComponent, DatePickerChange } from '../../shared/widget-date-picker/widget-date-picker';
+import { FilterCondition } from '../../../core/query-types';
 
 import {
   ApexNonAxisChartSeries,
@@ -48,7 +50,7 @@ export interface PieChartOptions {
 
 @Component({
   selector: 'app-pie-widget',
-  imports: [CommonModule, NgApexchartsModule],
+  imports: [CommonModule, NgApexchartsModule, WidgetDatePickerComponent],
   templateUrl: './pie-widget.html',
   styleUrl: './pie-widget.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -60,8 +62,18 @@ export class PieWidget implements OnChanges {
 
   chartOptions?: PieChartOptions;
 
+  localDatePreset = '';
+  private localDateFilter: FilterCondition | null = null;
+
   private readonly qsvc = inject(QueryService);
   private readonly cdr  = inject(ChangeDetectorRef);
+
+  onDateChange(e: DatePickerChange): void {
+    this.localDateFilter = e.filter;
+    this.localDatePreset  = e.preset;
+    this.buildChart();
+    this.cdr.markForCheck();
+  }
 
   constructor() {
     effect(() => {
@@ -84,7 +96,10 @@ export class PieWidget implements OnChanges {
     let activeData = cfg?.data ?? [];
     if (cfg?.queryConfig) {
       try {
-        activeData = mapPieResult(this.qsvc.executePieQuery(cfg.queryConfig));
+        const effectiveQcfg = this.localDateFilter
+          ? { ...cfg.queryConfig, filters: [...(cfg.queryConfig.filters ?? []), this.localDateFilter] }
+          : cfg.queryConfig;
+        activeData = mapPieResult(this.qsvc.executePieQuery(effectiveQcfg));
       } catch { /* keep static */ }
     }
     if (!activeData.length) { this.chartOptions = undefined; return; }

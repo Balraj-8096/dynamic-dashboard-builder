@@ -3,9 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { QueryService } from '../../../../services/query.service';
 import {
-  EntityDef, FieldDef, FilterCondition,
+  EntityDef, FieldDef, FilterCondition, FilterGroup, FilterLogic,
   FilterOperator, DateRangePreset, FieldType,
 } from '../../../../core/query-types';
+
+let _nextGroupId = 0;
+function newGroupId(): string { return `fg${++_nextGroupId}`; }
 
 @Component({
   selector: 'app-filter-builder',
@@ -15,10 +18,10 @@ import {
 })
 export class FilterBuilder {
   @Input({ required: true }) product!: string;
-  /** Restrict filter entity dropdown to these entity names (the current query's entity scope). */
+  /** Restrict entity dropdown to these entity names (the current query's entity scope). */
   @Input() entityScope: string[] = [];
-  @Input() filters: FilterCondition[] = [];
-  @Output() filtersChange = new EventEmitter<FilterCondition[]>();
+  @Input() filterGroups: FilterGroup[] = [];
+  @Output() filterGroupsChange = new EventEmitter<FilterGroup[]>();
 
   readonly FilterOperator = FilterOperator;
   readonly DateRangePreset = DateRangePreset;
@@ -43,35 +46,65 @@ export class FilterBuilder {
     return this.fieldsFor(entity).filter(f => f.filterable);
   }
 
-  addFilter(): void {
+  // ── Group CRUD ──────────────────────────────────────────────────────────
+
+  addGroup(): void {
     const firstEntity = this.entities[0]?.name ?? '';
     const firstField  = this.filterableFields(firstEntity)[0]?.name ?? '';
-    this.filtersChange.emit([...this.filters, {
-      entity: firstEntity,
-      field:  firstField,
-      operator: FilterOperator.Eq,
-      value: '',
+    this.emit([...this.filterGroups, {
+      id: newGroupId(),
+      logic: 'AND',
+      conditions: [{ entity: firstEntity, field: firstField, operator: FilterOperator.Eq, value: '' }],
     }]);
   }
 
-  removeFilter(i: number): void {
-    this.filtersChange.emit(this.filters.filter((_, idx) => idx !== i));
+  removeGroup(gi: number): void {
+    this.emit(this.filterGroups.filter((_, i) => i !== gi));
   }
 
-  updateFilter(i: number, patch: Partial<FilterCondition>): void {
-    this.filtersChange.emit(
-      this.filters.map((f, idx) => idx === i ? { ...f, ...patch } : f)
-    );
+  toggleGroupLogic(gi: number): void {
+    this.emit(this.filterGroups.map((g, i) =>
+      i === gi ? { ...g, logic: (g.logic === 'AND' ? 'OR' : 'AND') as FilterLogic } : g
+    ));
   }
 
-  onEntityChange(i: number, entity: string): void {
+  // ── Condition CRUD ──────────────────────────────────────────────────────
+
+  addCondition(gi: number): void {
+    const firstEntity = this.entities[0]?.name ?? '';
+    const firstField  = this.filterableFields(firstEntity)[0]?.name ?? '';
+    this.emit(this.filterGroups.map((g, i) =>
+      i === gi
+        ? { ...g, conditions: [...g.conditions, { entity: firstEntity, field: firstField, operator: FilterOperator.Eq, value: '' }] }
+        : g
+    ));
+  }
+
+  removeCondition(gi: number, ci: number): void {
+    const updated = this.filterGroups
+      .map((g, i) => i === gi ? { ...g, conditions: g.conditions.filter((_, j) => j !== ci) } : g)
+      .filter(g => g.conditions.length > 0);   // auto-remove now-empty groups
+    this.emit(updated);
+  }
+
+  updateCondition(gi: number, ci: number, patch: Partial<FilterCondition>): void {
+    this.emit(this.filterGroups.map((g, i) =>
+      i === gi
+        ? { ...g, conditions: g.conditions.map((c, j) => j === ci ? { ...c, ...patch } : c) }
+        : g
+    ));
+  }
+
+  onEntityChange(gi: number, ci: number, entity: string): void {
     const firstField = this.filterableFields(entity)[0]?.name ?? '';
-    this.updateFilter(i, { entity, field: firstField, value: '', values: undefined, dateRange: undefined });
+    this.updateCondition(gi, ci, { entity, field: firstField, value: '', values: undefined, dateRange: undefined });
   }
 
-  onOperatorChange(i: number, op: FilterOperator): void {
-    this.updateFilter(i, { operator: op, value: '', values: undefined, dateRange: undefined });
+  onOperatorChange(gi: number, ci: number, op: FilterOperator): void {
+    this.updateCondition(gi, ci, { operator: op, value: '', values: undefined, dateRange: undefined });
   }
+
+  // ── Field helpers ───────────────────────────────────────────────────────
 
   operators(entity: string, field: string): FilterOperator[] {
     const type = this.fieldsFor(entity).find(f => f.name === field)?.type ?? FieldType.String;
@@ -85,21 +118,19 @@ export class FilterBuilder {
     return base;
   }
 
-  isMultiValue(op: FilterOperator): boolean {
-    return op === FilterOperator.In || op === FilterOperator.NotIn;
-  }
-  isDateRange(op: FilterOperator): boolean { return op === FilterOperator.DateRange; }
-  isNoValue(op:  FilterOperator): boolean {
-    return op === FilterOperator.IsNull || op === FilterOperator.IsNotNull;
-  }
+  isMultiValue(op: FilterOperator): boolean { return op === FilterOperator.In || op === FilterOperator.NotIn; }
+  isDateRange(op:  FilterOperator): boolean { return op === FilterOperator.DateRange; }
+  isNoValue(op:    FilterOperator): boolean { return op === FilterOperator.IsNull || op === FilterOperator.IsNotNull; }
 
-  valuesStr(f: FilterCondition): string {
-    return (f.values ?? []).join(', ');
-  }
+  valuesStr(c: FilterCondition): string { return (c.values ?? []).join(', '); }
 
-  setValues(i: number, raw: string): void {
-    this.updateFilter(i, { values: raw.split(',').map(s => s.trim()).filter(Boolean) });
+  setValues(gi: number, ci: number, raw: string): void {
+    this.updateCondition(gi, ci, { values: raw.split(',').map(s => s.trim()).filter(Boolean) });
   }
 
   presetList(): DateRangePreset[] { return Object.values(DateRangePreset); }
+
+  private emit(groups: FilterGroup[]): void {
+    this.filterGroupsChange.emit(groups);
+  }
 }

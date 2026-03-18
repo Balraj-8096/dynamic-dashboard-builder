@@ -24,10 +24,12 @@ import { CommonModule } from '@angular/common';
 import { AnalyticsConfig, Widget } from '../../../core/interfaces';
 import { QueryService } from '../../../services/query.service';
 import { mapStatResult } from '../../../core/query-result-mapper';
+import { WidgetDatePickerComponent, DatePickerChange } from '../../shared/widget-date-picker/widget-date-picker';
+import { FilterCondition } from '../../../core/query-types';
 
 @Component({
   selector: 'app-analytics-widget',
-  imports: [CommonModule],
+  imports: [CommonModule, WidgetDatePickerComponent],
   templateUrl: './analytics-widget.html',
   styleUrl: './analytics-widget.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -55,6 +57,17 @@ export class AnalyticsWidget implements OnChanges {
   displayData:       number[] = [];
   displayPeriod      = '';
 
+  // ── Per-widget date filter ────────────────────────────────────
+  localDatePreset = '';
+  private localDateFilter: FilterCondition | null = null;
+
+  onDateChange(e: DatePickerChange): void {
+    this.localDateFilter = e.filter;
+    this.localDatePreset  = e.preset;
+    this.refresh();
+    this.cdr.markForCheck();
+  }
+
   // ── Config accessor ──────────────────────────────────────────
   get cfg(): AnalyticsConfig {
     return this.widget.config as AnalyticsConfig;
@@ -66,7 +79,10 @@ export class AnalyticsWidget implements OnChanges {
     const qcfg = this.cfg?.queryConfig;
     if (qcfg) {
       try {
-        const result = this.qsvc.executeStatQuery(qcfg);
+        const effectiveQcfg = this.localDateFilter
+          ? { ...qcfg, filters: [...(qcfg.filters ?? []), this.localDateFilter] }
+          : qcfg;
+        const result = this.qsvc.executeStatQuery(effectiveQcfg);
         const mapped = mapStatResult(result, qcfg.periodLabel);
         this.displayValue       = mapped.value;
         this.displayChangeValue = mapped.trend;

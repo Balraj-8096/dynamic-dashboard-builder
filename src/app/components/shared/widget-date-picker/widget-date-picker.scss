@@ -1,0 +1,45 @@
+// ═══════════════════════════════════════════════════════════════
+//  Widget Date Picker — dark-theme compact dropdown
+// ═══════════════════════════════════════════════════════════════
+
+.wdp {
+  display:     inline-flex;
+  align-items: center;
+  gap:         4px;
+  position:    relative;
+
+  &__icon {
+    font-size:   12px;
+    line-height: 1;
+    opacity:     0.55;
+    user-select: none;
+  }
+
+  &__select {
+    appearance:    none;
+    background:    #131c2e;
+    border:        1px solid #253047;
+    border-radius: 5px;
+    color:         #7a90b0;
+    cursor:        pointer;
+    font-family:   inherit;
+    font-size:     11px;
+    height:        22px;
+    padding:       0 22px 0 7px;
+    transition:    border-color 0.15s, color 0.15s;
+
+    &:hover  { border-color: #3b5280; color: #b0c4de; }
+    &:focus  { border-color: #3b82f6; outline: none; color: #e2e8f0; }
+
+    option { background: #131c2e; }
+  }
+
+  &__chevron {
+    pointer-events: none;
+    position:       absolute;
+    right:          6px;
+    font-size:      10px;
+    color:          #4a6080;
+    line-height:    1;
+  }
+}

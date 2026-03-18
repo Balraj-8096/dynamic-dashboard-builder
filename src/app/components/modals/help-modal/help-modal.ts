@@ -28,7 +28,7 @@ export class HelpModal {
       color: '#3b82f6',
       intro: 'The fastest ways to go from an empty canvas to a working dashboard.',
       items: [
-        { key: '⊟ Templates',     desc: 'Click Templates in the topbar or the sidebar to open the template picker. Choose from Sales Overview, Marketing KPIs, DevOps Health, or Finance Summary — each loads a full pre-built layout you can customise immediately.' },
+        { key: '⊟ Templates',     desc: 'Click Templates in the topbar or the sidebar to open the template picker. Choose from EPX Clinical, Accounting, Prescriptions, Aggregation Functions, Filter Operations, Patient Roster, Appointment Quality, or Site Performance — each loads a fully wired layout with live queryConfig data you can customise immediately.' },
         { key: '⚡ Demo',          desc: 'Click the green Demo button in the topbar to instantly populate the canvas with a sample dashboard containing all widget types. Great for exploring the builder before building your own.' },
         { key: '+ Add Widget',    desc: 'Click the blue + Add Widget button in the topbar, or click any widget type in the left sidebar. This opens the 3-step wizard: (1) Choose type → (2) Select fields → (3) Configure & preview. You can only add it to the canvas on the final step.' },
         { key: '⬆ Import',        desc: 'Click Import in the topbar to load a previously exported .json file. Drag-and-drop the file or click to browse. This restores your entire layout including widget titles, fields, and colours. Note: importing replaces the current canvas.' },
