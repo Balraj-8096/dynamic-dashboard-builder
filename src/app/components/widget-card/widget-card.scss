@@ -11,6 +11,11 @@
     border-color var(--transition-base),
     box-shadow   var(--transition-base),
     transform    var(--transition-base);
+  will-change: transform, width, height;
+
+  &.can-drag {
+    cursor: grab;
+  }
 
   // ── Visual states ──────────────────────────────────────────
   &.is-selected {
@@ -23,7 +28,13 @@
     border: 1px dashed var(--acc);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
                 0 0 0 1px color-mix(in srgb, var(--acc) 20%, transparent);
-    transform: scale(1.002);
+  }
+
+  &.is-interacting {
+    transition: none;
+    cursor: grabbing;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.35),
+                0 0 0 1px color-mix(in srgb, var(--acc) 22%, transparent);
   }
 
   &.is-front {
@@ -58,8 +69,8 @@
   background: linear-gradient(180deg, var(--bg2) 0%, var(--bg1) 100%);
   user-select: none;
 
-  &.can-drag { cursor: grab; }
-  &.can-drag:active { cursor: grabbing; }
+  &.can-drag { cursor: inherit; }
+  &.can-drag:active { cursor: inherit; }
 }
 
 .header-left {
@@ -226,4 +237,19 @@
   .resize-handle--se:hover & {
     border-color: var(--acc);
   }
+}
+.widget-preview-shadow {
+  position: absolute;
+  border: 1px dashed color-mix(in srgb, var(--acc) 70%, transparent);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--acc) 10%, transparent),
+      color-mix(in srgb, var(--acc) 4%, transparent)
+    );
+  box-shadow:
+    0 18px 48px color-mix(in srgb, var(--acc) 16%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--acc) 20%, transparent);
+  pointer-events: none;
 }

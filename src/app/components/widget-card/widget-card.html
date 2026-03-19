@@ -1,17 +1,23 @@
+@if (previewGhostStyle; as ghostStyle) {
+<div class="widget-preview-shadow" [ngStyle]="ghostStyle"></div>
+}
+
 <div class="widget-card"
   [ngStyle]="posStyle"
+  [class.can-drag]="!isLocked"
   [class.is-selected]="isSelected"
   [class.is-active]="isActive"
   [class.is-front]="isFront"
   [class.is-animating]="isAnimating"
   [class.is-locked]="isLocked"
+  [class.is-interacting]="isInteracting"
   (click)="onCardClick($event)"
+  (mousedown)="onSurfaceMousedown($event)"
   (contextmenu)="onContextMenu($event)">
 
   <!-- ── HEADER ────────────────────────────────────────────── -->
   <div class="card-header"
-    [class.can-drag]="!isLocked"
-    (mousedown)="onHeaderMousedown($event)">
+    [class.can-drag]="!isLocked">
 
     <!-- Left: icon + title + badges -->
     <div class="header-left">

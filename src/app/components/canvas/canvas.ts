@@ -24,7 +24,7 @@ import { DashboardService } from '../../services/dashboard.service';
 import { Widget } from '../../core/interfaces';
 import { gridToPixel, nudgeWidget } from '../../core/layout.utils';
 import { COLS, KB_BLOCKED_TAGS, ZOOM_MAX, ZOOM_MIN } from '../../core/constants';
-import { WidgetCard } from "../widget-card/widget-card";
+import { WidgetCard } from "../widget-card/widget-card.smooth";
 import { Sidebar } from "../sidebar/sidebar";
 import { getCatalogByIndex } from '../../core/catalog';
 import { Toolbar } from "../toolbar/toolbar";
