@@ -75,6 +75,8 @@ export class WidgetCard implements OnDestroy {
     dir: ResizeDirection;
     startX: number;
     startY: number;
+    origX: number;
+    origY: number;
     origW: number;
     origH: number;
     latestX: number;
@@ -179,7 +181,9 @@ export class WidgetCard implements OnDestroy {
 
   get previewGhostStyle(): Record<string, string> | null {
     const rect = this.dragRef?.previewRect ?? this.resizeRef?.previewRect ?? null;
+    const liveRect = this.getInteractionRect();
     if (!rect || !this.isInteracting) return null;
+    if (liveRect && this.sameRect(liveRect, rect)) return null;
 
     return {
       left: `${rect.left}px`,
@@ -187,6 +191,20 @@ export class WidgetCard implements OnDestroy {
       width: `${rect.width}px`,
       height: `${rect.height}px`,
       zIndex: String(Math.max(this.zIndex - 1, 1)),
+    };
+  }
+
+  get interactionShadowStyle(): Record<string, string> | null {
+    const rect = this.getInteractionRect();
+    if (!rect) return null;
+
+    return {
+      left: `${rect.left}px`,
+      top: `${rect.top}px`,
+      width: `${rect.width}px`,
+      height: `${rect.height}px`,
+      transform: 'translate3d(8px, 12px, 0)',
+      zIndex: String(Math.max(this.zIndex - 2, 1)),
     };
   }
 
@@ -276,6 +294,8 @@ export class WidgetCard implements OnDestroy {
       dir,
       startX: e.clientX,
       startY: e.clientY,
+      origX: this.widget.x,
+      origY: this.widget.y,
       origW: this.widget.w,
       origH: this.widget.h,
       latestX: e.clientX,
@@ -420,39 +440,14 @@ export class WidgetCard implements OnDestroy {
     const zoom = this.svc.zoom();
     const dx = (ref.latestX - ref.startX) / zoom;
     const dy = (ref.latestY - ref.startY) / zoom;
-    const baseRect = gridToPixel(this.widget, colW);
+    const snappedWidget = this.buildResizePreviewWidget(ref, dx, dy);
 
-    const dcols = Math.round(dx / (colW + GAP));
-    const drows = Math.round(dy / (ROW_H + GAP));
-    const snappedW = ref.dir.includes('e')
-      ? clamp(ref.origW + dcols, 1, COLS - this.widget.x)
-      : ref.origW;
-    const snappedH = ref.dir.includes('s')
-      ? clamp(ref.origH + drows, 1, MAX_WIDGET_H)
-      : ref.origH;
+    ref.liveRect = this.buildLiveResizeRect(ref, dx, dy);
 
-    ref.liveRect = {
-      ...baseRect,
-      width: ref.dir.includes('e')
-        ? clamp(
-            baseRect.width + dx,
-            this.gridWidthPx(1),
-            this.gridWidthPx(COLS - this.widget.x)
-          )
-        : baseRect.width,
-      height: ref.dir.includes('s')
-        ? clamp(
-            baseRect.height + dy,
-            this.gridHeightPx(1),
-            this.gridHeightPx(MAX_WIDGET_H)
-          )
-        : baseRect.height,
-    };
-
-    const resolved = resolveResize(this.widget, snappedW, snappedH, ref.dir, this.svc.widgets());
+    const resolved = resolveResize(this.widget, snappedWidget, ref.dir, this.svc.widgets());
     ref.previewLayout = resolved;
     ref.previewRect = gridToPixel(
-      resolved?.find(w => w.id === this.widget.id) ?? this.widget,
+      resolved?.find(w => w.id === this.widget.id) ?? snappedWidget,
       colW
     );
 
@@ -475,6 +470,109 @@ export class WidgetCard implements OnDestroy {
 
   private gridHeightPx(rows: number): number {
     return rows * ROW_H + (rows - 1) * GAP;
+  }
+
+  private buildResizePreviewWidget(
+    ref: NonNullable<WidgetCard['resizeRef']>,
+    dx: number,
+    dy: number
+  ): Widget {
+    const dcols = Math.round(dx / (this.svc.colW() + GAP));
+    const drows = Math.round(dy / (ROW_H + GAP));
+    const right = ref.origX + ref.origW;
+    const bottom = ref.origY + ref.origH;
+
+    let x = ref.origX;
+    let y = ref.origY;
+    let w = ref.origW;
+    let h = ref.origH;
+
+    if (ref.dir.includes('w')) {
+      x = clamp(ref.origX + dcols, Math.max(0, right - COLS), right - 1);
+      w = right - x;
+    } else if (ref.dir.includes('e')) {
+      w = clamp(ref.origW + dcols, 1, COLS - ref.origX);
+    }
+
+    if (ref.dir.includes('n')) {
+      y = clamp(ref.origY + drows, Math.max(0, bottom - MAX_WIDGET_H), bottom - 1);
+      h = bottom - y;
+    } else if (ref.dir.includes('s')) {
+      h = clamp(ref.origH + drows, 1, MAX_WIDGET_H);
+    }
+
+    return {
+      ...this.widget,
+      x,
+      y,
+      w,
+      h,
+    };
+  }
+
+  private buildLiveResizeRect(
+    ref: NonNullable<WidgetCard['resizeRef']>,
+    dx: number,
+    dy: number
+  ): PixelRect {
+    const baseRect = gridToPixel(this.widget, this.svc.colW());
+    const right = baseRect.left + baseRect.width;
+    const bottom = baseRect.top + baseRect.height;
+    const minWidth = this.gridWidthPx(1);
+    const minHeight = this.gridHeightPx(1);
+    const maxWidth = ref.dir.includes('w')
+      ? this.gridWidthPx(ref.origX + ref.origW)
+      : this.gridWidthPx(COLS - ref.origX);
+    const maxHeight = ref.dir.includes('n')
+      ? this.gridHeightPx(MAX_WIDGET_H)
+      : this.gridHeightPx(MAX_WIDGET_H);
+
+    let left = baseRect.left;
+    let top = baseRect.top;
+    let width = baseRect.width;
+    let height = baseRect.height;
+
+    if (ref.dir.includes('w')) {
+      left = clamp(baseRect.left + dx, right - maxWidth, right - minWidth);
+      width = right - left;
+    } else if (ref.dir.includes('e')) {
+      width = clamp(baseRect.width + dx, minWidth, maxWidth);
+    }
+
+    if (ref.dir.includes('n')) {
+      top = clamp(baseRect.top + dy, bottom - maxHeight, bottom - minHeight);
+      height = bottom - top;
+    } else if (ref.dir.includes('s')) {
+      height = clamp(baseRect.height + dy, minHeight, maxHeight);
+    }
+
+    return { left, top, width, height };
+  }
+
+  private getInteractionRect(): PixelRect | null {
+    if (this.dragRef?.engaged) {
+      return this.translateRect(this.pixelRect, this.dragRef.translateX, this.dragRef.translateY);
+    }
+
+    return this.resizeRef?.liveRect ?? null;
+  }
+
+  private translateRect(rect: PixelRect, dx: number, dy: number): PixelRect {
+    return {
+      left: rect.left + dx,
+      top: rect.top + dy,
+      width: rect.width,
+      height: rect.height,
+    };
+  }
+
+  private sameRect(a: PixelRect, b: PixelRect): boolean {
+    return (
+      Math.abs(a.left - b.left) < 0.5 &&
+      Math.abs(a.top - b.top) < 0.5 &&
+      Math.abs(a.width - b.width) < 0.5 &&
+      Math.abs(a.height - b.height) < 0.5
+    );
   }
 
   private layoutChanged(next: Widget[]): boolean {

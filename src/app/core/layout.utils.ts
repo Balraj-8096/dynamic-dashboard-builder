@@ -360,41 +360,38 @@ export function resolveDrag(
  * Called on every mousemove during resize.
  * Tries progressively constrained resize before giving up:
  *
- *   Tier 1 — Full resize:   new w AND h
- *   Tier 2 — Width-only:    new w, keep h (for 'e' and 'se' handles)
- *   Tier 3 — Height-only:   keep w, new h (for 's' and 'se' handles)
+ *   Tier 1 — Full resize:   new x/y/w/h
+ *   Tier 2 — Width-only:    new x/w, keep y/h
+ *   Tier 3 — Height-only:   new y/h, keep x/w
  *   Tier 4 — No change:     return current layout unchanged
  *
  * @param active - The widget being resized (current state)
- * @param newW   - Proposed new width (clamped, grid units)
- * @param newH   - Proposed new height (clamped, grid units)
- * @param dir    - Resize direction ('e' | 's' | 'se')
+ * @param proposed - Proposed widget bounds (clamped, grid units)
+ * @param dir    - Resize direction ('n' | 'e' | 's' | 'w' | corners)
  * @param all    - Full current widget array
  * @returns      - Resolved layout, or null if fully blocked
  */
 export function resolveResize(
   active: Widget,
-  newW:   number,
-  newH:   number,
+  proposed: Widget,
   dir:    string,
   all:    Widget[]
 ): Widget[] | null {
 
-  // Tier 1 — Full resize (new w and h)
-  const proposed  = { ...active, w: newW, h: newH };
-  const resolved  = resolveLayout(proposed, all);
+  // Tier 1 — Full resize (new x/y/w/h)
+  const resolved = resolveLayout(proposed, all);
   if (resolved) return resolved;
 
   // Tier 2 — Width-only (only for handles that affect width)
-  if (dir.includes('e')) {
-    const wOnly     = { ...active, w: newW };
+  if (dir.includes('e') || dir.includes('w')) {
+    const wOnly     = { ...active, x: proposed.x, w: proposed.w };
     const resolvedW = resolveLayout(wOnly, all);
     if (resolvedW) return resolvedW;
   }
 
   // Tier 3 — Height-only (only for handles that affect height)
-  if (dir.includes('s')) {
-    const hOnly     = { ...active, h: newH };
+  if (dir.includes('n') || dir.includes('s')) {
+    const hOnly     = { ...active, y: proposed.y, h: proposed.h };
     const resolvedH = resolveLayout(hOnly, all);
     if (resolvedH) return resolvedH;
   }

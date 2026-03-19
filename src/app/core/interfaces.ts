@@ -26,8 +26,13 @@ export enum WidgetType {
 }
 
 export enum ResizeDirection {
+  N  = 'n',
   E  = 'e',
+  W  = 'w',
   S  = 's',
+  NE = 'ne',
+  NW = 'nw',
+  SW = 'sw',
   SE = 'se',
 }
 

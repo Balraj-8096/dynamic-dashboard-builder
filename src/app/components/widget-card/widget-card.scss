@@ -6,12 +6,14 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  contain: layout paint;
   box-shadow: var(--shadow-card);
   transition:
     border-color var(--transition-base),
     box-shadow   var(--transition-base),
     transform    var(--transition-base);
   will-change: transform, width, height;
+  backface-visibility: hidden;
 
   &.can-drag {
     cursor: grab;
@@ -33,7 +35,7 @@
   &.is-interacting {
     transition: none;
     cursor: grabbing;
-    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.35),
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.28),
                 0 0 0 1px color-mix(in srgb, var(--acc) 22%, transparent);
   }
 
@@ -186,43 +188,115 @@
   position: absolute;
   z-index: 20;
   background: transparent;
-  transition: background var(--transition-fast);
+  opacity: 0.75;
+  transition:
+    background var(--transition-fast),
+    opacity var(--transition-fast);
 
-  // Right edge
-  &--e {
-    right: -1px;
-    top: 15%;
-    height: 70%;
-    width: 5px;
-    cursor: ew-resize;
-    border-radius: 3px;
-
-    &:hover { background: color-mix(in srgb, var(--acc) 47%, transparent); }
+  &:hover {
+    opacity: 1;
   }
 
-  // Bottom edge
+  &--n,
   &--s {
-    bottom: -1px;
-    left: 15%;
-    width: 70%;
-    height: 5px;
+    left: 14px;
+    right: 14px;
+    height: 10px;
+    border-radius: 999px;
     cursor: ns-resize;
-    border-radius: 3px;
 
-    &:hover { background: color-mix(in srgb, var(--acc) 47%, transparent); }
+    &:hover {
+      background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--acc) 40%, transparent),
+        color-mix(in srgb, var(--acc) 18%, transparent)
+      );
+    }
   }
 
-  // Corner (se)
+  &--n {
+    top: -5px;
+  }
+
+  &--s {
+    bottom: -5px;
+  }
+
+  &--e {
+    right: -5px;
+    top: 14px;
+    bottom: 14px;
+    width: 10px;
+    cursor: ew-resize;
+    border-radius: 999px;
+
+    &:hover {
+      background: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--acc) 18%, transparent),
+        color-mix(in srgb, var(--acc) 40%, transparent)
+      );
+    }
+  }
+
+  &--w {
+    left: -5px;
+    top: 14px;
+    bottom: 14px;
+    width: 10px;
+    cursor: ew-resize;
+    border-radius: 999px;
+
+    &:hover {
+      background: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--acc) 40%, transparent),
+        color-mix(in srgb, var(--acc) 18%, transparent)
+      );
+    }
+  }
+
+  &--nw,
+  &--ne,
+  &--sw,
   &--se {
-    bottom: 0;
-    right: 0;
-    width: 20px;
-    height: 20px;
-    cursor: se-resize;
+    width: 18px;
+    height: 18px;
     display: flex;
-    align-items: flex-end;
-    justify-content: flex-end;
-    padding: 3px;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+  }
+
+  &--nw {
+    top: -1px;
+    left: -1px;
+    cursor: nwse-resize;
+  }
+
+  &--ne {
+    top: -1px;
+    right: -1px;
+    cursor: nesw-resize;
+  }
+
+  &--sw {
+    bottom: -1px;
+    left: -1px;
+    cursor: nesw-resize;
+  }
+
+  &--se {
+    right: -1px;
+    bottom: -1px;
+    cursor: nwse-resize;
+  }
+
+  &--nw:hover,
+  &--ne:hover,
+  &--sw:hover,
+  &--se:hover {
+    background: color-mix(in srgb, var(--acc) 10%, transparent);
   }
 }
 
@@ -234,22 +308,41 @@
   border-radius: 1px;
   transition: border-color var(--transition-fast);
 
+  .resize-handle--nw & {
+    transform: rotate(180deg);
+  }
+
+  .resize-handle--ne & {
+    transform: rotate(-90deg);
+  }
+
+  .resize-handle--sw & {
+    transform: rotate(90deg);
+  }
+
+  .resize-handle--nw:hover &,
+  .resize-handle--ne:hover &,
+  .resize-handle--sw:hover &,
   .resize-handle--se:hover & {
     border-color: var(--acc);
   }
 }
-.widget-preview-shadow {
+
+.widget-live-shadow {
+  position: absolute;
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--acc) 12%, transparent);
+  box-shadow: 0 14px 28px color-mix(in srgb, #000 18%, transparent);
+  opacity: 0.45;
+  pointer-events: none;
+  will-change: transform, width, height;
+}
+
+.widget-placement-outline {
   position: absolute;
   border: 1px dashed color-mix(in srgb, var(--acc) 70%, transparent);
   border-radius: var(--radius-lg);
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--acc) 10%, transparent),
-      color-mix(in srgb, var(--acc) 4%, transparent)
-    );
-  box-shadow:
-    0 18px 48px color-mix(in srgb, var(--acc) 16%, transparent),
-    inset 0 0 0 1px color-mix(in srgb, var(--acc) 20%, transparent);
+  background: color-mix(in srgb, var(--acc) 8%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--acc) 18%, transparent);
   pointer-events: none;
 }
