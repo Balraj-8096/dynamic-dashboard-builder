@@ -52,6 +52,23 @@
   z-index: 0;
 }
 
+.alignment-guide {
+  position: absolute;
+  pointer-events: none;
+  z-index: 250;
+  background: color-mix(in srgb, var(--acc) 85%, white 10%);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--acc) 26%, transparent);
+  opacity: 0.95;
+
+  &--vertical {
+    width: 1px;
+  }
+
+  &--horizontal {
+    height: 1px;
+  }
+}
+
 // ── Empty state ────────────────────────────────────────────────
 .empty-state {
   position: absolute;

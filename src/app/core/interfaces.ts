@@ -513,6 +513,13 @@ export interface ResizeRef {
   lastH:  number;
 }
 
+export interface AlignmentGuide {
+  axis: 'x' | 'y';
+  pos: number;
+  start: number;
+  end: number;
+}
+
 
 // ───────────────────────────────────────────────────────────────
 //  STATUS BADGE
@@ -570,6 +577,8 @@ export interface DashboardState {
   zoom:        number;
   scrollTop:   number;
   showMinimap: boolean;
+  showAlignmentGuides: boolean;
+  alignmentGuides: AlignmentGuide[];
 
   // History
   history:     HistoryEntry[];

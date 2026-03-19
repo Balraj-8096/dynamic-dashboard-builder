@@ -21,7 +21,7 @@ import {
 } from 'rxjs';
 
 import { DashboardService } from '../../services/dashboard.service';
-import { Widget } from '../../core/interfaces';
+import { AlignmentGuide, Widget } from '../../core/interfaces';
 import { gridToPixel, nudgeWidget } from '../../core/layout.utils';
 import { COLS, KB_BLOCKED_TAGS, ZOOM_MAX, ZOOM_MIN } from '../../core/constants';
 import { WidgetCard } from "../widget-card/widget-card.smooth";
@@ -211,6 +211,22 @@ export class Canvas implements OnInit, OnDestroy {
       transformOrigin: 'top left',
       width: `${100 / z}%`,
       minHeight: `${100 / z}%`,
+    };
+  }
+
+  alignmentGuideStyle(guide: AlignmentGuide): Record<string, string> {
+    if (guide.axis === 'x') {
+      return {
+        left: `${guide.pos}px`,
+        top: `${guide.start}px`,
+        height: `${Math.max(guide.end - guide.start, 1)}px`,
+      };
+    }
+
+    return {
+      left: `${guide.start}px`,
+      top: `${guide.pos}px`,
+      width: `${Math.max(guide.end - guide.start, 1)}px`,
     };
   }
 }

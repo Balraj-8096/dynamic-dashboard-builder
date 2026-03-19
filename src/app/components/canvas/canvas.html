@@ -28,6 +28,16 @@
                     }
                     }
 
+                    @if (svc.showAlignmentGuides() && svc.alignmentGuides().length) {
+                    @for (guide of svc.alignmentGuides(); track $index) {
+                    <div class="alignment-guide"
+                        [class.alignment-guide--vertical]="guide.axis === 'x'"
+                        [class.alignment-guide--horizontal]="guide.axis === 'y'"
+                        [ngStyle]="alignmentGuideStyle(guide)">
+                    </div>
+                    }
+                    }
+
                     <!-- Empty state -->
                     @if (svc.widgetCount() === 0) {
                     <div class="empty-state">

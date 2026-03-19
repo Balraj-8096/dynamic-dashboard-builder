@@ -9,7 +9,7 @@ import {
 import { CommonModule } from '@angular/common';
 
 import { DashboardService } from '../../services/dashboard.service';
-import { PixelRect, ResizeDirection, Widget } from '../../core/interfaces';
+import { AlignmentGuide, PixelRect, ResizeDirection, Widget } from '../../core/interfaces';
 import { gridToPixel, resolveDrag, resolveResize } from '../../core/layout.utils';
 import {
   COLS,
@@ -56,6 +56,7 @@ export class WidgetCard implements OnDestroy {
   private readonly cdr = inject(ChangeDetectorRef);
 
   private static readonly DRAG_THRESHOLD_PX = 4;
+  private static readonly ALIGNMENT_THRESHOLD_PX = 8;
 
   private dragRef: {
     startX: number;
@@ -213,6 +214,7 @@ export class WidgetCard implements OnDestroy {
     this.removeResizeListeners();
     if (this.dragRafId !== null) cancelAnimationFrame(this.dragRafId);
     if (this.resizeRafId !== null) cancelAnimationFrame(this.resizeRafId);
+    this.svc.setAlignmentGuides([]);
   }
 
   onCardClick(e: MouseEvent): void {
@@ -428,6 +430,9 @@ export class WidgetCard implements OnDestroy {
       resolved?.find(w => w.id === this.widget.id) ?? this.widget,
       colW
     );
+    this.updateAlignmentGuides(
+      this.translateRect(this.pixelRect, ref.translateX, ref.translateY)
+    );
 
     this.cdr.markForCheck();
   }
@@ -450,6 +455,7 @@ export class WidgetCard implements OnDestroy {
       resolved?.find(w => w.id === this.widget.id) ?? snappedWidget,
       colW
     );
+    this.updateAlignmentGuides(ref.liveRect);
 
     this.cdr.markForCheck();
   }
@@ -573,6 +579,76 @@ export class WidgetCard implements OnDestroy {
       Math.abs(a.width - b.width) < 0.5 &&
       Math.abs(a.height - b.height) < 0.5
     );
+  }
+
+  private updateAlignmentGuides(source: PixelRect): void {
+    if (!this.svc.showAlignmentGuides()) {
+      this.svc.setAlignmentGuides([]);
+      return;
+    }
+
+    this.svc.setAlignmentGuides(this.buildAlignmentGuides(source));
+  }
+
+  private buildAlignmentGuides(source: PixelRect): AlignmentGuide[] {
+    const others = this.svc.widgets()
+      .filter(widget => widget.id !== this.widget.id)
+      .map(widget => gridToPixel(widget, this.svc.colW()));
+
+    if (!others.length) return [];
+
+    const guides: AlignmentGuide[] = [];
+    const vertical = this.findClosestAlignmentGuide(source, others, 'x');
+    const horizontal = this.findClosestAlignmentGuide(source, others, 'y');
+
+    if (vertical) guides.push(vertical);
+    if (horizontal) guides.push(horizontal);
+
+    return guides;
+  }
+
+  private findClosestAlignmentGuide(
+    source: PixelRect,
+    others: PixelRect[],
+    axis: 'x' | 'y'
+  ): AlignmentGuide | null {
+    const threshold = WidgetCard.ALIGNMENT_THRESHOLD_PX;
+    const sourcePoints = axis === 'x'
+      ? [source.left, source.left + source.width / 2, source.left + source.width]
+      : [source.top, source.top + source.height / 2, source.top + source.height];
+
+    let bestGuide: AlignmentGuide | null = null;
+    let bestDelta = threshold + 1;
+
+    for (const other of others) {
+      const otherPoints = axis === 'x'
+        ? [other.left, other.left + other.width / 2, other.left + other.width]
+        : [other.top, other.top + other.height / 2, other.top + other.height];
+
+      for (const sourcePoint of sourcePoints) {
+        for (const otherPoint of otherPoints) {
+          const delta = Math.abs(sourcePoint - otherPoint);
+          if (delta > threshold || delta >= bestDelta) continue;
+
+          const start = axis === 'x'
+            ? Math.min(source.top, other.top)
+            : Math.min(source.left, other.left);
+          const end = axis === 'x'
+            ? Math.max(source.top + source.height, other.top + other.height)
+            : Math.max(source.left + source.width, other.left + other.width);
+
+          bestGuide = {
+            axis,
+            pos: otherPoint,
+            start,
+            end,
+          };
+          bestDelta = delta;
+        }
+      }
+    }
+
+    return bestGuide;
   }
 
   private layoutChanged(next: Widget[]): boolean {

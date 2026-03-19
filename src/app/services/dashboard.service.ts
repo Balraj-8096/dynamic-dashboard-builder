@@ -13,6 +13,7 @@ import {
   ContextMenuState,
   HistoryEntry,
   DashboardExport,
+  AlignmentGuide,
 } from '../core/interfaces';
 
 import {
@@ -147,6 +148,8 @@ export class DashboardService {
    * Only renders when widgets.length > 0.
    */
   readonly showMinimap = signal<boolean>(true);
+  readonly showAlignmentGuides = signal<boolean>(true);
+  readonly alignmentGuides = signal<AlignmentGuide[]>([]);
 
 
   // ─────────────────────────────────────────────────────────────
@@ -369,6 +372,13 @@ export class DashboardService {
   /** Set the active (dragging/resizing) widget ID. */
   setActive(id: string | null): void {
     this.activeId.set(id);
+    if (id === null) {
+      this.alignmentGuides.set([]);
+    }
+  }
+
+  setAlignmentGuides(guides: AlignmentGuide[]): void {
+    this.alignmentGuides.set(guides);
   }
 
   /** Set the front-raised widget ID. */
@@ -409,6 +419,13 @@ export class DashboardService {
   /** Toggle minimap visibility. */
   toggleMinimap(): void {
     this.showMinimap.update(v => !v);
+  }
+
+  toggleAlignmentGuides(): void {
+    this.showAlignmentGuides.update(v => !v);
+    if (!this.showAlignmentGuides()) {
+      this.alignmentGuides.set([]);
+    }
   }
 
   /** Update sidebar search query. */
@@ -803,6 +820,7 @@ export class DashboardService {
    */
   commitDragResize(): void {
     this.pushHistory(this.widgets());
+    this.alignmentGuides.set([]);
     this.activeId.set(null);
   }
 

@@ -104,6 +104,18 @@
     </button>
   </div>
 
+  <div class="minimap-row">
+    <span class="minimap-label">Alignment Guides</span>
+    <button
+      class="minimap-toggle"
+      [class.is-on]="svc.showAlignmentGuides()"
+      (click)="svc.toggleAlignmentGuides()"
+      title="Toggle alignment guides while dragging and resizing"
+    >
+      {{ svc.showAlignmentGuides() ? 'on' : 'off' }}
+    </button>
+  </div>
+
   <!-- ── BOTTOM ACTIONS ── -->
   <button class="btn-templates" (click)="svc.openTemplates()">⊟ Browse Templates</button>
   <button class="btn-demo" (click)="svc.loadDemo()">⚡ Load Demo</button>
