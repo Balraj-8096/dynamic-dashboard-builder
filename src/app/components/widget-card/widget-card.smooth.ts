@@ -58,6 +58,8 @@ export class WidgetCard implements OnDestroy {
   private static readonly DRAG_THRESHOLD_PX = 4;
   private static readonly TOUCH_DRAG_HOLD_MS = 170;
   private static readonly TOUCH_SCROLL_CANCEL_PX = 10;
+  private static readonly AUTO_SCROLL_EDGE_PX = 72;
+  private static readonly AUTO_SCROLL_MAX_STEP_PX = 28;
   private static readonly ALIGNMENT_THRESHOLD_PX = 8;
 
   private dragRef: {
@@ -75,6 +77,9 @@ export class WidgetCard implements OnDestroy {
     previewLayout: Widget[] | null;
     previewRect: PixelRect | null;
     awaitingLongPress: boolean;
+    scrollEl: HTMLElement | null;
+    startScrollTop: number;
+    startScrollLeft: number;
   } | null = null;
 
   private resizeRef: {
@@ -95,6 +100,7 @@ export class WidgetCard implements OnDestroy {
 
   private dragRafId: number | null = null;
   private resizeRafId: number | null = null;
+  private autoScrollRafId: number | null = null;
   private touchDragHoldTimer: number | null = null;
 
   private dragMoveHandler!: (e: PointerEvent) => void;
@@ -224,6 +230,7 @@ export class WidgetCard implements OnDestroy {
     this.clearTouchDragHoldTimer();
     if (this.dragRafId !== null) cancelAnimationFrame(this.dragRafId);
     if (this.resizeRafId !== null) cancelAnimationFrame(this.resizeRafId);
+    this.stopAutoScrollLoop();
     this.svc.setAlignmentGuides([]);
   }
 
@@ -276,6 +283,7 @@ export class WidgetCard implements OnDestroy {
     if (this.widget.locked) return;
 
     const requiresTouchHold = e.pointerType === 'touch' && !wasSelected;
+    const scrollEl = this.getScrollArea();
     if (!requiresTouchHold) {
       e.preventDefault();
     }
@@ -295,6 +303,9 @@ export class WidgetCard implements OnDestroy {
       previewLayout: null,
       previewRect: null,
       awaitingLongPress: requiresTouchHold,
+      scrollEl,
+      startScrollTop: scrollEl?.scrollTop ?? 0,
+      startScrollLeft: scrollEl?.scrollLeft ?? 0,
     };
 
     this.dragMoveHandler = (mv: PointerEvent) => this.onDragMove(mv);
@@ -303,6 +314,7 @@ export class WidgetCard implements OnDestroy {
     document.addEventListener('pointermove', this.dragMoveHandler);
     document.addEventListener('pointerup', this.dragUpHandler);
     document.addEventListener('pointercancel', this.dragCancelHandler);
+    this.ensureAutoScrollLoop();
 
     if (requiresTouchHold) {
       this.touchDragHoldTimer = window.setTimeout(() => {
@@ -378,6 +390,7 @@ export class WidgetCard implements OnDestroy {
       cancelAnimationFrame(this.dragRafId);
       this.dragRafId = null;
     }
+    this.stopAutoScrollLoop();
     this.removeDragListeners();
 
     if (shouldCommit && nextLayout) {
@@ -441,8 +454,10 @@ export class WidgetCard implements OnDestroy {
     if (!ref) return;
 
     const zoom = this.svc.zoom();
-    const dx = (ref.latestX - ref.startX) / zoom;
-    const dy = (ref.latestY - ref.startY) / zoom;
+    const scrollDx = (ref.scrollEl?.scrollLeft ?? ref.startScrollLeft) - ref.startScrollLeft;
+    const scrollDy = (ref.scrollEl?.scrollTop ?? ref.startScrollTop) - ref.startScrollTop;
+    const dx = (ref.latestX - ref.startX + scrollDx) / zoom;
+    const dy = (ref.latestY - ref.startY + scrollDy) / zoom;
 
     ref.translateX = dx;
     ref.translateY = dy;
@@ -525,6 +540,7 @@ export class WidgetCard implements OnDestroy {
       cancelAnimationFrame(this.dragRafId);
       this.dragRafId = null;
     }
+    this.stopAutoScrollLoop();
     this.removeDragListeners();
     this.svc.setActive(null);
     this.cdr.markForCheck();
@@ -534,6 +550,68 @@ export class WidgetCard implements OnDestroy {
     if (this.touchDragHoldTimer === null) return;
     clearTimeout(this.touchDragHoldTimer);
     this.touchDragHoldTimer = null;
+  }
+
+  private ensureAutoScrollLoop(): void {
+    if (this.autoScrollRafId !== null) return;
+    this.autoScrollRafId = requestAnimationFrame(() => this.runAutoScrollLoop());
+  }
+
+  private stopAutoScrollLoop(): void {
+    if (this.autoScrollRafId === null) return;
+    cancelAnimationFrame(this.autoScrollRafId);
+    this.autoScrollRafId = null;
+  }
+
+  private runAutoScrollLoop(): void {
+    this.autoScrollRafId = null;
+
+    const ref = this.dragRef;
+    if (!ref) return;
+
+    if (ref.engaged && this.applyDragAutoScroll(ref)) {
+      this.scheduleDragPreview();
+    }
+
+    this.autoScrollRafId = requestAnimationFrame(() => this.runAutoScrollLoop());
+  }
+
+  private applyDragAutoScroll(ref: NonNullable<WidgetCard['dragRef']>): boolean {
+    const scrollEl = ref.scrollEl;
+    if (!scrollEl) return false;
+
+    const bounds = scrollEl.getBoundingClientRect();
+    const edge = WidgetCard.AUTO_SCROLL_EDGE_PX;
+    const maxStep = WidgetCard.AUTO_SCROLL_MAX_STEP_PX;
+
+    let nextTop = scrollEl.scrollTop;
+    let nextLeft = scrollEl.scrollLeft;
+
+    if (ref.latestY < bounds.top + edge) {
+      const intensity = clamp((bounds.top + edge - ref.latestY) / edge, 0, 1);
+      nextTop = Math.max(0, scrollEl.scrollTop - Math.ceil(maxStep * intensity));
+    } else if (ref.latestY > bounds.bottom - edge) {
+      const intensity = clamp((ref.latestY - (bounds.bottom - edge)) / edge, 0, 1);
+      const maxTop = scrollEl.scrollHeight - scrollEl.clientHeight;
+      nextTop = Math.min(maxTop, scrollEl.scrollTop + Math.ceil(maxStep * intensity));
+    }
+
+    if (ref.latestX < bounds.left + edge) {
+      const intensity = clamp((bounds.left + edge - ref.latestX) / edge, 0, 1);
+      nextLeft = Math.max(0, scrollEl.scrollLeft - Math.ceil(maxStep * intensity));
+    } else if (ref.latestX > bounds.right - edge) {
+      const intensity = clamp((ref.latestX - (bounds.right - edge)) / edge, 0, 1);
+      const maxLeft = scrollEl.scrollWidth - scrollEl.clientWidth;
+      nextLeft = Math.min(maxLeft, scrollEl.scrollLeft + Math.ceil(maxStep * intensity));
+    }
+
+    if (nextTop === scrollEl.scrollTop && nextLeft === scrollEl.scrollLeft) {
+      return false;
+    }
+
+    scrollEl.scrollTop = nextTop;
+    scrollEl.scrollLeft = nextLeft;
+    return true;
   }
 
   private removeResizeListeners(): void {
@@ -749,6 +827,10 @@ export class WidgetCard implements OnDestroy {
 
   private isPrimaryPointer(e: PointerEvent): boolean {
     return e.isPrimary && (e.pointerType !== 'mouse' || e.button === 0);
+  }
+
+  private getScrollArea(): HTMLElement | null {
+    return document.querySelector('.scroll-area');
   }
 
 }
