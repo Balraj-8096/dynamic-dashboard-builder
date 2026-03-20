@@ -120,7 +120,11 @@
         <div class="wizard-right">
             <div class="preview-label">Live Preview</div>
 
-            <app-widget-mini-preview [type]="selectedType" [config]="cfg" [title]="previewTitle" />
+            <app-widget-mini-preview
+                [type]="selectedType"
+                [config]="cfg"
+                [title]="previewTitle"
+                [contentH]="previewContentH" />
 
             <!-- Setup summary -->
             @if (selectedType && cfg) {

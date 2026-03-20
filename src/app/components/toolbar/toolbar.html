@@ -1,7 +1,13 @@
-<header class="toolbar">
+<header class="toolbar" [class.is-compact]="svc.compactViewport()">
 
   <!-- ── LEFT CLUSTER ─────────────────────────────────────────── -->
   <div class="cluster cluster--left">
+
+    @if (svc.compactViewport()) {
+      <button class="btn-icon btn-sidebar-toggle" title="Open widget tools" (click)="toggleSidebar()">
+        Menu
+      </button>
+    }
 
     <!-- Logo -->
     <div class="logo">
@@ -9,7 +15,7 @@
       <span class="logo-dash"> dash</span><span class="logo-craft">craft</span>
     </div>
 
-    <div class="vdivider"></div>
+    <div class="vdivider desktop-only"></div>
 
     <!-- Dashboard title (editable) -->
     @if (svc.editingTitle()) {
@@ -59,12 +65,12 @@
     <div class="vdivider"></div>
 
     <!-- Pack -->
-    <button class="btn-text btn-text--green" title="Auto-arrange: collapse empty rows" (click)="svc.applyPackLayout()">
+    <button class="btn-text btn-text--green desktop-only" title="Auto-arrange: collapse empty rows" (click)="svc.applyPackLayout()">
       ⊕ pack
     </button>
 
     <!-- Clear -->
-    <button class="btn-text btn-text--red" title="Clear all widgets" (click)="svc.clearAll()">
+    <button class="btn-text btn-text--red desktop-only" title="Clear all widgets" (click)="svc.clearAll()">
       ✕ clear
     </button>
   </div>
@@ -87,21 +93,21 @@
     <div class="vdivider"></div>
 
     <!-- Import -->
-    <button class="btn-text" title="Import JSON layout" (click)="svc.openImport()">
+    <button class="btn-text desktop-only" title="Import JSON layout" (click)="svc.openImport()">
       ⬆ import
     </button>
 
     <!-- Export -->
-    <button class="btn-text" title="Export layout as JSON" (click)="svc.exportLayout()">
+    <button class="btn-text desktop-only" title="Export layout as JSON" (click)="svc.exportLayout()">
       ⬇ export
     </button>
 
     <!-- Help -->
-    <button class="btn-icon" title="How to use (help)" (click)="svc.openHelp()">?</button>
+    <button class="btn-icon desktop-only" title="How to use (help)" (click)="svc.openHelp()">?</button>
 
     <!-- Theme toggle -->
     <button
-      class="btn-icon btn-theme"
+      class="btn-icon btn-theme desktop-only"
       [title]="themeSvc.theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
       (click)="themeSvc.toggle()"
     >{{ themeSvc.theme() === 'dark' ? '☀' : '☾' }}</button>
@@ -117,6 +123,24 @@
     >
       ▶ View
     </button>
+    @if (svc.compactViewport()) {
+      <button class="btn-icon btn-overflow" title="More actions" (click)="toggleToolbarMenu()">
+        More
+      </button>
+    }
   </div>
+
+  @if (svc.compactViewport() && svc.toolbarMenuOpen()) {
+    <div class="toolbar-menu">
+      <button class="toolbar-menu__item" (click)="runPackLayout()">Pack Layout</button>
+      <button class="toolbar-menu__item toolbar-menu__item--danger" (click)="clearAll()">Clear All</button>
+      <button class="toolbar-menu__item" (click)="openImport()">Import Layout</button>
+      <button class="toolbar-menu__item" (click)="exportLayout()">Export Layout</button>
+      <button class="toolbar-menu__item" (click)="openHelp()">Help</button>
+      <button class="toolbar-menu__item" (click)="toggleTheme()">
+        {{ themeSvc.theme() === 'dark' ? 'Light Mode' : 'Dark Mode' }}
+      </button>
+    </div>
+  }
 
 </header>

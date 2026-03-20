@@ -210,6 +210,9 @@ export class DashboardService {
    * Reset to '' when sidebar is cleared.
    */
   readonly sidebarSearch = signal<string>('');
+  readonly compactViewport = signal<boolean>(false);
+  readonly sidebarOpen = signal<boolean>(false);
+  readonly toolbarMenuOpen = signal<boolean>(false);
 
 
   // ─────────────────────────────────────────────────────────────
@@ -438,10 +441,57 @@ export class DashboardService {
     this.sidebarSearch.set('');
   }
 
+  /** Update whether the builder is in a compact viewport mode. */
+  setCompactViewport(isCompact: boolean): void {
+    this.compactViewport.set(isCompact);
+
+    if (!isCompact) {
+      this.sidebarOpen.set(false);
+      this.toolbarMenuOpen.set(false);
+    }
+  }
+
+  /** Toggle the compact sidebar drawer. */
+  toggleSidebar(): void {
+    if (!this.compactViewport()) return;
+    this.sidebarOpen.update(v => !v);
+    if (this.sidebarOpen()) {
+      this.toolbarMenuOpen.set(false);
+    }
+  }
+
+  /** Explicitly open the compact sidebar drawer. */
+  openSidebar(): void {
+    if (!this.compactViewport()) return;
+    this.sidebarOpen.set(true);
+    this.toolbarMenuOpen.set(false);
+  }
+
+  /** Explicitly close the compact sidebar drawer. */
+  closeSidebar(): void {
+    this.sidebarOpen.set(false);
+  }
+
+  /** Toggle the compact toolbar overflow menu. */
+  toggleToolbarMenu(): void {
+    if (!this.compactViewport()) return;
+    this.toolbarMenuOpen.update(v => !v);
+    if (this.toolbarMenuOpen()) {
+      this.sidebarOpen.set(false);
+    }
+  }
+
+  /** Close the compact toolbar overflow menu. */
+  closeToolbarMenu(): void {
+    this.toolbarMenuOpen.set(false);
+  }
+
   /** Open wizard — optionally pre-set to a widget type. */
   openWizard(type: WidgetType | null = null): void {
     this.wizardInitType.set(type);
     this.wizardOpen.set(true);
+    this.closeSidebar();
+    this.closeToolbarMenu();
   }
 
   /** Close wizard and reset init type. */
@@ -463,6 +513,8 @@ export class DashboardService {
   /** Open templates modal. */
   openTemplates(): void {
     this.showTemplates.set(true);
+    this.closeSidebar();
+    this.closeToolbarMenu();
   }
 
   /** Close templates modal. */
@@ -473,6 +525,8 @@ export class DashboardService {
   /** Open import modal. */
   openImport(): void {
     this.showImport.set(true);
+    this.closeSidebar();
+    this.closeToolbarMenu();
   }
 
   /** Close import modal. */
@@ -483,6 +537,8 @@ export class DashboardService {
   /** Open help modal. */
   openHelp(): void {
     this.showHelp.set(true);
+    this.closeSidebar();
+    this.closeToolbarMenu();
   }
 
   /** Close help modal. */
@@ -521,6 +577,8 @@ export class DashboardService {
     this.closeImport();
     this.closeHelp();
     this.closeContextMenu();
+    this.closeSidebar();
+    this.closeToolbarMenu();
     this.selectedId.set(null);
   }
 
@@ -874,6 +932,8 @@ export class DashboardService {
 
     // Close modal
     this.closeTemplates();
+    this.closeSidebar();
+    this.closeToolbarMenu();
   }
 
   /**
@@ -891,6 +951,8 @@ export class DashboardService {
     this.selectedId.set(null);
     this.frontId.set(null);
     this.animatingId.set(null);    // B7 fix: clear any in-flight save animation
+    this.closeSidebar();
+    this.closeToolbarMenu();
   }
 
   /**
@@ -974,6 +1036,8 @@ export class DashboardService {
 
       // Close import modal
       this.closeImport();
+      this.closeSidebar();
+      this.closeToolbarMenu();
 
       return null; // success
 

@@ -20,6 +20,94 @@
   }
 }
 
+.cdk-overlay-pane.dashboard-modal-pane {
+  max-width: calc(100vw - 16px) !important;
+  max-height: calc(100dvh - 16px) !important;
+}
+
+.cdk-overlay-pane.dashboard-modal-pane .mat-mdc-dialog-container {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: 100% !important;
+}
+
+.cdk-overlay-pane.dashboard-modal-pane .mdc-dialog__surface {
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+}
+
+@media (max-width: 1100px) {
+  .cdk-overlay-pane.dashboard-modal-pane--edit app-edit-modal .modal-body {
+    flex-direction: column;
+  }
+
+  .cdk-overlay-pane.dashboard-modal-pane--edit app-edit-modal .panel-left {
+    order: 2;
+    min-height: 0;
+    border-right: none;
+  }
+
+  .cdk-overlay-pane.dashboard-modal-pane--edit app-edit-modal .panel-right {
+    order: 1;
+    width: auto;
+    min-width: 0;
+    min-height: min(24dvh, 220px);
+    max-height: min(30dvh, 260px);
+    border-top: none;
+    border-bottom: 1px solid var(--bdr);
+  }
+}
+
+@media (max-width: 720px) {
+  .cdk-overlay-pane.dashboard-modal-pane--edit app-edit-modal .modal-header,
+  .cdk-overlay-pane.dashboard-modal-pane--edit app-edit-modal .form-body,
+  .cdk-overlay-pane.dashboard-modal-pane--edit app-edit-modal .form-footer,
+  .cdk-overlay-pane.dashboard-modal-pane--edit app-edit-modal .preview-hdr,
+  .cdk-overlay-pane.dashboard-modal-pane--edit app-edit-modal .preview-section,
+  .cdk-overlay-pane.dashboard-modal-pane--edit app-edit-modal .settings-section,
+  .cdk-overlay-pane.dashboard-modal-pane--edit app-edit-modal .chips-section {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .cdk-overlay-pane.dashboard-modal-pane--edit app-edit-modal .modal-header {
+    align-items: flex-start;
+  }
+
+  .cdk-overlay-pane.dashboard-modal-pane--edit app-edit-modal .header-title,
+  .cdk-overlay-pane.dashboard-modal-pane--edit app-edit-modal .header-sub,
+  .cdk-overlay-pane.dashboard-modal-pane--edit app-edit-modal .preview-card-title,
+  .cdk-overlay-pane.dashboard-modal-pane--edit app-edit-modal .settings-val {
+    min-width: 0;
+    word-break: break-word;
+  }
+
+  .cdk-overlay-pane.dashboard-modal-pane--edit app-edit-modal .preview-card-size {
+    display: none;
+  }
+
+  .cdk-overlay-pane.dashboard-modal-pane--edit app-edit-modal .settings-row {
+    gap: 12px;
+  }
+
+  .cdk-overlay-pane.dashboard-modal-pane--edit app-edit-modal .settings-val {
+    text-align: right;
+  }
+
+  .cdk-overlay-pane.dashboard-modal-pane--edit app-edit-modal .form-footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .cdk-overlay-pane.dashboard-modal-pane--edit app-edit-modal .btn-cancel,
+  .cdk-overlay-pane.dashboard-modal-pane--edit app-edit-modal .btn-save {
+    width: 100%;
+  }
+}
+
 // ── Form fields ──────────────────────────────────────────────────
 .mat-mdc-form-field {
   --mdc-filled-text-field-container-color: var(--bg3) !important;

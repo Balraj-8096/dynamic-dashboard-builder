@@ -1,4 +1,15 @@
 <aside class="sidebar">
+  @if (svc.compactViewport()) {
+  <div class="sidebar-compact-topbar">
+    <div class="sidebar-compact-copy">
+      <div class="sidebar-compact-title">Widget Tools</div>
+      <div class="sidebar-compact-subtitle">Add widgets and adjust canvas helpers</div>
+    </div>
+    <button class="sidebar-close" (click)="svc.closeSidebar()" title="Close widget tools">x</button>
+  </div>
+  }
+
+  <div class="sidebar-primary">
 
   <!-- ── WIDGET PALETTE ── -->
   <div class="section-label">Widget Palette</div>
@@ -46,6 +57,9 @@
   </div>
 
   <div class="divider"></div>
+  </div>
+
+  <div class="sidebar-secondary">
 
   <!-- ── KEYBOARD SHORTCUTS ── -->
   <div class="section-label">Keyboard Shortcuts</div>
@@ -91,6 +105,9 @@
 
   <!-- ── SPACER ── -->
   <div class="spacer"></div>
+  </div>
+
+  <div class="sidebar-footer">
 
   <!-- ── MINIMAP TOGGLE ── -->
   <div class="minimap-row">
@@ -120,4 +137,5 @@
   <button class="btn-templates" (click)="svc.openTemplates()">⊟ Browse Templates</button>
   <button class="btn-demo" (click)="svc.loadDemo()">⚡ Load Demo</button>
 
+  </div>
 </aside>

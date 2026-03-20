@@ -37,11 +37,50 @@ export class Toolbar {
     }
   }
 
-  goToView(): void {
-    this.router.navigate(['/view']);
-  }
-
   openWizard(): void {
     this.svc.openWizard(null);   // null = open at Step 1
+  }
+
+  toggleSidebar(): void {
+    this.svc.toggleSidebar();
+  }
+
+  toggleToolbarMenu(): void {
+    this.svc.toggleToolbarMenu();
+  }
+
+  runPackLayout(): void {
+    this.svc.applyPackLayout();
+    this.svc.closeToolbarMenu();
+  }
+
+  clearAll(): void {
+    this.svc.clearAll();
+    this.svc.closeToolbarMenu();
+  }
+
+  openImport(): void {
+    this.svc.openImport();
+    this.svc.closeToolbarMenu();
+  }
+
+  exportLayout(): void {
+    this.svc.exportLayout();
+    this.svc.closeToolbarMenu();
+  }
+
+  openHelp(): void {
+    this.svc.openHelp();
+    this.svc.closeToolbarMenu();
+  }
+
+  toggleTheme(): void {
+    this.themeSvc.toggle();
+    this.svc.closeToolbarMenu();
+  }
+
+  goToView(): void {
+    this.svc.closeToolbarMenu();
+    this.router.navigate(['/view']);
   }
 }

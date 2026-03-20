@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, HostListener, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { getCatalogItem } from '../../../core/catalog';
@@ -56,6 +56,7 @@ export class EditModal implements OnInit {
   queryResult:    StatQueryResult | ChartQueryResult | PieQueryResult | TableQueryResult | null = null;
   queryError:     string | null = null;
   resultCategory: 'stat' | 'chart' | 'pie' | 'table' | null = null;
+  private viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1280;
 
   // Expose enum for template
   readonly WidgetType = WidgetType;
@@ -73,6 +74,11 @@ export class EditModal implements OnInit {
     this.title = this.widget.title;
     this.cfg = JSON.parse(JSON.stringify(this.widget.config));
     this.runQuery();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.viewportWidth = window.innerWidth;
   }
 
   // ── Display config changes ────────────────────────────────────
@@ -130,6 +136,16 @@ export class EditModal implements OnInit {
 
   // ── Preview ───────────────────────────────────────────────────
   get previewH(): number {
+    if (this.viewportWidth <= 720) {
+      if ([WidgetType.Bar, WidgetType.Line, WidgetType.Pie].includes(this.widget.type)) return 170;
+      if (this.widget.type === WidgetType.Table) return 150;
+      return 132;
+    }
+    if (this.viewportWidth <= 1100) {
+      if ([WidgetType.Bar, WidgetType.Line, WidgetType.Pie].includes(this.widget.type)) return 200;
+      if (this.widget.type === WidgetType.Table) return 180;
+      return 150;
+    }
     if ([WidgetType.Bar, WidgetType.Line, WidgetType.Pie].includes(this.widget.type)) return 240;
     if (this.widget.type === WidgetType.Table) return 220;
     return 180;

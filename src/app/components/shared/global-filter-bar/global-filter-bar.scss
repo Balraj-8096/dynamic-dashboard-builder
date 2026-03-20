@@ -84,3 +84,36 @@
     border-color: #ef4444;
   }
 }
+
+@media (max-width: 1024px) {
+  .filter-bar {
+    flex-wrap: nowrap;
+    min-height: 36px;
+    padding: 5px 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+
+    &::-webkit-scrollbar {
+      height: 4px;
+    }
+  }
+
+  .filter-group,
+  .filter-label,
+  .btn-clear {
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .filter-bar {
+    min-height: 34px;
+    padding-inline: 10px;
+    gap: 6px;
+  }
+
+  .filter-select {
+    min-width: 96px;
+  }
+}

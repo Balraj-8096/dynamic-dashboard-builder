@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, HostListener, inject, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { CATALOG } from '../../../core/catalog';
 import { FACTORIES } from '../../../core/factories';
@@ -41,6 +41,7 @@ export class AddWidgetWizard implements OnInit {
 
   readonly catalog = CATALOG;
   readonly WidgetType = WidgetType;
+  private viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1280;
 
   // ── Wizard state ──────────────────────────────────────────────
   step = 1;
@@ -61,6 +62,11 @@ export class AddWidgetWizard implements OnInit {
       this._initForType(initType);
       this.step = 2;
     }
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.viewportWidth = window.innerWidth;
   }
 
   // ── Step 1: select type card ───────────────────────────────────
@@ -119,6 +125,12 @@ export class AddWidgetWizard implements OnInit {
 
   // ── Preview helpers ───────────────────────────────────────────
   get previewTitle(): string { return this.titleForm.value.title ?? ''; }
+
+  get previewContentH(): number {
+    if (this.viewportWidth <= 720) return 120;
+    if (this.viewportWidth <= 1024) return 140;
+    return 180;
+  }
 
   get summaryRows(): { k: string; v: string }[] {
     if (!this.selectedType) return [];

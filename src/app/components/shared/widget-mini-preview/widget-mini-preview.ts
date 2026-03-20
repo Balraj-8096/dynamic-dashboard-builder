@@ -37,8 +37,7 @@ export class WidgetMiniPreview implements OnChanges {
   @Input({ required: true }) type!: WidgetType | null;
   @Input() config: WidgetConfig | null = null;
   @Input() title = '';
-
-  readonly contentH = PREVIEW_CONTENT_H;
+  @Input() contentH = PREVIEW_CONTENT_H;
 
   fakeWidget: Widget | null = null;
   catalogItem: ReturnType<typeof getCatalogItem> = undefined;

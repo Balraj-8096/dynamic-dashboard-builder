@@ -55,6 +55,7 @@ export class Canvas implements OnInit, OnDestroy {
 
   readonly COLS = COLS;
   readonly colIndices = Array.from({ length: COLS }, (_, i) => i);
+  readonly compactBreakpoint = 1024;
 
   // Step 32: destroy$ drives all RxJS subscription cleanup
   private readonly destroy$ = new Subject<void>();
@@ -69,7 +70,15 @@ export class Canvas implements OnInit, OnDestroy {
       if (!this.svc.wizardOpen()) return;
       const ref = this.dialog.open<AddWidgetWizard, WizardDialogData>(
         AddWidgetWizard,
-        { width: '75%', data: { initType: this.svc.wizardInitType() } }
+        {
+          width: 'min(1120px, calc(100vw - 16px))',
+          maxWidth: '100vw',
+          height: 'min(92dvh, 920px)',
+          panelClass: ['dashboard-modal-pane', 'dashboard-modal-pane--wizard'],
+          autoFocus: false,
+          restoreFocus: false,
+          data: { initType: this.svc.wizardInitType() },
+        }
       );
       ref.afterClosed().subscribe(() => this.svc.closeWizard());
     });
@@ -78,7 +87,15 @@ export class Canvas implements OnInit, OnDestroy {
     effect(() => {
       const widget = this.svc.editingWidget();
       if (!widget) return;
-      const ref = this.dialog.open(EditModal, { width: '75%', data: widget });
+      const ref = this.dialog.open(EditModal, {
+        width: 'min(1180px, calc(100vw - 16px))',
+        maxWidth: '100vw',
+        height: 'min(92dvh, 940px)',
+        panelClass: ['dashboard-modal-pane', 'dashboard-modal-pane--edit'],
+        autoFocus: false,
+        restoreFocus: false,
+        data: widget,
+      });
       ref.afterClosed().subscribe(() => this.svc.closeEditModal());
     });
 
@@ -122,10 +139,14 @@ export class Canvas implements OnInit, OnDestroy {
   ngOnInit(): void {
     const main = this.mainRef.nativeElement;
     const canvas = this.canvasRef.nativeElement;
+    this.syncResponsiveUi();
 
     // Step 32: ResizeObserver with rAF delay (bug fix #14)
     this.resizeObserver = new ResizeObserver(() => {
-      requestAnimationFrame(() => this.svc.setCanvasW(canvas.offsetWidth));
+      requestAnimationFrame(() => {
+        this.svc.setCanvasW(canvas.offsetWidth);
+        this.syncResponsiveUi();
+      });
     });
     this.resizeObserver.observe(canvas);
 
@@ -201,7 +222,52 @@ export class Canvas implements OnInit, OnDestroy {
     }
   }
 
-  onCanvasClick(): void { this.svc.select(null); this.svc.closeContextMenu(); }
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.syncResponsiveUi();
+  }
+
+  onCanvasClick(): void {
+    this.svc.select(null);
+    this.svc.closeContextMenu();
+    this.svc.closeToolbarMenu();
+  }
+
+  closeCompactChrome(): void {
+    this.svc.closeSidebar();
+    this.svc.closeToolbarMenu();
+  }
+
+  openSelectedWidgetEditor(): void {
+    const widget = this.svc.selectedWidget();
+    if (!widget) return;
+    this.svc.openEditModal(widget);
+  }
+
+  duplicateSelectedWidget(): void {
+    const widget = this.svc.selectedWidget();
+    if (!widget) return;
+    this.svc.duplicateWidget(widget);
+  }
+
+  toggleSelectedWidgetLock(): void {
+    const widget = this.svc.selectedWidget();
+    if (!widget) return;
+    this.svc.lockWidget(widget.id);
+  }
+
+  bringSelectedWidgetFront(): void {
+    const widget = this.svc.selectedWidget();
+    if (!widget) return;
+    this.svc.bringFront(widget.id);
+  }
+
+  deleteSelectedWidget(): void {
+    const widget = this.svc.selectedWidget();
+    if (!widget) return;
+    this.svc.deleteWidget(widget.id);
+  }
+
   trackWidget(_: number, widget: { id: string }): string { return widget.id; }
 
   get zoomStyle(): Record<string, string> {
@@ -228,5 +294,9 @@ export class Canvas implements OnInit, OnDestroy {
       top: `${guide.pos}px`,
       width: `${Math.max(guide.end - guide.start, 1)}px`,
     };
+  }
+
+  private syncResponsiveUi(): void {
+    this.svc.setCompactViewport(window.innerWidth <= this.compactBreakpoint);
   }
 }

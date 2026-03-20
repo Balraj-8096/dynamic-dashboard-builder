@@ -1,7 +1,16 @@
-<div class="canvas-shell">
+<div class="canvas-shell" [class.is-compact]="svc.compactViewport()">
 
     <!-- ── SIDEBAR ── -->
+    @if (!svc.compactViewport()) {
     <app-sidebar />
+    } @else {
+    <div class="compact-backdrop"
+        [class.is-visible]="svc.sidebarOpen() || svc.toolbarMenuOpen()"
+        (click)="closeCompactChrome()"></div>
+    <div class="compact-sidebar-shell" [class.is-open]="svc.sidebarOpen()">
+        <app-sidebar />
+    </div>
+    }
 
     <!-- ── MAIN AREA ── -->
     <div class="main-area">
@@ -69,6 +78,24 @@
         <!-- ── CONTEXT MENU (Step 29) — outside scroll-area so fixed positioning works ── -->
         @if (svc.contextMenu()) {
         <app-context-menu />
+        }
+
+        @if (svc.compactViewport() && svc.selectedWidget(); as selectedWidget) {
+        <div class="mobile-action-bar">
+            <div class="mobile-action-bar__meta">
+                <span class="mobile-action-bar__label">{{ selectedWidget.title }}</span>
+                <span class="mobile-action-bar__type">{{ selectedWidget.type }}</span>
+            </div>
+            <div class="mobile-action-bar__actions">
+                <button class="mobile-action-btn" (click)="openSelectedWidgetEditor()">Edit</button>
+                <button class="mobile-action-btn" (click)="duplicateSelectedWidget()">Copy</button>
+                <button class="mobile-action-btn" (click)="toggleSelectedWidgetLock()">
+                    {{ selectedWidget.locked ? 'Unlock' : 'Lock' }}
+                </button>
+                <button class="mobile-action-btn" (click)="bringSelectedWidgetFront()">Front</button>
+                <button class="mobile-action-btn mobile-action-btn--danger" (click)="deleteSelectedWidget()">Delete</button>
+            </div>
+        </div>
         }
 
     </div><!-- /main-area -->
