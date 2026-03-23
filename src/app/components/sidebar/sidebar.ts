@@ -77,4 +77,10 @@ export class Sidebar {
     this.svc.openWizard(type as any);
   }
 
+  onPaletteItemDragStart(e: DragEvent, type: WidgetType): void {
+    if (!e.dataTransfer) return;
+    e.dataTransfer.effectAllowed = 'copy';
+    e.dataTransfer.setData('text/plain', type);
+  }
+
 }

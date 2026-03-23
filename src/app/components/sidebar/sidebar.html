@@ -35,8 +35,10 @@
       <button
         class="palette-item"
         [style.--item-color]="item.color"
+        draggable="true"
         (click)="openWizard(item.type)"
-        title="{{ item.label }}"
+        (dragstart)="onPaletteItemDragStart($event, item.type)"
+        title="{{ item.label }} — drag to canvas to place"
       >
         <div class="palette-icon" [style.color]="item.color">{{ item.icon }}</div>
         <div class="palette-text">
@@ -130,6 +132,18 @@
       title="Toggle alignment guides while dragging and resizing"
     >
       {{ svc.showAlignmentGuides() ? 'on' : 'off' }}
+    </button>
+  </div>
+
+  <div class="minimap-row">
+    <span class="minimap-label">Grid Background</span>
+    <button
+      class="minimap-toggle"
+      [class.is-on]="svc.showGridBackground()"
+      (click)="svc.toggleGridBackground()"
+      title="Toggle dot-grid canvas background"
+    >
+      {{ svc.showGridBackground() ? 'on' : 'off' }}
     </button>
   </div>
 

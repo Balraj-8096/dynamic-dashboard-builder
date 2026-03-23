@@ -177,6 +177,8 @@ export const KB_BLOCKED_TAGS = new Set(['INPUT', 'TEXTAREA', 'SELECT']);
  */
 export const KEYBOARD_SHORTCUTS: { key: string; tip: string }[] = [
   { key: 'Ctrl+Z / Y',  tip: 'Undo / Redo'          },
+  { key: 'Ctrl+C',      tip: 'Copy selected'         },
+  { key: 'Ctrl+V',      tip: 'Paste copied'          },
   { key: 'Ctrl+D',      tip: 'Duplicate selected'    },
   { key: 'Ctrl+1…9',    tip: 'Add widget by type'    },
   { key: 'Del',         tip: 'Delete selected'       },

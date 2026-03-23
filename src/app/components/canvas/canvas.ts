@@ -21,12 +21,13 @@ import {
 } from 'rxjs';
 
 import { DashboardService } from '../../services/dashboard.service';
-import { AlignmentGuide, Widget } from '../../core/interfaces';
+import { AlignmentGuide, Widget, WidgetType } from '../../core/interfaces';
 import { gridToPixel, nudgeWidget } from '../../core/layout.utils';
-import { COLS, KB_BLOCKED_TAGS, ZOOM_MAX, ZOOM_MIN } from '../../core/constants';
+import { COLS, GAP, KB_BLOCKED_TAGS, ROW_H, ZOOM_MAX, ZOOM_MIN, clamp } from '../../core/constants';
 import { WidgetCard } from "../widget-card/widget-card.smooth";
 import { Sidebar } from "../sidebar/sidebar";
 import { getCatalogByIndex } from '../../core/catalog';
+import { createWidget } from '../../core/factories';
 import { Toolbar } from "../toolbar/toolbar";
 import { MatDialog } from '@angular/material/dialog';
 import { AddWidgetWizard, WizardDialogData } from '../modals/add-widget-wizard/add-widget-wizard';
@@ -187,6 +188,17 @@ export class Canvas implements OnInit, OnDestroy {
     if (ctrl && e.key === 'z' && !e.shiftKey) { e.preventDefault(); this.svc.undo(); return; }
     // Ctrl+Y / Ctrl+Shift+Z — redo
     if (ctrl && (e.key === 'y' || (e.key === 'Z' && e.shiftKey))) { e.preventDefault(); this.svc.redo(); return; }
+    // Ctrl+C — copy selected widget to clipboard
+    if (ctrl && e.key === 'c') {
+      const w = this.svc.selectedWidget();
+      if (w) { e.preventDefault(); this.svc.copyWidget(w); }
+      return;
+    }
+    // Ctrl+V — paste clipboard widget onto canvas
+    if (ctrl && e.key === 'v') {
+      if (this.svc.clipboard()) { e.preventDefault(); this.svc.pasteWidget(); }
+      return;
+    }
     // Ctrl+D — duplicate (A3: svc.duplicateWidget always scrolls+selects)
     if (ctrl && e.key === 'd') {
       const w = this.svc.selectedWidget();
@@ -297,6 +309,47 @@ export class Canvas implements OnInit, OnDestroy {
       top: `${guide.pos}px`,
       width: `${Math.max(guide.end - guide.start, 1)}px`,
     };
+  }
+
+  // ── Drag-from-sidebar drop zone ────────────────────────────────
+  isDragOver = false;
+
+  onCanvasDragOver(e: DragEvent): void {
+    if (!e.dataTransfer?.types.includes('text/plain')) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+    this.isDragOver = true;
+  }
+
+  onCanvasDragLeave(e: DragEvent): void {
+    // Only clear when leaving the canvas itself, not a child element
+    if (!(e.currentTarget as HTMLElement).contains(e.relatedTarget as Node)) {
+      this.isDragOver = false;
+    }
+  }
+
+  onCanvasDrop(e: DragEvent): void {
+    this.isDragOver = false;
+    const type = e.dataTransfer?.getData('text/plain') as WidgetType | undefined;
+    if (!type) return;
+    e.preventDefault();
+
+    const canvasEl = this.canvasRef.nativeElement;
+    const rect = canvasEl.getBoundingClientRect();
+    const zoom = this.svc.zoom();
+    const colW = this.svc.colW();
+
+    const relX = (e.clientX - rect.left) / zoom;
+    const relY = (e.clientY - rect.top)  / zoom;
+
+    const gridX = clamp(Math.floor(relX / (colW + GAP)), 0, COLS - 1);
+    const gridY = Math.max(0, Math.floor(relY / (ROW_H + GAP)));
+
+    const draft = createWidget(type, gridX, gridY);
+    if (!draft) return;
+
+    const placed = this.svc.addWidgetAt(draft);
+    this.svc.openEditModal(placed);
   }
 
   private syncResponsiveUi(): void {

@@ -28,7 +28,12 @@
             <div class="zoom-wrapper" [ngStyle]="zoomStyle">
 
                 <!-- Canvas -->
-                <div class="canvas" #canvasRef [style.min-height.px]="svc.canvasH()">
+                <div class="canvas" #canvasRef [style.min-height.px]="svc.canvasH()"
+                    [class.no-grid]="!svc.showGridBackground()"
+                    [class.drag-over]="isDragOver"
+                    (dragover)="onCanvasDragOver($event)"
+                    (dragleave)="onCanvasDragLeave($event)"
+                    (drop)="onCanvasDrop($event)">
                     <!-- Column snap guides (during active drag) -->
                     @if (svc.activeId()) {
                     @for (i of colIndices; track i) {

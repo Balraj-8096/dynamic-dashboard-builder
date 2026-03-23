@@ -113,6 +113,13 @@ export class DashboardService {
    */
   readonly animatingId = signal<string | null>(null);
 
+  /**
+   * Clipboard — holds the last copied widget (deep clone).
+   * null = nothing copied yet.
+   * Persists across multiple pastes (paste is non-destructive).
+   */
+  readonly clipboard = signal<Widget | null>(null);
+
 
   // ─────────────────────────────────────────────────────────────
   //  CANVAS STATE
@@ -151,6 +158,7 @@ export class DashboardService {
   readonly showMinimap = signal<boolean>(true);
   readonly showAlignmentGuides = signal<boolean>(true);
   readonly alignmentGuides = signal<AlignmentGuide[]>([]);
+  readonly showGridBackground = signal<boolean>(true);
 
 
   // ─────────────────────────────────────────────────────────────
@@ -435,6 +443,10 @@ export class DashboardService {
     if (!this.showAlignmentGuides()) {
       this.alignmentGuides.set([]);
     }
+  }
+
+  toggleGridBackground(): void {
+    this.showGridBackground.update(v => !v);
   }
 
   /** Update sidebar search query. */
@@ -733,6 +745,19 @@ export class DashboardService {
   }
 
   /**
+   * Add a widget at an explicit grid position (drag-from-sidebar drop).
+   * Unlike addWidget(), this respects the provided x/y instead of forcing x=0 / getNextY().
+   * Returns the placed widget (with its final ID) so the caller can open the edit modal.
+   * Does NOT close the wizard or auto-scroll — caller handles UX.
+   */
+  addWidgetAt(widget: Widget): Widget {
+    const placed: Widget = { ...deepClone(widget), id: uid() };
+    this.updateWidgets(prev => [...prev, placed]);
+    this.selectedId.set(placed.id);
+    return placed;
+  }
+
+  /**
    * Duplicate a widget.
    *
    * Behavior:
@@ -763,6 +788,37 @@ export class DashboardService {
     this.updateWidgets(prev => [...prev, duplicate]);
 
     // Select and queue scroll (A3 audit fix)
+    this.selectedId.set(newId);
+    this.pendingScrollId = newId;
+  }
+
+  /**
+   * Copy selected widget to clipboard (deep clone).
+   * Does not modify the canvas or history.
+   */
+  copyWidget(widget: Widget): void {
+    this.clipboard.set(deepClone(widget));
+  }
+
+  /**
+   * Paste clipboard widget onto canvas.
+   * Same placement logic as duplicateWidget — bottom of canvas, x preserved.
+   * No-op when clipboard is empty.
+   */
+  pasteWidget(): void {
+    const source = this.clipboard();
+    if (!source) return;
+
+    const newId = uid();
+    const nextY = getNextY(this.widgets());
+
+    const pasted: Widget = {
+      ...deepClone(source),
+      id: newId,
+      y:  nextY,
+    };
+
+    this.updateWidgets(prev => [...prev, pasted]);
     this.selectedId.set(newId);
     this.pendingScrollId = newId;
   }

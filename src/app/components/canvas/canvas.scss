@@ -75,6 +75,16 @@
   // dot grid background
   background-image: radial-gradient(circle, var(--bdr) 1px, transparent 1px);
   background-size: 32px 32px;
+
+  &.no-grid {
+    background-image: none;
+  }
+
+  &.drag-over {
+    outline: 2px dashed color-mix(in srgb, var(--acc) 60%, transparent);
+    outline-offset: -4px;
+    background-color: color-mix(in srgb, var(--acc) 4%, transparent);
+  }
 }
 
 // ── Column snap guides ─────────────────────────────────────────
