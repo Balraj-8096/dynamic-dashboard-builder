@@ -6,10 +6,8 @@
       background:var(--bg3); border:1px solid var(--bdr); border-radius:4px;
       padding:3px 8px; font-size:12px; font-family:var(--font-mono)">
       {{ e }}
-      @if (entityList.length > 1) {
-        <button class="btn-remove" style="padding:0 2px; font-size:10px"
-          (click)="removeEntity(e)">✕</button>
-      }
+      <button class="btn-remove" style="padding:0 2px; font-size:10px"
+        (click)="removeEntity(e)">✕</button>
     </span>
   }
 </div>
