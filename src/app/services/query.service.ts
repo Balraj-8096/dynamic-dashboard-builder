@@ -109,8 +109,30 @@ export class QueryService {
         const key = `${col.entity}.${col.field}`;
         out[key] = row[key] ?? null;
       }
+      // Compute derived columns after base projection
+      if (query.derivedColumns?.length) {
+        for (const def of query.derivedColumns) {
+          // Ensure source fields are available even when not in query.columns
+          for (const src of def.sources) {
+            const srcKey = `${src.entity}.${src.field}`;
+            if (!(srcKey in out)) out[srcKey] = row[srcKey] ?? null;
+          }
+          out[def.key] = this.evaluateDerivedColumn(out, def);
+        }
+      }
       return out;
     });
+
+    // Append derived column headers so the table widget renders them
+    if (query.derivedColumns?.length) {
+      for (const def of query.derivedColumns) {
+        columns.push({
+          key:   def.key,
+          label: def.label ?? def.key,
+          type:  (def.mode === 'concat' ? 'string' : 'number') as any,
+        });
+      }
+    }
 
     return { columns, rows: projectedRows, totalRows, page, pageSize, warnings };
   }
@@ -794,6 +816,35 @@ export class QueryService {
 
   private columnToFieldName(entity: EntityDef, column: string): string | undefined {
     return entity.fields.find(f => f.column === column)?.name;
+  }
+
+  /** Evaluates a derived column formula against an already-projected row. */
+  private evaluateDerivedColumn(
+    row: Record<string, unknown>,
+    def: import('../core/query-types').DerivedColumnDef,
+  ): unknown {
+    const vals = def.sources.map(s => row[`${s.entity}.${s.field}`]);
+    switch (def.mode) {
+      case 'concat':
+        return vals
+          .map(v => (v == null ? '' : String(v)))
+          .filter(Boolean)
+          .join(def.separator ?? ' ');
+      case 'sum':
+        return vals.reduce<number>((acc, v) => acc + (Number(v) || 0), 0);
+      case 'subtract': {
+        const ns = vals.map(v => Number(v) || 0);
+        return ns.slice(1).reduce((acc, v) => acc - v, ns[0] ?? 0);
+      }
+      case 'multiply':
+        return vals.reduce<number>((acc, v) => acc * (Number(v) || 1), 1);
+      case 'divide': {
+        const ns = vals.map(v => Number(v) || 0);
+        return ns.slice(1).reduce((acc, v) => (v !== 0 ? acc / v : acc), ns[0] ?? 0);
+      }
+      default:
+        return '';
+    }
   }
 
   private buildResultColumns(

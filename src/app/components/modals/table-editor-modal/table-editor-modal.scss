@@ -1,0 +1,744 @@
+// ═══════════════════════════════════════════════════════════════
+//  DASHCRAFT — Table Editor Modal Styles
+// ═══════════════════════════════════════════════════════════════
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.te-modal {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+// ── 1. Top bar ────────────────────────────────────────────────
+.te-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 20px 10px;
+  border-bottom: 1px solid var(--bdr);
+  flex-shrink: 0;
+
+  &__left { display: flex; align-items: center; gap: 8px; }
+  &__icon { font-size: 14px; color: var(--acc); opacity: 0.8; }
+  &__title {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 1.3px;
+    color: var(--txt2);
+  }
+  &__close {
+    width: 30px; height: 30px;
+    border-radius: 7px;
+    border: 1px solid var(--bdr);
+    background: transparent;
+    color: var(--txt1);
+    cursor: pointer;
+    font-size: 17px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all var(--transition-fast);
+    &:hover { background: var(--bg3); color: var(--txt0); }
+  }
+}
+
+// ── 2. Meta row ───────────────────────────────────────────────
+.te-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--bdr);
+  background: var(--bg1);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+
+  &__title-inp {
+    flex: 0 0 auto;
+    width: 200px;
+    background: var(--bg2);
+    border: 1px solid var(--bdr);
+    border-radius: var(--radius-sm);
+    color: var(--txt0);
+    padding: 6px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--font-sans);
+    outline: none;
+    transition: border-color var(--transition-fast);
+    &:focus { border-color: var(--acc); }
+    &::placeholder { color: var(--txt2); }
+  }
+
+  // Vertical rule between title and source
+  &__sep {
+    display: block;
+    width: 1px;
+    height: 24px;
+    background: var(--bdr);
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  // Source block: label + product + entity path
+  &__source {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    flex-wrap: wrap;
+  }
+
+  &__source-label {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.9px;
+    color: var(--txt2);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  &__product-sel { flex-shrink: 0; }
+}
+
+// ── Entity join-path ──────────────────────────────────────────
+.te-entity-path {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+// Arrow connector between entity chips
+.te-path-arrow {
+  font-size: 11px;
+  color: var(--txt2);
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+  user-select: none;
+
+  &--join {
+    color: color-mix(in srgb, var(--acc) 60%, transparent);
+    font-size: 13px;
+  }
+}
+
+// Individual entity chip
+.te-entity-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: color-mix(in srgb, var(--acc) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--acc) 28%, transparent);
+  border-radius: 5px;
+  padding: 4px 6px 4px 9px;
+  white-space: nowrap;
+
+  &__name {
+    font-size: 12px;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--acc);
+    line-height: 1;
+  }
+  &__remove {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--acc);
+    font-size: 13px;
+    padding: 0 1px;
+    opacity: 0.55;
+    line-height: 1;
+    border-radius: 3px;
+    transition: all var(--transition-fast);
+    &:hover { opacity: 1; background: color-mix(in srgb, var(--acc) 18%, transparent); }
+  }
+}
+
+// "join entity…" add select — styled to match the chip aesthetic
+.te-entity-add-sel {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 1px dashed color-mix(in srgb, var(--acc) 30%, transparent);
+  border-radius: 5px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--txt2);
+  cursor: pointer;
+  outline: none;
+  transition: all var(--transition-fast);
+  &:hover, &:focus {
+    border-color: var(--acc);
+    color: var(--acc);
+    background: color-mix(in srgb, var(--acc) 5%, transparent);
+  }
+}
+
+// ── 3. Toolbar ────────────────────────────────────────────────
+.te-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 7px 16px;
+  border-bottom: 1px solid var(--bdr);
+  background: var(--bg0);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+
+  &__left, &__right {
+    display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
+  }
+}
+
+// ── Shared select ─────────────────────────────────────────────
+.te-sel {
+  background: var(--bg2);
+  border: 1px solid var(--bdr);
+  border-radius: var(--radius-sm);
+  color: var(--txt1);
+  padding: 5px 8px;
+  font-size: 12px;
+  font-family: var(--font-sans);
+  outline: none;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+  &:focus { border-color: var(--acc); }
+  &--sm    { min-width: 88px; }
+  &--field { min-width: 120px; }
+}
+
+.te-field-search {
+  background: var(--bg2);
+  border: 1px solid var(--bdr);
+  border-radius: var(--radius-sm);
+  color: var(--txt1);
+  padding: 5px 8px;
+  font-size: 12px;
+  outline: none;
+  width: 110px;
+  transition: border-color var(--transition-fast);
+  &:focus { border-color: var(--acc); }
+  &::placeholder { color: var(--txt2); font-size: 11px; }
+}
+
+// ── Shared buttons ────────────────────────────────────────────
+.te-btn {
+  padding: 5px 11px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--bdr);
+  background: transparent;
+  color: var(--txt1);
+  cursor: pointer;
+  font-size: 12px;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  &:hover { background: var(--bg3); color: var(--txt0); }
+
+  &--add-col {
+    background: color-mix(in srgb, var(--acc) 12%, transparent);
+    border-color: color-mix(in srgb, var(--acc) 35%, transparent);
+    color: var(--acc);
+    font-weight: 600;
+    &:hover { background: color-mix(in srgb, var(--acc) 22%, transparent); }
+  }
+  &--ghost {
+    font-size: 11px; padding: 5px 9px; color: var(--txt2);
+    &:hover { color: var(--txt0); }
+  }
+}
+
+.te-icon-btn {
+  height: 28px; padding: 0 9px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--bdr);
+  background: transparent; color: var(--txt2);
+  cursor: pointer; font-size: 12px; white-space: nowrap;
+  transition: all var(--transition-fast);
+  &:hover { background: var(--bg3); color: var(--txt0); }
+  &.is-on {
+    background: color-mix(in srgb, var(--acc) 12%, transparent);
+    border-color: color-mix(in srgb, var(--acc) 35%, transparent);
+    color: var(--acc);
+  }
+  &--undo { color: var(--txt1); }
+}
+
+.te-row-badge {
+  font-size: 11px; font-family: var(--font-mono);
+  color: var(--txt2); background: var(--bg2);
+  border: 1px solid var(--bdr); border-radius: 10px;
+  padding: 2px 9px; white-space: nowrap;
+}
+
+.te-hidden-badge {
+  font-size: 11px; font-family: var(--font-mono);
+  color: color-mix(in srgb, var(--acc) 80%, var(--txt2));
+  background: color-mix(in srgb, var(--acc) 8%, transparent);
+  border: 1px dashed color-mix(in srgb, var(--acc) 35%, transparent);
+  border-radius: 10px; padding: 2px 9px; white-space: nowrap;
+}
+
+.te-page-sel { width: 58px; font-size: 11px; }
+
+// ── 4. Derived column creator panel ──────────────────────────
+.te-derived-panel {
+  border-bottom: 1px solid var(--bdr);
+  background: color-mix(in srgb, var(--bg2) 60%, var(--bg1));
+  flex-shrink: 0;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px 8px;
+    border-bottom: 1px solid var(--bdr);
+  }
+  &__title {
+    font-size: 12px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--acc);
+    flex-shrink: 0;
+  }
+  &__hint {
+    font-size: 11px;
+    color: var(--txt2);
+    flex: 1;
+  }
+  &__close {
+    background: none; border: none; cursor: pointer;
+    color: var(--txt2); font-size: 16px; padding: 0 4px;
+    border-radius: 4px; line-height: 1;
+    transition: all var(--transition-fast);
+    &:hover { background: var(--bg3); color: var(--txt0); }
+  }
+
+  &__body {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 12px 16px;
+    flex-wrap: wrap;
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 8px 16px 10px;
+  }
+}
+
+.te-drv-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.te-drv-label {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: var(--txt2);
+}
+
+.te-drv-inp {
+  background: var(--bg1);
+  border: 1px solid var(--bdr);
+  border-radius: var(--radius-sm);
+  color: var(--txt0);
+  padding: 6px 10px;
+  font-size: 12px;
+  font-family: var(--font-sans);
+  outline: none;
+  transition: border-color var(--transition-fast);
+  &:focus { border-color: var(--acc); }
+  &::placeholder { color: var(--txt2); }
+  &--name { width: 220px; }
+  &--sep  { width: 80px; text-align: center; }
+}
+
+// Mode pill buttons
+.te-drv-mode-pills {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.te-drv-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--bdr);
+  background: transparent;
+  color: var(--txt2);
+  cursor: pointer;
+  font-size: 11px;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  &:hover { background: var(--bg3); color: var(--txt0); border-color: var(--txt2); }
+  &.is-active {
+    background: color-mix(in srgb, var(--acc) 12%, transparent);
+    border-color: color-mix(in srgb, var(--acc) 45%, transparent);
+    color: var(--acc);
+  }
+  &__icon { font-size: 13px; font-weight: 700; line-height: 1; }
+  &__lbl  { font-family: var(--font-mono); font-weight: 500; }
+}
+
+// Source field rows
+.te-drv-sources {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.te-drv-op {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--acc);
+  padding: 0 2px;
+  font-family: var(--font-mono);
+  flex-shrink: 0;
+}
+
+.te-drv-src-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg1);
+  border: 1px solid var(--bdr);
+  border-radius: 6px;
+  padding: 3px 6px 3px 4px;
+
+  .te-sel { border: none; background: transparent; padding: 3px 6px; font-size: 11px; }
+}
+
+.te-drv-src-remove {
+  background: none; border: none; cursor: pointer;
+  color: var(--txt2); font-size: 13px; padding: 0 2px;
+  border-radius: 3px; line-height: 1;
+  transition: all var(--transition-fast);
+  &:hover { color: #ef4444; background: color-mix(in srgb, #ef4444 12%, transparent); }
+}
+
+.te-drv-add-src { font-size: 11px; padding: 4px 9px; }
+
+// Separator preview
+.te-drv-sep-row {
+  display: flex; align-items: center; gap: 10px;
+}
+
+.te-drv-sep-preview {
+  font-size: 11px; color: var(--txt2);
+  em { font-style: normal; color: var(--txt1); font-family: var(--font-mono); }
+}
+
+// Derived column badge in table header
+.te-type-badge--derived {
+  background: color-mix(in srgb, var(--acc) 12%, transparent) !important;
+  border-color: color-mix(in srgb, var(--acc) 35%, transparent) !important;
+  color: var(--acc) !important;
+  font-weight: 700;
+}
+
+// ── 5. Filter shelf ───────────────────────────────────────────
+.te-filter-shelf {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--bdr);
+  background: color-mix(in srgb, var(--bg0) 70%, var(--bg1));
+  flex-shrink: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar-thumb { background: var(--bdr); border-radius: 4px; }
+}
+
+// ── 5. Table scroll container ─────────────────────────────────
+.te-table-scroll {
+  flex: 1; overflow: auto; min-height: 0;
+  background: var(--bg0);
+  &::-webkit-scrollbar { width: 6px; height: 6px; }
+  &::-webkit-scrollbar-thumb { background: var(--bdr); border-radius: 4px; }
+  &::-webkit-scrollbar-corner { background: var(--bg0); }
+}
+
+// ── Table ─────────────────────────────────────────────────────
+.te-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  thead { position: sticky; top: 0; z-index: 10; }
+
+  th {
+    background: var(--bg2);
+    border-right: 1px solid var(--bdr);
+    border-bottom: 2px solid var(--bdr);
+    padding: 0;
+    vertical-align: middle;
+    white-space: nowrap;
+    min-width: 120px;
+    user-select: none;
+    transition: opacity var(--transition-fast), border-color var(--transition-fast);
+
+    &:last-child { border-right: none; }
+
+    // Hidden column: dim the header but keep it in-place so CDK drag and td stay aligned
+    &.te-col--hidden {
+      opacity: 0.38;
+      border-bottom-color: var(--bdr) !important;
+      border-bottom-style: dashed;
+
+      .te-col-label {
+        text-decoration: line-through;
+        text-decoration-style: wavy;
+        text-decoration-color: var(--txt2);
+      }
+    }
+
+    &.te-col--sorted {
+      background: color-mix(in srgb, var(--acc) 7%, var(--bg2));
+      border-bottom-color: var(--acc);
+    }
+  }
+
+  td {
+    border-right: 1px solid color-mix(in srgb, var(--bdr) 40%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--bdr) 40%, transparent);
+    padding: 9px 12px;
+    color: var(--txt1);
+    vertical-align: middle;
+    background: var(--bg1);
+    transition: opacity var(--transition-fast);
+
+    &:last-child { border-right: none; }
+
+    // Hidden column cells: dim to match header
+    &.te-col--hidden {
+      opacity: 0.35;
+      background: color-mix(in srgb, var(--bg0) 60%, var(--bg1));
+    }
+  }
+
+  &--compact td { padding: 5px 12px; }
+
+  .te-row--stripe td { background: color-mix(in srgb, var(--bg2) 55%, var(--bg1)); }
+  .te-row--stripe .te-col--hidden { background: var(--bg0); }
+}
+
+// ── Column header inner layout ────────────────────────────────
+.te-th-inner {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 7px 7px 7px 5px;
+}
+
+.te-drag-handle {
+  color: var(--txt2); cursor: grab; font-size: 12px;
+  flex-shrink: 0; opacity: 0.3; line-height: 1;
+  padding: 0 2px;
+  transition: opacity var(--transition-fast);
+  &:hover { opacity: 1; }
+  &:active { cursor: grabbing; }
+}
+
+.te-type-badge {
+  font-size: 8px; font-family: var(--font-mono);
+  color: var(--txt2); background: var(--bg3);
+  border: 1px solid var(--bdr); border-radius: 3px;
+  padding: 1px 4px; flex-shrink: 0; line-height: 1.5;
+  min-width: 13px; text-align: center;
+}
+
+.te-col-label {
+  font-size: 11px; font-family: var(--font-mono); font-weight: 600;
+  color: var(--txt0); flex: 1; overflow: hidden; text-overflow: ellipsis;
+  cursor: pointer; border-radius: 3px; padding: 2px 4px;
+  transition: background var(--transition-fast);
+  &:hover {
+    background: var(--bg3);
+    text-decoration: underline;
+    text-decoration-style: dashed;
+    text-underline-offset: 2px;
+  }
+}
+
+.te-col-rename-inp {
+  flex: 1; min-width: 55px;
+  background: var(--bg0); border: 1px solid var(--acc);
+  border-radius: 3px; color: var(--txt0);
+  padding: 2px 6px; font-size: 11px;
+  font-family: var(--font-mono); font-weight: 600; outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--acc) 20%, transparent);
+}
+
+.te-sort-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--txt2); font-size: 11px; padding: 2px 3px;
+  border-radius: 3px; flex-shrink: 0;
+  transition: all var(--transition-fast);
+  &:hover { background: var(--bg3); color: var(--txt0); }
+  &.is-active { color: var(--acc); }
+}
+
+.te-edit-drv-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--acc); font-size: 11px; padding: 2px 3px;
+  border-radius: 3px; flex-shrink: 0;
+  transition: all var(--transition-fast);
+  &:hover { background: color-mix(in srgb, var(--acc) 15%, transparent); }
+}
+
+.te-eye-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 11px; padding: 1px 3px; border-radius: 3px;
+  flex-shrink: 0; opacity: 0.5; line-height: 1;
+  transition: opacity var(--transition-fast);
+  &:hover { opacity: 1; }
+  &.is-off { opacity: 0.22; filter: grayscale(1); }
+}
+
+.te-remove-col {
+  background: none; border: none; cursor: pointer;
+  color: var(--txt2); font-size: 14px; padding: 1px 3px;
+  border-radius: 3px; flex-shrink: 0; line-height: 1;
+  transition: all var(--transition-fast);
+  &:hover {
+    color: #ef4444;
+    background: color-mix(in srgb, #ef4444 12%, transparent);
+  }
+}
+
+// ── CDK drag styles ───────────────────────────────────────────
+.te-drag-preview {
+  background: var(--bg3); border: 1px solid var(--acc);
+  border-radius: var(--radius-sm); padding: 6px 12px;
+  font-size: 12px; font-family: var(--font-mono); font-weight: 600;
+  color: var(--txt0); box-shadow: 0 4px 18px rgba(0, 0, 0, 0.55);
+  opacity: 0.95; white-space: nowrap;
+}
+
+:host ::ng-deep .cdk-drag-placeholder {
+  background: color-mix(in srgb, var(--acc) 8%, transparent);
+  border: 1px dashed color-mix(in srgb, var(--acc) 50%, transparent);
+  opacity: 0.7;
+}
+
+:host ::ng-deep .cdk-drag-animating {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+:host ::ng-deep .cdk-drop-list-dragging th:not(.cdk-drag-placeholder) {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+// ── Status badge ──────────────────────────────────────────────
+.te-status-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 2px 8px 2px 6px; border-radius: 10px;
+  font-size: 11px; font-weight: 500; font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+.te-status-dot {
+  width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
+}
+
+.te-cell-text { font-size: 12px; color: var(--txt1); font-family: var(--font-mono); }
+
+.te-cell-hidden { font-size: 12px; color: var(--txt2); font-family: var(--font-mono); }
+
+// ── Empty states ──────────────────────────────────────────────
+.te-empty-row {
+  text-align: center; color: var(--txt2); font-size: 12px;
+  padding: 36px 20px !important; font-style: italic;
+}
+
+.te-empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 10px; padding: 52px 32px;
+  text-align: center; height: 100%; min-height: 180px;
+
+  &__icon { font-size: 42px; opacity: 0.13; }
+  &__msg { font-size: 14px; color: var(--txt1); margin: 0; font-weight: 500; }
+  &__hint { font-size: 12px; color: var(--txt2); margin: 0; }
+}
+
+// ── 6. Bottom bar ─────────────────────────────────────────────
+.te-bottom-bar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 7px 16px; border-top: 1px solid var(--bdr);
+  background: var(--bg1); flex-shrink: 0; flex-wrap: wrap; min-height: 40px;
+}
+
+.te-bottom-toggle {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: none; border: 1px solid var(--bdr); border-radius: var(--radius-sm);
+  padding: 4px 10px; cursor: pointer; font-size: 12px; color: var(--txt1);
+  transition: all var(--transition-fast);
+  &:hover { background: var(--bg3); }
+  strong { color: var(--txt0); }
+}
+
+.te-toggle-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--txt2); flex-shrink: 0;
+  transition: background var(--transition-base);
+  &.is-on {
+    background: var(--acc);
+    box-shadow: 0 0 5px color-mix(in srgb, var(--acc) 70%, transparent);
+  }
+}
+
+.te-status-legend { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+
+.te-status-pill {
+  font-size: 10px; font-family: var(--font-mono);
+  padding: 2px 8px; border-radius: 10px; white-space: nowrap;
+}
+
+// ── 7. Footer ─────────────────────────────────────────────────
+.te-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; padding: 10px 16px; border-top: 1px solid var(--bdr);
+  background: var(--bg1); flex-shrink: 0;
+}
+
+.te-btn-back {
+  padding: 7px 16px; border-radius: 7px;
+  border: 1px solid var(--bdr); background: transparent;
+  color: var(--txt1); cursor: pointer; font-size: 13px;
+  transition: all var(--transition-base);
+  &:hover { background: var(--bg3); color: var(--txt0); }
+}
+
+.te-btn-save {
+  padding: 8px 22px; border-radius: 7px; border: none;
+  background: linear-gradient(135deg, #1d4ed8, var(--acc));
+  color: #fff; cursor: pointer; font-size: 13px; font-weight: 600;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--acc) 27%, transparent);
+  transition: opacity var(--transition-base);
+  &:hover { opacity: 0.88; }
+  &.is-disabled { opacity: 0.38; cursor: not-allowed; box-shadow: none; }
+}

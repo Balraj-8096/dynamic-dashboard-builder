@@ -32,6 +32,14 @@
         }
     </div>
 
+    <!-- ── TABLE TYPE: unified editor replaces body + footer ─────── -->
+    @if (isConfigStep && selectedType === WidgetType.Table && draftWidget) {
+      <app-table-editor-modal
+        [widget]="draftWidget"
+        (saved)="onTableSaveFromWizard($event)"
+        (cancelled)="prevStep()" />
+    } @else {
+
     <!-- ── BODY ───────────────────────────────────────────────────── -->
     <div class="wizard-body">
 
@@ -164,5 +172,7 @@
             }
         </div>
     </div>
+
+} <!-- /else (non-table types) -->
 
 </div>

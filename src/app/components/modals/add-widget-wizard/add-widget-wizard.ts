@@ -3,7 +3,7 @@ import { Component, HostListener, inject, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { CATALOG } from '../../../core/catalog';
 import { FACTORIES } from '../../../core/factories';
-import { WidgetType, WidgetConfig } from '../../../core/interfaces';
+import { Widget, WidgetType, WidgetConfig } from '../../../core/interfaces';
 import { DashboardService } from '../../../services/dashboard.service';
 import { EditStatConfig } from "../../shared/edit-stat-config/edit-stat-config";
 import { EditAnalyticsConfig } from "../../shared/edit-analytics-config/edit-analytics-config";
@@ -16,6 +16,7 @@ import { EditSectionConfig } from "../../shared/edit-section-config/edit-section
 import { WidgetMiniPreview } from "../../shared/widget-mini-preview/widget-mini-preview";
 import { QueryBuilder, AnyQueryConfig } from "../../shared/query-builder/query-builder";
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { TableEditorModal } from '../table-editor-modal/table-editor-modal';
 
 export interface WizardDialogData {
   /** Pre-selected type from Ctrl+1-9 or sidebar click. null = open at Step 1. */
@@ -28,7 +29,7 @@ export interface WizardDialogData {
     CommonModule, ReactiveFormsModule, QueryBuilder,
     EditStatConfig, EditAnalyticsConfig, EditSeriesConfig, EditPieConfig,
     EditTableConfig, EditNoteConfig, EditProgressConfig, EditSectionConfig,
-    WidgetMiniPreview,
+    WidgetMiniPreview, TableEditorModal,
   ],
   templateUrl: './add-widget-wizard.html',
   styleUrl: './add-widget-wizard.scss',
@@ -122,6 +123,21 @@ export class AddWidgetWizard implements OnInit {
   }
 
   close(): void { this.dialogRef.close(); }
+
+  // ── Table-editor shortcut ─────────────────────────────────────
+  /** Draft widget passed to TableEditorModal when table type is selected in step 2. */
+  get draftWidget(): Widget | null {
+    if (this.selectedType !== WidgetType.Table) return null;
+    const base = FACTORIES[WidgetType.Table]?.(0, 0);
+    if (!base) return null;
+    return { ...base, title: this.titleForm.value.title || base.title };
+  }
+
+  /** Called by TableEditorModal (saved) output — routes through svc.addWidget and closes. */
+  onTableSaveFromWizard(updated: Widget): void {
+    this.svc.addWidget(updated);
+    this.dialogRef.close();
+  }
 
   // ── Preview helpers ───────────────────────────────────────────
   get previewTitle(): string { return this.titleForm.value.title ?? ''; }

@@ -224,6 +224,8 @@ export interface TableColumn {
   width:         string;
   type?:         FieldType;
   statusValues?: StatusValueDef[];
+  /** Present when this column is derived from multiple source fields. */
+  derived?:      import('./query-types').DerivedColumnDef;
 }
 
 /**

@@ -190,10 +190,29 @@ export interface ResultColumn {
 
 // ── Table query ──────────────────────────────────────────────────────────────
 
+/**
+ * A derived (computed) column built from multiple source fields.
+ * Evaluated client-side after the base query projection.
+ */
+export interface DerivedColumnDef {
+  /** Synthetic row key — "__derived_<timestamp>" — unique within a widget config. */
+  key:        string;
+  /** Human-readable column header shown in the table. */
+  label?:     string;
+  /** How source field values are combined. */
+  mode:       'concat' | 'sum' | 'subtract' | 'multiply' | 'divide';
+  /** Source fields whose values feed this formula (in order). */
+  sources:    Array<{ entity: string; field: string }>;
+  /** Separator between values — concat mode only; default ' '. */
+  separator?: string;
+}
+
 export interface TableQueryConfig {
   product: string;                                    // product slug
   entities: string[];                                 // join order, first = root
-  columns: Array<{ entity: string; field: string }>; // columns to display
+  columns: Array<{ entity: string; field: string }>; // base columns to fetch
+  /** Derived/computed columns evaluated after base projection. */
+  derivedColumns?: DerivedColumnDef[];
   filters?: FilterCondition[];       // legacy flat AND list (backward-compat)
   filterGroups?: FilterGroup[];      // structured AND/OR groups (takes precedence)
   sort?: { entity: string; field: string; direction: SortDirection };

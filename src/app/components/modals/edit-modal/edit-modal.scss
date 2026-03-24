@@ -7,6 +7,12 @@
   max-height: min(92dvh, 920px);
   overflow: hidden;
   box-shadow: var(--shadow-modal);
+
+  // Table editor fills the full dialog height so the table section
+  // has room to scroll independently — matches the dialog height set in canvas.ts
+  &--table {
+    height: min(92dvh, 940px);
+  }
 }
 
 // ── Header ────────────────────────────────────────────────────

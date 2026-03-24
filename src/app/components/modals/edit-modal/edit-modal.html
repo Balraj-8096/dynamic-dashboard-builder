@@ -1,4 +1,12 @@
-<div class="edit-modal">
+<div class="edit-modal" [class.edit-modal--table]="widget.type === WidgetType.Table">
+
+  @if (widget.type === WidgetType.Table) {
+    <!-- ── TABLE EDITOR — unified single-view layout ────────────── -->
+    <app-table-editor-modal
+      [widget]="widget"
+      (saved)="onTableSave($event)"
+      (cancelled)="cancel()" />
+  } @else {
 
   <!-- ── HEADER ───────────────────────────────────────────────── -->
   <div class="modal-header">
@@ -55,9 +63,6 @@
           @case (WidgetType.Pie) {
             <app-edit-pie-config [cfg]="cfgAsPie" (cfgChange)="onCfgChange($event)" />
           }
-          @case (WidgetType.Table) {
-            <app-edit-table-config [cfg]="cfgAsTable" (cfgChange)="onCfgChange($event)" />
-          }
           @case (WidgetType.Progress) {
             <app-edit-progress-config [cfg]="cfgAsProgress" (cfgChange)="onCfgChange($event)" />
           }
@@ -107,9 +112,6 @@
               }
               @case (WidgetType.Pie) {
                 <app-pie-widget [widget]="previewWidget" [contentH]="previewH" />
-              }
-              @case (WidgetType.Table) {
-                <app-table-widget [widget]="previewWidget" [contentH]="previewH" />
               }
               @case (WidgetType.Progress) {
                 <app-progress-widget [widget]="previewWidget" [contentH]="previewH" />
@@ -204,5 +206,7 @@
     <button class="btn-cancel" (click)="cancel()">Cancel</button>
     <button class="btn-save" (click)="save()">Save Changes</button>
   </div>
+
+  } <!-- /else (non-table types) -->
 
 </div>

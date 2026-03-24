@@ -13,7 +13,7 @@
 import { DashboardTemplate, Widget, WidgetType, TextAlign } from './interfaces';
 import { FACTORIES }                                        from './factories';
 import {
-  AggregationFunction, DateInterval, SortDirection, FilterOperator, FilterGroup,
+  AggregationFunction, DateInterval, SortDirection, FilterOperator, FilterGroup, DerivedColumnDef,
 } from './query-types';
 
 
@@ -165,8 +165,37 @@ function buildEpx(): Widget[] {
             { entity: 'appointment',         field: 'status'      },
             { entity: 'appointment_patient', field: 'payor_type'  },
             { entity: 'appointment_patient', field: 'price'       },
-            { entity: 'contact',             field: 'firstname'   },
-            { entity: 'contact',             field: 'lastname'    },
+          ],
+          derivedColumns: [
+            {
+              key:       '__derived_appt_fullname',
+              label:     'Patient Name',
+              mode:      'concat',
+              sources:   [
+                { entity: 'contact', field: 'title'     },
+                { entity: 'contact', field: 'firstname' },
+                { entity: 'contact', field: 'lastname'  },
+              ],
+              separator: ' ',
+            } as DerivedColumnDef,
+          ],
+          // Show only completed or active appointments that have been invoiced
+          filterGroups: [
+            {
+              id:     'epx-appt-status',
+              logic:  'OR',
+              conditions: [
+                { entity: 'appointment', field: 'status', operator: FilterOperator.Eq, value: 'completed' },
+                { entity: 'appointment', field: 'status', operator: FilterOperator.Eq, value: 'active'    },
+              ],
+            } as FilterGroup,
+            {
+              id:     'epx-appt-invoiced',
+              logic:  'AND',
+              conditions: [
+                { entity: 'appointment', field: 'invoiced', operator: FilterOperator.Eq, value: 'true' },
+              ],
+            } as FilterGroup,
           ],
           sort: { entity: 'appointment', field: 'start_date', direction: SortDirection.Desc },
           pageSize: 20,
@@ -296,15 +325,35 @@ function buildEpx(): Widget[] {
           product: 'epx',
           entities: ['patient', 'contact', 'contact_address', 'address'],
           columns: [
-            { entity: 'patient',  field: 'mrn'        },
-            { entity: 'contact',  field: 'title'      },
-            { entity: 'contact',  field: 'firstname'  },
-            { entity: 'contact',  field: 'lastname'   },
+            { entity: 'patient',  field: 'mrn'          },
             { entity: 'patient',  field: 'date_of_birth' },
-            { entity: 'patient',  field: 'sex'        },
-            { entity: 'patient',  field: 'status'     },
-            { entity: 'address',  field: 'address1'   },
-            { entity: 'address',  field: 'postcode'   },
+            { entity: 'patient',  field: 'sex'           },
+            { entity: 'patient',  field: 'status'        },
+            { entity: 'address',  field: 'address1'      },
+            { entity: 'address',  field: 'postcode'      },
+          ],
+          derivedColumns: [
+            {
+              key:       '__derived_patient_fullname',
+              label:     'Full Name',
+              mode:      'concat',
+              sources:   [
+                { entity: 'contact', field: 'title'     },
+                { entity: 'contact', field: 'firstname' },
+                { entity: 'contact', field: 'lastname'  },
+              ],
+              separator: ' ',
+            } as DerivedColumnDef,
+          ],
+          // Only active patients
+          filterGroups: [
+            {
+              id:     'epx-patient-active',
+              logic:  'AND',
+              conditions: [
+                { entity: 'patient', field: 'status', operator: FilterOperator.Eq, value: 'active' },
+              ],
+            } as FilterGroup,
           ],
           sort: { entity: 'contact', field: 'lastname', direction: SortDirection.Asc },
           pageSize: 20,
@@ -461,10 +510,39 @@ function buildAccounting(): Widget[] {
             { entity: 'invoice', field: 'invoice_number' },
             { entity: 'invoice', field: 'invoice_date'   },
             { entity: 'invoice', field: 'status'         },
-            { entity: 'invoice', field: 'total_amount'   },
+            { entity: 'invoice', field: 'net_amount'     },
+            { entity: 'invoice', field: 'tax_amount'     },
             { entity: 'invoice', field: 'due_date'       },
             { entity: 'invoice', field: 'currency_code'  },
-            { entity: 'invoice', field: 'site_id'        },
+          ],
+          derivedColumns: [
+            {
+              key:     '__derived_gross_value',
+              label:   'Gross Value',
+              mode:    'sum',
+              sources: [
+                { entity: 'invoice', field: 'net_amount' },
+                { entity: 'invoice', field: 'tax_amount' },
+              ],
+            } as DerivedColumnDef,
+          ],
+          // Pending or overdue non-void invoices
+          filterGroups: [
+            {
+              id:     'acc-invoice-status',
+              logic:  'OR',
+              conditions: [
+                { entity: 'invoice', field: 'status', operator: FilterOperator.Eq, value: 'pending'  },
+                { entity: 'invoice', field: 'status', operator: FilterOperator.Eq, value: 'overdue'  },
+              ],
+            } as FilterGroup,
+            {
+              id:     'acc-invoice-not-void',
+              logic:  'AND',
+              conditions: [
+                { entity: 'invoice', field: 'is_void', operator: FilterOperator.Eq, value: 'false' },
+              ],
+            } as FilterGroup,
           ],
           sort: { entity: 'invoice', field: 'invoice_date', direction: SortDirection.Desc },
           pageSize: 20,
@@ -640,6 +718,28 @@ function buildAccounting(): Widget[] {
             { entity: 'payer',   field: 'payer_type'      },
             { entity: 'invoice', field: 'invoice_number'  },
           ],
+          derivedColumns: [
+            {
+              key:     '__derived_claim_variance',
+              label:   'Variance',
+              mode:    'subtract',
+              sources: [
+                { entity: 'claim', field: 'claimed_amount'  },
+                { entity: 'claim', field: 'approved_amount' },
+              ],
+            } as DerivedColumnDef,
+          ],
+          // Approved or pending claims only
+          filterGroups: [
+            {
+              id:     'acc-claim-status',
+              logic:  'OR',
+              conditions: [
+                { entity: 'claim', field: 'status', operator: FilterOperator.Eq, value: 'approved' },
+                { entity: 'claim', field: 'status', operator: FilterOperator.Eq, value: 'pending'  },
+              ],
+            } as FilterGroup,
+          ],
           sort: { entity: 'claim', field: 'submitted_date', direction: SortDirection.Desc },
           pageSize: 20,
         },
@@ -796,12 +896,43 @@ function buildPrescriptions(): Widget[] {
             { entity: 'prescription',      field: 'prescription_number' },
             { entity: 'prescription',      field: 'prescribed_date'     },
             { entity: 'prescription',      field: 'status'              },
-            { entity: 'medication',        field: 'name'                },
             { entity: 'medication',        field: 'drug_class'          },
             { entity: 'medication',        field: 'is_controlled'       },
-            { entity: 'prescriber',        field: 'lastname'            },
             { entity: 'prescription_item', field: 'quantity'            },
             { entity: 'prescription_item', field: 'unit'                },
+          ],
+          derivedColumns: [
+            {
+              key:       '__derived_rx_prescriber',
+              label:     'Prescriber',
+              mode:      'concat',
+              sources:   [
+                { entity: 'prescriber', field: 'firstname' },
+                { entity: 'prescriber', field: 'lastname'  },
+              ],
+              separator: ' ',
+            } as DerivedColumnDef,
+            {
+              key:       '__derived_rx_medication',
+              label:     'Medication',
+              mode:      'concat',
+              sources:   [
+                { entity: 'medication', field: 'name'     },
+                { entity: 'medication', field: 'strength' },
+              ],
+              separator: ' ',
+            } as DerivedColumnDef,
+          ],
+          // Active or dispensed prescriptions only
+          filterGroups: [
+            {
+              id:     'rx-prescription-status',
+              logic:  'OR',
+              conditions: [
+                { entity: 'prescription', field: 'status', operator: FilterOperator.Eq, value: 'active'    },
+                { entity: 'prescription', field: 'status', operator: FilterOperator.Eq, value: 'dispensed' },
+              ],
+            } as FilterGroup,
           ],
           sort: { entity: 'prescription', field: 'prescribed_date', direction: SortDirection.Desc },
           pageSize: 20,

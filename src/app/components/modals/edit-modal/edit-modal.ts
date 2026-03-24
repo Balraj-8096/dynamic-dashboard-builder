@@ -13,7 +13,6 @@ import { EditStatConfig } from "../../shared/edit-stat-config/edit-stat-config";
 import { EditAnalyticsConfig } from "../../shared/edit-analytics-config/edit-analytics-config";
 import { EditSeriesConfig } from "../../shared/edit-series-config/edit-series-config";
 import { EditPieConfig } from "../../shared/edit-pie-config/edit-pie-config";
-import { EditTableConfig } from "../../shared/edit-table-config/edit-table-config";
 import { EditProgressConfig } from "../../shared/edit-progress-config/edit-progress-config";
 import { EditNoteConfig } from "../../shared/edit-note-config/edit-note-config";
 import { EditSectionConfig } from "../../shared/edit-section-config/edit-section-config";
@@ -23,10 +22,10 @@ import { AnalyticsWidget } from "../../widgets/analytics-widget/analytics-widget
 import { BarWidget } from "../../widgets/bar-widget/bar-widget";
 import { LineWidget } from "../../widgets/line-widget/line-widget";
 import { PieWidget } from "../../widgets/pie-widget/pie-widget";
-import { TableWidget } from "../../widgets/table-widget/table-widget";
 import { ProgressWidget } from "../../widgets/progress-widget/progress-widget";
 import { NoteWidget } from "../../widgets/note-widget/note-widget";
 import { SectionWidget } from "../../widgets/section-widget/section-widget";
+import { TableEditorModal } from "../table-editor-modal/table-editor-modal";
 
 @Component({
   selector: 'app-edit-modal',
@@ -34,9 +33,10 @@ import { SectionWidget } from "../../widgets/section-widget/section-widget";
     CommonModule, FormsModule,
     QueryBuilder,
     EditStatConfig, EditAnalyticsConfig, EditSeriesConfig, EditPieConfig,
-    EditTableConfig, EditProgressConfig, EditNoteConfig, EditSectionConfig,
+    EditProgressConfig, EditNoteConfig, EditSectionConfig,
     StatWidget, AnalyticsWidget, BarWidget, LineWidget, PieWidget,
-    TableWidget, ProgressWidget, NoteWidget, SectionWidget,
+    ProgressWidget, NoteWidget, SectionWidget,
+    TableEditorModal,
   ],
   templateUrl: './edit-modal.html',
   styleUrl: './edit-modal.scss',
@@ -186,6 +186,12 @@ export class EditModal implements OnInit {
   }
 
   cancel(): void {
+    this.dialogRef.close();
+  }
+
+  /** Called by TableEditorModal (saved) output — saves and closes the dialog. */
+  onTableSave(updated: Widget): void {
+    this.svc.saveWidget(updated);
     this.dialogRef.close();
   }
 
