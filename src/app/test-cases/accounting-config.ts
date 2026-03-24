@@ -1,4 +1,5 @@
-{
+// Auto-converted from accounting-config.json
+export const ACCOUNTING_SCHEMA_CONFIG = {
   "product": {
     "slug": "accounting",
     "display_name": "Accounting",
@@ -581,4 +582,4 @@
       ]
     }
   ]
-}
+} as const;

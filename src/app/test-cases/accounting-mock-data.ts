@@ -1,4 +1,5 @@
-{
+// Auto-converted from accounting-mock-data.json
+export const ACCOUNTING_MOCK_DATA = {
   "product": "accounting",
   "description": "In-memory database for Accounting product. Keys match entity.schema and entity.table from accounting-config.json. Column names match field.column values exactly.",
   "schemas": {
@@ -179,4 +180,4 @@
     "EC-ACC_REVERSED_PAYMENT": "pay-008 has status='reversed' — reversed payments should be excluded from total receipts calculations",
     "EC-ACC_YEAR_OVER_YEAR": "Invoices span 2024-01 through 2026-03 — Q4 2024 (inv-010 to inv-013) vs Q4 2025 (inv-023 to inv-025) supports year-over-year revenue comparisons"
   }
-}
+} as const;

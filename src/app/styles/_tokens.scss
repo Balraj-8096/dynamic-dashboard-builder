@@ -11,29 +11,29 @@
 [data-theme="dark"] {
 
   // ── Backgrounds ─────────────────────────────────────────────
-  --bg0:  #070b12;   // darkest — canvas background
-  --bg1:  #0d1219;   // card / sidebar background
-  --bg2:  #121a25;   // widget header gradient top
-  --bg3:  #1a2535;   // input background, hover states
-  --bg4:  #1f2d3d;   // button hover
+  --bg0: #070b12; // darkest — canvas background
+  --bg1: #0d1219; // card / sidebar background
+  --bg2: #121a25; // widget header gradient top
+  --bg3: #1a2535; // input background, hover states
+  --bg4: #1f2d3d; // button hover
 
   // ── Borders ─────────────────────────────────────────────────
-  --bdr:  #1e2d42;   // default border
-  --bdrH: #2a4060;   // hovered border
-  --bdrA: #1d4ed8;   // active / dragging border
+  --bdr: #1e2d42; // default border
+  --bdrH: #2a4060; // hovered border
+  --bdrA: #1d4ed8; // active / dragging border
 
   // ── Text ────────────────────────────────────────────────────
-  --txt0: #e8edf5;   // primary text
-  --txt1: #8fa3be;   // secondary text
-  --txt2: #526070;   // muted / label text
+  --txt0: #e8edf5; // primary text
+  --txt1: #8fa3be; // secondary text
+  --txt2: #526070; // muted / label text
 
   // ── Accent Colors ───────────────────────────────────────────
-  --acc:  #3b82f6;   // blue accent
-  --acc2: #60a5fa;   // lighter blue
-  --grn:  #22c55e;   // green — success, trend up
-  --red:  #ef4444;   // red — danger, trend down
-  --amb:  #f59e0b;   // amber — warning, locked badge
-  --pur:  #a78bfa;   // purple — bring to front, templates
+  --acc: #3b82f6; // blue accent
+  --acc2: #60a5fa; // lighter blue
+  --grn: #22c55e; // green — success, trend up
+  --red: #ef4444; // red — danger, trend down
+  --amb: #f59e0b; // amber — warning, locked badge
+  --pur: #a78bfa; // purple — bring to front, templates
 
   // ── Chart Colors ────────────────────────────────────────────
   --chart-1: #3b82f6;
@@ -46,80 +46,82 @@
   --chart-8: #ec4899;
 
   // ── Widget Type Colors (matches CATALOG) ────────────────────
-  --color-stat:      #3b82f6;
+  --color-stat: #3b82f6;
   --color-analytics: #22c55e;
-  --color-bar:       #f59e0b;
-  --color-line:      #06b6d4;
-  --color-pie:       #a78bfa;
-  --color-table:     #38bdf8;
-  --color-progress:  #f97316;
-  --color-note:      #94a3b8;
-  --color-section:   #64748b;
+  --color-bar: #f59e0b;
+  --color-line: #06b6d4;
+  --color-pie: #a78bfa;
+  --color-table: #38bdf8;
+  --color-progress: #f97316;
+  --color-note: #94a3b8;
+  --color-section: #64748b;
 
   // ── Spacing ─────────────────────────────────────────────────
-  --gap:        10px;   // grid gap between cells
-  --row-h:      80px;   // grid row height
-  --hdr-h:      40px;   // widget header height
-  --sidebar-w:  210px;  // sidebar width
-  --toolbar-h:  52px;   // top toolbar height
+  --gap: 10px; // grid gap between cells
+  --row-h: 80px; // grid row height
+  --hdr-h: 40px; // widget header height
+  --sidebar-w: 210px; // sidebar width
+  --toolbar-h: 52px; // top toolbar height
 
   // ── Border Radius ───────────────────────────────────────────
-  --radius-sm:  5px;
-  --radius-md:  8px;
-  --radius-lg:  10px;
-  --radius-xl:  14px;
+  --radius-sm: 5px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
 
   // ── Shadows ─────────────────────────────────────────────────
-  --shadow-card:    0 2px 12px rgba(0, 0, 0, 0.35);
-  --shadow-modal:   0 24px 64px rgba(0, 0, 0, 0.7);
-  --shadow-ctx:     0 16px 40px rgba(0, 0, 0, 0.7),
-                    0 0 0 1px #1e2d42;
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.35);
+  --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.7);
+  --shadow-ctx: 0 16px 40px rgba(0, 0, 0, 0.7),
+    0 0 0 1px #1e2d42;
 
   // ── Transitions ─────────────────────────────────────────────
-  --transition-fast:   all 0.12s ease;
-  --transition-base:   all 0.15s ease;
-  --transition-slow:   all 0.25s ease;
+  --transition-fast: all 0.12s ease;
+  --transition-base: all 0.15s ease;
+  --transition-slow: all 0.25s ease;
 
   // ── Typography ──────────────────────────────────────────────
-  --font-sans:  'Outfit', sans-serif;
-  --font-mono:  'JetBrains Mono', monospace;
+  // --font-sans:  'Outfit', sans-serif;
+  // --font-mono:  'JetBrains Mono', monospace;
+  --font-sans: 'Onest', sans-serif;
+  --font-mono: 'Geist Mono', monospace;
 
   // ── Z-index Scale ───────────────────────────────────────────
-  --z-widget:       1;
+  --z-widget: 1;
   --z-widget-front: 100;
-  --z-selected:     150;
-  --z-active:       200;
-  --z-minimap:      300;
-  --z-toolbar:      400;
-  --z-modal:        1000;
+  --z-selected: 150;
+  --z-active: 200;
+  --z-minimap: 300;
+  --z-toolbar: 400;
+  --z-modal: 1000;
   --z-ctx-backdrop: 8000;
-  --z-ctx-menu:     8001;
+  --z-ctx-menu: 8001;
 
   // ── Widget State Colors ─────────────────────────────────────
-  --widget-border-default:   var(--bdr);
-  --widget-border-hover:     var(--bdrH);
-  --widget-border-selected:  var(--acc);
-  --widget-border-active:    var(--bdrA);
-  --widget-border-front:     #7c3aed88;
+  --widget-border-default: var(--bdr);
+  --widget-border-hover: var(--bdrH);
+  --widget-border-selected: var(--acc);
+  --widget-border-active: var(--bdrA);
+  --widget-border-front: #7c3aed88;
   --widget-border-animating: #22c55ecc;
 
   // ── Status Badge Colors ─────────────────────────────────────
-  --status-paid-bg:      #052e16;
-  --status-paid-fg:      #22c55e;
-  --status-pending-bg:   #2d1b01;
-  --status-pending-fg:   #f59e0b;
-  --status-failed-bg:    #2d0707;
-  --status-failed-fg:    #ef4444;
-  --status-active-bg:    #03224c;
-  --status-active-fg:    #3b82f6;
-  --status-inactive-bg:  #1c1c1c;
-  --status-inactive-fg:  #64748b;
-  --status-shipped-bg:   #052e16;
-  --status-shipped-fg:   #10b981;
-  --status-refunded-bg:  #2a1a3e;
-  --status-refunded-fg:  #a78bfa;
-  --status-draft-bg:     #1c1c1c;
-  --status-draft-fg:     #64748b;
+  --status-paid-bg: #052e16;
+  --status-paid-fg: #22c55e;
+  --status-pending-bg: #2d1b01;
+  --status-pending-fg: #f59e0b;
+  --status-failed-bg: #2d0707;
+  --status-failed-fg: #ef4444;
+  --status-active-bg: #03224c;
+  --status-active-fg: #3b82f6;
+  --status-inactive-bg: #1c1c1c;
+  --status-inactive-fg: #64748b;
+  --status-shipped-bg: #052e16;
+  --status-shipped-fg: #10b981;
+  --status-refunded-bg: #2a1a3e;
+  --status-refunded-fg: #a78bfa;
+  --status-draft-bg: #1c1c1c;
+  --status-draft-fg: #64748b;
 
   // ── Color-mix base (used for hover tints) ───────────────────
   --mix-base: #000000;
@@ -131,14 +133,14 @@
 [data-theme="light"] {
 
   // ── Backgrounds ─────────────────────────────────────────────
-  --bg0:  #eef1f6;   // canvas background
-  --bg1:  #ffffff;   // card / sidebar background
-  --bg2:  #f4f6fa;   // widget header
-  --bg3:  #e8edf6;   // input background, hover states
-  --bg4:  #dce3ef;   // button hover
+  --bg0: #eef1f6; // canvas background
+  --bg1: #ffffff; // card / sidebar background
+  --bg2: #f4f6fa; // widget header
+  --bg3: #e8edf6; // input background, hover states
+  --bg4: #dce3ef; // button hover
 
   // ── Borders ─────────────────────────────────────────────────
-  --bdr:  #cdd5e0;
+  --bdr: #cdd5e0;
   --bdrH: #93b4d4;
   --bdrA: #1d4ed8;
 
@@ -148,32 +150,32 @@
   --txt2: #94a3b8;
 
   // ── Shadows ─────────────────────────────────────────────────
-  --shadow-card:  0 2px 12px rgba(0, 0, 0, 0.10);
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.10);
   --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.22);
-  --shadow-ctx:   0 16px 40px rgba(0, 0, 0, 0.14),
-                  0 0 0 1px #cdd5e0;
+  --shadow-ctx: 0 16px 40px rgba(0, 0, 0, 0.14),
+    0 0 0 1px #cdd5e0;
 
   // ── Widget State Colors ──────────────────────────────────────
-  --widget-border-front:     #7c3aed55;
+  --widget-border-front: #7c3aed55;
   --widget-border-animating: #22c55e99;
 
   // ── Status Badge Colors ─────────────────────────────────────
-  --status-paid-bg:      #dcfce7;
-  --status-paid-fg:      #16a34a;
-  --status-pending-bg:   #fef3c7;
-  --status-pending-fg:   #d97706;
-  --status-failed-bg:    #fee2e2;
-  --status-failed-fg:    #dc2626;
-  --status-active-bg:    #dbeafe;
-  --status-active-fg:    #1d4ed8;
-  --status-inactive-bg:  #f1f5f9;
-  --status-inactive-fg:  #64748b;
-  --status-shipped-bg:   #d1fae5;
-  --status-shipped-fg:   #059669;
-  --status-refunded-bg:  #ede9fe;
-  --status-refunded-fg:  #7c3aed;
-  --status-draft-bg:     #f1f5f9;
-  --status-draft-fg:     #64748b;
+  --status-paid-bg: #dcfce7;
+  --status-paid-fg: #16a34a;
+  --status-pending-bg: #fef3c7;
+  --status-pending-fg: #d97706;
+  --status-failed-bg: #fee2e2;
+  --status-failed-fg: #dc2626;
+  --status-active-bg: #dbeafe;
+  --status-active-fg: #1d4ed8;
+  --status-inactive-bg: #f1f5f9;
+  --status-inactive-fg: #64748b;
+  --status-shipped-bg: #d1fae5;
+  --status-shipped-fg: #059669;
+  --status-refunded-bg: #ede9fe;
+  --status-refunded-fg: #7c3aed;
+  --status-draft-bg: #f1f5f9;
+  --status-draft-fg: #64748b;
 
   // ── Color-mix base (used for hover tints) ───────────────────
   --mix-base: #ffffff;

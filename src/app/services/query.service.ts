@@ -1,11 +1,11 @@
 import { Injectable, signal } from '@angular/core';
 
-import epxConfigData from '../test-cases/epx-config.json';
-import epxMockData from '../test-cases/epx-mock-data.json';
-import accountingConfigData from '../test-cases/accounting-config.json';
-import accountingMockData from '../test-cases/accounting-mock-data.json';
-import prescriptionsConfigData from '../test-cases/prescriptions-config.json';
-import prescriptionsMockData from '../test-cases/prescriptions-mock-data.json';
+import { EPX_SCHEMA_CONFIG }           from '../test-cases/epx-config';
+import { EPX_MOCK_DATA }               from '../test-cases/epx-mock-data';
+import { ACCOUNTING_SCHEMA_CONFIG }    from '../test-cases/accounting-config';
+import { ACCOUNTING_MOCK_DATA }        from '../test-cases/accounting-mock-data';
+import { PRESCRIPTIONS_SCHEMA_CONFIG } from '../test-cases/prescriptions-config';
+import { PRESCRIPTIONS_MOCK_DATA }     from '../test-cases/prescriptions-mock-data';
 
 import {
   ProductConfig, MockDatabase, EntityDef, FieldDef,
@@ -37,15 +37,15 @@ export class QueryService {
   // ── Data registries ─────────────────────────────────────────────────────
 
   private readonly configs: Record<string, ProductConfig> = {
-    'epx':           epxConfigData as unknown as ProductConfig,
-    'accounting':    accountingConfigData as unknown as ProductConfig,
-    'prescriptions': prescriptionsConfigData as unknown as ProductConfig,
+    'epx':           EPX_SCHEMA_CONFIG           as unknown as ProductConfig,
+    'accounting':    ACCOUNTING_SCHEMA_CONFIG    as unknown as ProductConfig,
+    'prescriptions': PRESCRIPTIONS_SCHEMA_CONFIG as unknown as ProductConfig,
   };
 
   private readonly databases: Record<string, MockDatabase> = {
-    'epx':           epxMockData as unknown as MockDatabase,
-    'accounting':    accountingMockData as unknown as MockDatabase,
-    'prescriptions': prescriptionsMockData as unknown as MockDatabase,
+    'epx':           EPX_MOCK_DATA           as unknown as MockDatabase,
+    'accounting':    ACCOUNTING_MOCK_DATA    as unknown as MockDatabase,
+    'prescriptions': PRESCRIPTIONS_MOCK_DATA as unknown as MockDatabase,
   };
 
   // ── Global filters (dashboard-level, auto-applied to all queries) ────────

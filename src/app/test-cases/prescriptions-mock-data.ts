@@ -1,4 +1,5 @@
-{
+// Auto-converted from prescriptions-mock-data.json
+export const PRESCRIPTIONS_MOCK_DATA = {
   "product": "prescriptions",
   "description": "In-memory database for Prescriptions product. Keys match entity.schema and entity.table from prescriptions-config.json. Column names match field.column values exactly.",
   "schemas": {
@@ -169,4 +170,4 @@
     "EC-RX_PRIORITY_ALL": "All 3 priority values present: routine(25), urgent(7 — rx-002/006/010/013/017/022/024/026), emergency(3 — rx-005/019/032) — use for IN/NOT_IN and groupBy filter demos",
     "EC-RX_PRIORITY_EMERGENCY": "Only 3 emergency prescriptions: rx-005 (tramadol post-op), rx-019 (diazepam acute anxiety), rx-032 (controlled substance quota) — EQ filter priority='emergency' returns exactly 3 rows"
   }
-}
+} as const;

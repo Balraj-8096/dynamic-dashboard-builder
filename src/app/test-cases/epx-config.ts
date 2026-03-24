@@ -1,4 +1,5 @@
-{
+// Auto-converted from epx-config.json
+export const EPX_SCHEMA_CONFIG = {
   "product": {
     "slug": "epx",
     "display_name": "EPX",
@@ -550,4 +551,4 @@
       ]
     }
   ]
-}
+} as const;

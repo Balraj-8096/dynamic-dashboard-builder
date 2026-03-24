@@ -1,4 +1,5 @@
-{
+// Auto-converted from prescriptions-config.json
+export const PRESCRIPTIONS_SCHEMA_CONFIG = {
   "product": {
     "slug": "prescriptions",
     "display_name": "Prescriptions",
@@ -523,4 +524,4 @@
       ]
     }
   ]
-}
+} as const;

@@ -1,4 +1,5 @@
-{
+// Auto-converted from epx-mock-data.json
+export const EPX_MOCK_DATA = {
   "product": "epx",
   "description": "In-memory database for EPX product. Keys match entity.schema and entity.table from epx-config.json. Column names match field.column values exactly.",
   "schemas": {
@@ -220,4 +221,4 @@
     "EC-APPT_TYPE_ALL": "All 5 appointment_type values are present: consultation(17), follow_up(11), procedure(9), screening(5), emergency(1) — use for IN/NOT_IN and groupBy demos",
     "EC-APPT_TYPE_EMERGENCY": "appt-040 is the only emergency type — EQ filter on appointment_type='emergency' returns exactly 1 row"
   }
-}
+} as const;
