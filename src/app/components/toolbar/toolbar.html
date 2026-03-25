@@ -33,14 +33,14 @@
       </span>
     }
 
-    <span class="widget-count">{{ widgetCount }}w</span>
+    <span class="widget-count">{{ widgetCount }} widget{{ widgetCount !== 1 ? 's' : '' }}</span>
   </div>
 
   <!-- ── CENTER CLUSTER ────────────────────────────────────────── -->
   <div class="cluster cluster--center">
 
     <!-- Add Widget -->
-    <button class="btn-add" (click)="svc.openWizard(null)" title="Add a new widget">
+    <button class="btn-add" (click)="openWizard()" title="Add a new widget">
       + Add Widget
     </button>
 
@@ -92,27 +92,28 @@
 
     <div class="vdivider"></div>
 
+    <div class="utility-group desktop-only">
     <!-- Import -->
-    <button class="btn-text desktop-only" title="Import JSON layout" (click)="svc.openImport()">
+    <button class="btn-text btn-text--utility" title="Import JSON layout" (click)="svc.openImport()">
       ⬆ import
     </button>
 
     <!-- Export -->
-    <button class="btn-text desktop-only" title="Export layout as JSON" (click)="svc.exportLayout()">
+    <button class="btn-text btn-text--utility" title="Export layout as JSON" (click)="svc.exportLayout()">
       ⬇ export
     </button>
 
     <!-- Help -->
-    <button class="btn-icon desktop-only" title="How to use (help)" (click)="svc.openHelp()">?</button>
+    <button class="btn-icon" title="How to use (help)" (click)="svc.openHelp()">?</button>
 
     <!-- Theme toggle -->
     <button
-      class="btn-icon btn-theme desktop-only"
+      class="btn-icon btn-theme"
       [title]="themeSvc.theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
       (click)="themeSvc.toggle()"
     >{{ themeSvc.theme() === 'dark' ? '☀' : '☾' }}</button>
 
-    <div class="vdivider"></div>
+    </div>
 
     <!-- View Dashboard -->
     <button

@@ -124,6 +124,7 @@
   align-items: center;
   justify-content: center;
   gap: 14px;
+  padding: 28px;
   pointer-events: none;
 }
 
@@ -134,21 +135,78 @@
   line-height: 1;
 }
 
+.empty-title {
+  max-width: 18ch;
+  font-size: clamp(26px, 4vw, 36px);
+  line-height: 1.06;
+  font-weight: 700;
+  color: var(--txt0);
+}
+
 .empty-hint {
+  max-width: 58ch;
   font-size: 14px;
-  color: var(--txt2);
-  opacity: 0.5;
+  line-height: 1.7;
+  color: var(--txt1);
+  opacity: 1;
+}
+
+.empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+.empty-btn {
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--bdr);
+  background: color-mix(in srgb, var(--bg1) 82%, transparent);
+  color: var(--txt0);
+  cursor: pointer;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+
+  &:hover {
+    background: var(--bg3);
+    border-color: var(--bdrH);
+    transform: translateY(-1px);
+  }
+
+  &--primary {
+    border-color: color-mix(in srgb, var(--acc) 40%, transparent);
+    background: linear-gradient(135deg, #1d4ed8, var(--acc));
+    color: #fff;
+    box-shadow: 0 12px 28px color-mix(in srgb, var(--acc) 22%, transparent);
+  }
+
+  &--accent {
+    border-color: color-mix(in srgb, var(--grn) 30%, transparent);
+    color: var(--grn);
+    background: color-mix(in srgb, var(--grn) 8%, transparent);
+  }
 }
 
 .empty-links {
   display: flex;
   gap: 8px;
-  opacity: 0.4;
+  flex-wrap: wrap;
+  justify-content: center;
+  opacity: 1;
 }
 
 .empty-link {
   font-size: 12px;
   font-family: var(--font-mono);
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg2) 78%, transparent);
+  border: 1px solid color-mix(in srgb, var(--bdr) 80%, transparent);
+  color: var(--txt1);
 
   &--pur { color: var(--pur); }
   &--grn { color: var(--grn); }
@@ -278,6 +336,20 @@
   .empty-state {
     padding: 0 20px;
     text-align: center;
+  }
+
+  .empty-title,
+  .empty-hint {
+    max-width: none;
+  }
+
+  .empty-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .empty-btn {
+    width: 100%;
   }
 
   .empty-links {

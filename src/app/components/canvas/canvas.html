@@ -56,7 +56,13 @@
                     @if (svc.widgetCount() === 0) {
                     <div class="empty-state">
                         <div class="empty-icon">◈</div>
-                        <div class="empty-hint">Click a widget from the sidebar to begin</div>
+                        <div class="empty-title">Start with a flexible layout, then shape it as you go.</div>
+                        <div class="empty-hint">Add a widget from scratch, load a demo, or begin from a template and refine the canvas once the data is in place.</div>
+                        <div class="empty-actions">
+                            <button class="empty-btn empty-btn--primary" (click)="openAddWidgetWizard()">+ Add Widget</button>
+                            <button class="empty-btn" (click)="openTemplates()">Browse Templates</button>
+                            <button class="empty-btn empty-btn--accent" (click)="loadDemo()">Load Demo</button>
+                        </div>
                         <div class="empty-links">
                             <span class="empty-link empty-link--pur">⊟ templates</span>
                             <span class="empty-sep">·</span>

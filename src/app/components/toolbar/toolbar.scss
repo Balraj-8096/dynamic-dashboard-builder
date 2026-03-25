@@ -49,6 +49,18 @@
 .logo-dash    { color: var(--txt0); }
 .logo-craft   { color: var(--acc2); }
 
+.workspace-badge {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--acc) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--acc) 20%, transparent);
+  color: var(--acc);
+  font-size: 10px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
 // ── Title ─────────────────────────────────────────────────────
 .title-span {
   font-size: 13px;
@@ -85,6 +97,10 @@
   color: var(--txt2);
   font-family: var(--font-mono);
   flex-shrink: 0;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg2) 80%, transparent);
+  border: 1px solid color-mix(in srgb, var(--bdr) 85%, transparent);
 }
 
 // ── Icon buttons (undo/redo/help) ─────────────────────────────
@@ -92,7 +108,7 @@
   width: 30px;
   height: 30px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--bdr);
+  border: none;
   background: transparent;
   color: var(--txt1);
   cursor: pointer;
@@ -146,6 +162,11 @@
       background: color-mix(in srgb, var(--red) 14%, var(--mix-base));
       color: var(--red);
     }
+  }
+
+  &--utility {
+    border-color: transparent;
+    background: transparent;
   }
 }
 
@@ -256,6 +277,16 @@
     opacity: 0.4;
     cursor: not-allowed;
   }
+}
+
+.utility-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid var(--bdr);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg2) 76%, transparent);
 }
 
 .btn-sidebar-toggle,

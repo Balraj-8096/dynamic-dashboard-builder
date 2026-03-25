@@ -253,6 +253,18 @@ export class Canvas implements OnInit, OnDestroy {
     this.svc.closeToolbarMenu();
   }
 
+  openAddWidgetWizard(): void {
+    this.svc.openWizard(null);
+  }
+
+  openTemplates(): void {
+    this.svc.openTemplates();
+  }
+
+  loadDemo(): void {
+    this.svc.loadDemo();
+  }
+
   openSelectedWidgetEditor(): void {
     const widget = this.svc.selectedWidget();
     if (!widget) return;
