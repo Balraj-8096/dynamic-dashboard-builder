@@ -1,17 +1,38 @@
-<div class="section-hdr">Filters</div>
+<div class="filter-builder-shell">
+  <div class="filter-builder-intro">
+    <div>
+      <div class="filter-builder-kicker">Optional Refinement</div>
+      <div class="filter-builder-title">Limit which records this widget includes</div>
+      <div class="filter-builder-copy">Groups are always combined with AND. Inside each group, switch between AND or OR to control how its conditions match.</div>
+    </div>
+    <div class="filter-builder-stats">
+      <span class="filter-builder-stat">{{ filterGroups.length }} group{{ filterGroups.length === 1 ? '' : 's' }}</span>
+      <span class="filter-builder-stat">{{ totalConditions }} condition{{ totalConditions === 1 ? '' : 's' }}</span>
+    </div>
+  </div>
+
+  @if (!hasGroups) {
+    <div class="filter-empty-card">
+      <div class="filter-empty-title">No filters added</div>
+      <div class="filter-empty-copy">Add a filter group when you want to narrow the query to specific entities, fields, or time ranges.</div>
+      <button class="btn-add-dashed" (click)="addGroup()">+ Add First Filter Group</button>
+    </div>
+  } @else {
+  <div class="section-hdr">Filters</div>
 
 @for (g of filterGroups; track g.id; let gi = $index) {
 
   @if (gi > 0) {
-    <div class="filter-group-sep">AND</div>
+    <div class="filter-group-sep">AND between groups</div>
   }
 
-  <div class="item-card" style="margin-bottom:8px">
+  <div class="item-card filter-group-card" style="margin-bottom:8px">
 
     <!-- Group header: number + logic toggle + remove -->
-    <div class="item-card-header">
-      <div style="display:flex; align-items:center; gap:8px">
+    <div class="item-card-header filter-group-card__header">
+      <div>
         <span class="item-card-title">Group {{ gi + 1 }}</span>
+        <div class="filter-group-card__meta">{{ groupSummary(g) }}</div>
         <button class="btn-logic" [class.is-or]="g.logic === 'OR'"
           (click)="toggleGroupLogic(gi)">{{ g.logic }}</button>
       </div>
@@ -22,12 +43,16 @@
     @for (c of g.conditions; track $index; let ci = $index) {
 
       @if (ci > 0) {
-        <div class="filter-cond-sep">{{ g.logic }}</div>
+        <div class="filter-cond-sep">{{ g.logic }} within group</div>
       }
 
-      <div style="margin-bottom:8px">
+      <div class="filter-condition-card">
+        <div class="filter-condition-card__header">
+          <span class="filter-condition-card__title">Condition {{ ci + 1 }}</span>
+          <span class="filter-condition-card__summary">{{ conditionValueSummary(c) }}</span>
+        </div>
         <!-- Entity / Field / Operator row -->
-        <div class="three-col" style="margin-bottom:6px">
+        <div class="three-col filter-grid" style="margin-bottom:6px">
           <div class="field-row">
             <label class="field-label">Entity</label>
             <select class="sel sel--sm"
@@ -54,38 +79,43 @@
               [ngModel]="c.operator"
               (ngModelChange)="onOperatorChange(gi, ci, $event)">
               @for (op of operators(c.entity, c.field); track op) {
-                <option [value]="op">{{ op }}</option>
+                <option [value]="op">{{ operatorLabel(op) }}</option>
               }
             </select>
           </div>
         </div>
 
         <!-- Value row -->
-        <div style="display:flex; gap:8px; align-items:center">
+        <div class="filter-value-row">
+          <div class="field-row filter-value-row__input">
+            <label class="field-label">Value</label>
           @if (!isNoValue(c.operator)) {
             @if (isDateRange(c.operator)) {
-              <select class="sel sel--sm" style="flex:1"
+              <select class="sel sel--sm"
                 [ngModel]="c.dateRange?.preset ?? ''"
                 (ngModelChange)="updateCondition(gi, ci, { dateRange: { preset: $event } })">
                 <option value="">— custom range —</option>
                 @for (p of presetList(); track p) {
-                  <option [value]="p">{{ p }}</option>
+                  <option [value]="p">{{ presetLabel(p) }}</option>
                 }
               </select>
+              <div class="field-hint">Use a preset range now, or keep it on custom and supply the exact dates later.</div>
             } @else if (isMultiValue(c.operator)) {
-              <input class="inp inp--sm" style="flex:1" type="text"
+              <input class="inp inp--sm" type="text"
                 placeholder="val1, val2, …"
                 [value]="valuesStr(c)"
                 (change)="setValues(gi, ci, $any($event.target).value)" />
+              <div class="field-hint">Separate multiple values with commas.</div>
             } @else {
-              <input class="inp inp--sm" style="flex:1" type="text"
+              <input class="inp inp--sm" type="text"
                 placeholder="value"
                 [value]="$any(c.value) ?? ''"
                 (change)="updateCondition(gi, ci, { value: $any($event.target).value })" />
             }
           } @else {
-            <span style="flex:1; font-size:11px; color:var(--txt2); font-style:italic">no value needed</span>
+            <div class="filter-value-row__empty">No value is needed for this operator.</div>
           }
+          </div>
           <button class="btn-remove-sm" (click)="removeCondition(gi, ci)">✕</button>
         </div>
       </div>
@@ -97,3 +127,5 @@
 }
 
 <button class="btn-add-dashed" (click)="addGroup()">+ Add Filter Group</button>
+  }
+</div>

@@ -46,6 +46,14 @@ export class FilterBuilder {
     return this.fieldsFor(entity).filter(f => f.filterable);
   }
 
+  get hasGroups(): boolean {
+    return this.filterGroups.length > 0;
+  }
+
+  get totalConditions(): number {
+    return this.filterGroups.reduce((sum, group) => sum + group.conditions.length, 0);
+  }
+
   // ── Group CRUD ──────────────────────────────────────────────────────────
 
   addGroup(): void {
@@ -129,6 +137,58 @@ export class FilterBuilder {
   }
 
   presetList(): DateRangePreset[] { return Object.values(DateRangePreset); }
+
+  groupSummary(group: FilterGroup): string {
+    const count = group.conditions.length;
+    const noun = count === 1 ? 'condition' : 'conditions';
+    return `${count} ${noun} using ${group.logic}`;
+  }
+
+  operatorLabel(op: FilterOperator): string {
+    const labels: Record<FilterOperator, string> = {
+      [FilterOperator.Eq]: 'Equals',
+      [FilterOperator.Neq]: 'Does not equal',
+      [FilterOperator.In]: 'Is any of',
+      [FilterOperator.NotIn]: 'Is none of',
+      [FilterOperator.Gt]: 'Greater than',
+      [FilterOperator.Gte]: 'Greater or equal',
+      [FilterOperator.Lt]: 'Less than',
+      [FilterOperator.Lte]: 'Less or equal',
+      [FilterOperator.IsNull]: 'Is empty',
+      [FilterOperator.IsNotNull]: 'Is not empty',
+      [FilterOperator.DateRange]: 'Is within date range',
+      [FilterOperator.Contains]: 'Contains',
+    };
+    return labels[op] ?? op;
+  }
+
+  presetLabel(preset: DateRangePreset): string {
+    const labels: Record<DateRangePreset, string> = {
+      [DateRangePreset.Today]: 'Today',
+      [DateRangePreset.Yesterday]: 'Yesterday',
+      [DateRangePreset.Last7Days]: 'Last 7 days',
+      [DateRangePreset.Last30Days]: 'Last 30 days',
+      [DateRangePreset.Last90Days]: 'Last 90 days',
+      [DateRangePreset.ThisMonth]: 'This month',
+      [DateRangePreset.LastMonth]: 'Last month',
+      [DateRangePreset.ThisYear]: 'This year',
+      [DateRangePreset.LastYear]: 'Last year',
+    };
+    return labels[preset] ?? preset;
+  }
+
+  conditionValueSummary(c: FilterCondition): string {
+    if (this.isNoValue(c.operator)) return 'No value needed';
+    if (this.isDateRange(c.operator)) {
+      return c.dateRange?.preset ? this.presetLabel(c.dateRange.preset) : 'Custom date range';
+    }
+    if (this.isMultiValue(c.operator)) {
+      const count = c.values?.length ?? 0;
+      return count ? `${count} value${count === 1 ? '' : 's'}` : 'Add one or more values';
+    }
+    const value = c.value;
+    return value === undefined || value === null || value === '' ? 'Enter a value' : String(value);
+  }
 
   private emit(groups: FilterGroup[]): void {
     this.filterGroupsChange.emit(groups);
