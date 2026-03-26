@@ -1,4 +1,4 @@
-# CLAUDE.md — DnamicDashboardBuilder
+# CLAUDE.md — DynamicDashboardBuilder
 
 Comprehensive context for AI-assisted development on this project.
 
@@ -6,7 +6,7 @@ Comprehensive context for AI-assisted development on this project.
 
 ## Project Overview
 
-**DnamicDashboardBuilder** (internal name: **DASHCRAFT**) is a no-code Angular dashboard builder. Users drag-and-drop widgets onto a 12-column grid canvas, configure them with data queries or static values, and publish to a read-only view mode.
+**DynamicDashboardBuilder** (internal name: **DASHCRAFT**) is a no-code Angular dashboard builder. Users drag-and-drop widgets onto a 12-column grid canvas, configure them with data queries or static values, and publish to a read-only view mode.
 
 - **Live URL:** deployed via GitHub Pages (`npm run deploy`)
 - **Dev server:** `npm start` → `http://localhost:4200`

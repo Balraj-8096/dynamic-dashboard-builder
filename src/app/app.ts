@@ -9,8 +9,8 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './app.scss'
 })
 export class App {
-  protected readonly title = signal('dnamic-dashboard-builder');
+  protected readonly title = signal('dynamic-dashboard-builder');
 
-  //ng build --configuration production --base-href /dnamic-dashboard-builder/
-  //npx angular-cli-ghpages --dir=dist/dnamic-dashboard-builder/browser
+  //ng build --configuration production --base-href /dynamic-dashboard-builder/
+  //npx angular-cli-ghpages --dir=dist/dynamic-dashboard-builder/browser
 }

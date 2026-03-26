@@ -7,7 +7,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "dnamic-dashboard-builder": {
+    "dynamic-dashboard-builder": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -65,10 +65,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "dnamic-dashboard-builder:build:production"
+              "buildTarget": "dynamic-dashboard-builder:build:production"
             },
             "development": {
-              "buildTarget": "dnamic-dashboard-builder:build:development"
+              "buildTarget": "dynamic-dashboard-builder:build:development"
             }
           },
           "defaultConfiguration": "development"
