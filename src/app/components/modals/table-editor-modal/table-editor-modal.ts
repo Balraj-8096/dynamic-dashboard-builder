@@ -19,7 +19,8 @@ import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-
 
 import { Widget, TableConfig, TableColumn } from '../../../core/interfaces';
 import {
-  DerivedColumnDef, FieldType, FilterGroup, SortDirection, TableQueryConfig, TableQueryResult,
+  DerivedColumnDef, EntityDef, FieldType, FilterGroup, SortDirection,
+  TableQueryConfig, TableQueryResult,
 } from '../../../core/query-types';
 import { QueryService } from '../../../services/query.service';
 import { STATUS_MAP } from '../../../core/constants';
@@ -60,10 +61,9 @@ export class TableEditorModal implements OnInit {
   readonly PRODUCTS      = ['epx', 'accounting', 'prescriptions'] as const;
 
   // ── Widget meta ───────────────────────────────────────────────────────────
-  title        = '';
-  product      = '';
-  entityList:   string[] = [];
-  newAddEntity = '';
+  title      = '';
+  product    = '';
+  rootEntity = '';
 
   // ── Display options ───────────────────────────────────────────────────────
   striped      = false;
@@ -71,11 +71,9 @@ export class TableEditorModal implements OnInit {
   statusColumn = false;
 
   // ── Columns ───────────────────────────────────────────────────────────────
-  editorCols:   EditorColumn[] = [];
-  newColEntity  = '';
-  newColField   = '';
-  colSearch     = '';
-  editingColIdx = -1;
+  editorCols:     EditorColumn[] = [];
+  editingColIdx   = -1;
+  showFieldPicker = false;
 
   // ── Sort ──────────────────────────────────────────────────────────────────
   sortEntity = '';
@@ -90,11 +88,11 @@ export class TableEditorModal implements OnInit {
   filterGroups: FilterGroup[] = [];
 
   // ── Derived column creator / editor ──────────────────────────────────────
-  showDerivedPanel    = false;
-  editingDerivedColIdx = -1;   // >= 0 means editing an existing derived col
-  drvLabel            = '';
+  showDerivedPanel     = false;
+  editingDerivedColIdx = -1;
+  drvLabel             = '';
   drvMode: DerivedColumnDef['mode'] = 'concat';
-  drvSeparator        = ' ';
+  drvSeparator         = ' ';
   drvSources: { entity: string; field: string }[] = [];
 
   get isDerivedPanelEditMode(): boolean { return this.editingDerivedColIdx >= 0; }
@@ -117,7 +115,7 @@ export class TableEditorModal implements OnInit {
   private localHistIdx  = -1;
   get canLocalUndo(): boolean { return this.localHistIdx > 0; }
 
-  // ── Derived ───────────────────────────────────────────────────────────────
+  // ── Computed ──────────────────────────────────────────────────────────────
   get visibleEditorCols(): EditorColumn[] {
     return this.editorCols.filter(c => c.visible);
   }
@@ -127,7 +125,7 @@ export class TableEditorModal implements OnInit {
   }
 
   get canSave(): boolean {
-    return !!(this.product && this.entityList.length && this.visibleEditorCols.length);
+    return !!(this.product && this.rootEntity && this.visibleEditorCols.length);
   }
 
   get canCreateDerived(): boolean {
@@ -152,17 +150,16 @@ export class TableEditorModal implements OnInit {
     this.statusColumn = cfg.statusColumn ?? false;
 
     if (qcfg) {
-      this.product      = qcfg.product    ?? '';
-      this.entityList   = [...(qcfg.entities ?? [])];
-      this.sortEntity   = qcfg.sort?.entity    ?? '';
-      this.sortField    = qcfg.sort?.field     ?? '';
+      this.product      = qcfg.product        ?? '';
+      this.rootEntity   = qcfg.entities?.[0]  ?? '';
+      this.sortEntity   = qcfg.sort?.entity   ?? '';
+      this.sortField    = qcfg.sort?.field    ?? '';
       this.sortDir      = qcfg.sort?.direction ?? '';
-      this.pageSize     = qcfg.pageSize        ?? 20;
-      this.filterGroups = qcfg.filterGroups    ? [...qcfg.filterGroups] : [];
+      this.pageSize     = qcfg.pageSize       ?? 20;
+      this.filterGroups = qcfg.filterGroups   ? [...qcfg.filterGroups] : [];
 
       // Build normal EditorColumns from query config.
-      // Exclude source-only fields that were added to queryConfig.columns solely to support
-      // derived column computation — they should not be restored as visible columns.
+      // Exclude source-only fields added solely to support derived column computation.
       const cfgColMap = new Map((cfg.columns ?? []).map(c => [c.key, c]));
       const derivedSourceKeys = new Set<string>(
         (qcfg.derivedColumns ?? []).flatMap(def =>
@@ -172,9 +169,7 @@ export class TableEditorModal implements OnInit {
       const normalCols: EditorColumn[] = (qcfg.columns ?? [])
         .filter(c => {
           const key = `${c.entity}.${c.field}`;
-          // Always include if cfg.columns (user's display config) has it
           if (cfgColMap.has(key)) return true;
-          // Otherwise exclude source-only fields used only by derived columns
           return !derivedSourceKeys.has(key);
         })
         .map(c => {
@@ -216,19 +211,12 @@ export class TableEditorModal implements OnInit {
         this.editorCols = cfg.columns
           .map(c => byKey.get(c.key))
           .filter((c): c is EditorColumn => !!c);
-        // Append any query-only columns not in cfg.columns (edge-case safety)
         for (const c of normalCols) {
           if (!this.editorCols.find(e => e.key === c.key)) this.editorCols.push(c);
         }
       } else {
         this.editorCols = [...normalCols, ...derivedCols];
       }
-    }
-
-    // Prime the add-column picker
-    if (this.entityList.length) {
-      this.newColEntity = this.entityList[0];
-      this.newColField  = this.fieldsFor(this.newColEntity)[0]?.name ?? '';
     }
 
     this.pushLocalHistory();
@@ -239,15 +227,14 @@ export class TableEditorModal implements OnInit {
   //  Query helpers
   // ─────────────────────────────────────────────────────────────────────────
 
-  get allEntities() {
+  get allEntities(): EntityDef[] {
     return this.product ? this.qsvc.getEntityList(this.product) : [];
   }
 
-  get availableEntities() {
-    const reachable = this.entityList.length
-      ? this.qsvc.getReachableEntities(this.product, this.entityList)
-      : this.allEntities;
-    return reachable.filter(e => !this.entityList.includes(e.name));
+  /** All entities reachable from rootEntity via joins (includes root itself). */
+  get reachableEntities(): EntityDef[] {
+    if (!this.rootEntity || !this.product) return [];
+    return this.qsvc.getReachableEntities(this.product, [this.rootEntity]);
   }
 
   fieldsFor(entity: string) {
@@ -256,69 +243,52 @@ export class TableEditorModal implements OnInit {
     catch { return []; }
   }
 
-  get filteredFields() {
-    const all = this.fieldsFor(this.newColEntity);
-    if (!this.colSearch) return all;
-    const s = this.colSearch.toLowerCase();
-    return all.filter(f => f.name.toLowerCase().includes(s));
+  /** Filter scope = all entities reachable from root (joins resolved automatically). */
+  get filterScope(): string[] {
+    return this.reachableEntities.map(e => e.name);
   }
-
-  get filterScope(): string[] { return this.entityList.filter(Boolean); }
 
   private getFieldDef(entity: string, field: string) {
     return this.fieldsFor(entity).find(f => f.name === field) ?? null;
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  //  Entity operations
+  //  Product / root entity
   // ─────────────────────────────────────────────────────────────────────────
 
-  onNewEntitySelected(entity: string): void {
-    if (!entity) return;
-    this.addEntity();
-  }
-
   onProductChange(): void {
-    this.entityList   = [];
+    this.rootEntity   = '';
     this.editorCols   = [];
-    this.newColEntity = '';
-    this.newColField  = '';
     this.sortEntity   = '';
     this.sortField    = '';
     this.sortDir      = '';
+    this.filterGroups = [];
     this.previewRows  = [];
     this.rowCount     = 0;
     this.pushLocalHistory();
     this.cdr.markForCheck();
   }
 
-  addEntity(): void {
-    if (!this.newAddEntity || this.entityList.includes(this.newAddEntity)) return;
-    this.entityList   = [...this.entityList, this.newAddEntity];
-    this.newAddEntity = '';
-    if (!this.newColEntity && this.entityList.length) {
-      this.newColEntity = this.entityList[0];
-      this.newColField  = this.fieldsFor(this.newColEntity)[0]?.name ?? '';
-    }
-    this.pushLocalHistory();
-    this.refreshPreview();
-  }
-
-  removeEntity(entity: string): void {
-    this.entityList = this.entityList.filter(e => e !== entity);
+  onRootEntityChange(entity: string): void {
+    this.rootEntity = entity;
+    const reachable = new Set(
+      this.qsvc.getReachableEntities(this.product, [entity]).map(e => e.name)
+    );
+    // Drop columns whose entity is no longer reachable from the new root
     this.editorCols = this.editorCols.filter(c => {
-      if (c.derived) return true;   // derived cols don't belong to a single entity
-      return c.entity !== entity;
+      if (c.derived) return true;
+      return reachable.has(c.entity);
     });
-    if (this.sortEntity === entity) {
-      this.sortEntity = this.entityList[0] ?? '';
-      this.sortField  = this.fieldsFor(this.sortEntity)[0]?.name ?? '';
+    // Reset sort if it pointed to an unreachable entity
+    if (!reachable.has(this.sortEntity)) {
+      this.sortEntity = entity;
+      this.sortField  = this.fieldsFor(entity)[0]?.name ?? '';
       this.sortDir    = '';
     }
-    if (this.newColEntity === entity) {
-      this.newColEntity = this.entityList[0] ?? '';
-      this.newColField  = this.fieldsFor(this.newColEntity)[0]?.name ?? '';
-    }
+    // Drop filter conditions whose entity is no longer reachable
+    this.filterGroups = this.filterGroups
+      .map(g => ({ ...g, conditions: g.conditions.filter(c => reachable.has(c.entity)) }))
+      .filter(g => g.conditions.length > 0);
     this.pushLocalHistory();
     this.refreshPreview();
   }
@@ -327,39 +297,32 @@ export class TableEditorModal implements OnInit {
   //  Column operations
   // ─────────────────────────────────────────────────────────────────────────
 
-  onNewColEntityChange(entity: string): void {
-    this.newColEntity = entity;
-    this.colSearch    = '';
-    this.newColField  = this.fieldsFor(entity)[0]?.name ?? '';
+  isColumnSelected(entity: string, field: string): boolean {
+    return this.editorCols.some(c => c.key === `${entity}.${field}`);
   }
 
-  onColSearchChange(search: string): void {
-    this.colSearch  = search;
-    const first     = this.filteredFields[0]?.name;
-    if (first) this.newColField = first;
-    this.cdr.markForCheck();
+  toggleColumn(entity: string, field: string): void {
+    const key = `${entity}.${field}`;
+    const idx = this.editorCols.findIndex(c => c.key === key);
+    if (idx >= 0) {
+      this.removeColumn(idx);
+    } else {
+      const fieldDef = this.getFieldDef(entity, field);
+      this.editorCols = [...this.editorCols, {
+        key,
+        label:   fieldDef?.name ?? field,
+        entity,
+        field,
+        visible: true,
+        type:    fieldDef?.type ?? FieldType.String,
+        width:   'auto',
+      }];
+      this.pushLocalHistory();
+      this.refreshPreview();
+    }
   }
 
-  addColumn(): void {
-    if (!this.newColEntity || !this.newColField) return;
-    const key = `${this.newColEntity}.${this.newColField}`;
-    if (this.editorCols.some(c => c.key === key)) return;
-    const fieldDef = this.getFieldDef(this.newColEntity, this.newColField);
-    this.editorCols = [...this.editorCols, {
-      key,
-      label:   fieldDef?.name ?? this.newColField,
-      entity:  this.newColEntity,
-      field:   this.newColField,
-      visible: true,
-      type:    fieldDef?.type ?? FieldType.String,
-      width:   'auto',
-    }];
-    this.pushLocalHistory();
-    this.refreshPreview();
-  }
-
-  addAllColumns(): void {
-    const entity = this.newColEntity || this.entityList[0];
+  addAllColumnsFromEntity(entity: string): void {
     if (!entity) return;
     const existing = new Set(
       this.editorCols.filter(c => c.entity === entity).map(c => c.field)
@@ -379,6 +342,10 @@ export class TableEditorModal implements OnInit {
     this.editorCols = [...this.editorCols, ...newCols];
     this.pushLocalHistory();
     this.refreshPreview();
+  }
+
+  addAllColumns(): void {
+    this.addAllColumnsFromEntity(this.rootEntity);
   }
 
   removeColumn(i: number): void {
@@ -429,8 +396,7 @@ export class TableEditorModal implements OnInit {
     this.drvLabel     = '';
     this.drvMode      = 'concat';
     this.drvSeparator = ' ';
-    // Pre-populate with first two fields so the form isn't empty
-    const entity  = this.entityList[0] ?? '';
+    const entity  = this.rootEntity;
     const fields  = this.fieldsFor(entity);
     this.drvSources = [
       { entity, field: fields[0]?.name ?? '' },
@@ -460,7 +426,7 @@ export class TableEditorModal implements OnInit {
   }
 
   addDrvSource(): void {
-    const entity = this.entityList[0] ?? '';
+    const entity = this.rootEntity;
     this.drvSources = [
       ...this.drvSources,
       { entity, field: this.fieldsFor(entity)[0]?.name ?? '' },
@@ -499,7 +465,7 @@ export class TableEditorModal implements OnInit {
       // ── Edit existing derived column in-place ──────────────────────────────
       const existing = this.editorCols[this.editingDerivedColIdx];
       const updatedDef: DerivedColumnDef = {
-        key:       existing.key,          // preserve original key
+        key:       existing.key,
         label,
         mode:      this.drvMode,
         sources:   this.drvSources.map(s => ({ ...s })),
@@ -548,7 +514,7 @@ export class TableEditorModal implements OnInit {
 
   onHeaderSortClick(col: EditorColumn): void {
     if (this.editingColIdx >= 0) return;
-    if (col.derived) return;   // derived columns can't be sort keys
+    if (col.derived) return;
     if (this.sortEntity === col.entity && this.sortField === col.field) {
       if      (this.sortDir === SortDirection.Asc)  this.sortDir = SortDirection.Desc;
       else if (this.sortDir === SortDirection.Desc) this.sortDir = '';
@@ -660,7 +626,7 @@ export class TableEditorModal implements OnInit {
 
   get generatedSql(): string {
     const qcfg = this.buildQueryConfig();
-    if (!qcfg?.product) return '-- Configure a product and entities to see the equivalent SQL.';
+    if (!qcfg?.product) return '-- Configure a product and entity to see the equivalent SQL.';
     try {
       const pc = this.qsvc.getConfig(qcfg.product);
       const gf = this.qsvc.globalFilters();
@@ -670,7 +636,6 @@ export class TableEditorModal implements OnInit {
     }
   }
 
-  /** Widget as it would be saved — used by Widget Payload dev section. */
   get devWidget(): Widget {
     const qcfg    = this.buildQueryConfig();
     const columns = this.buildTableColumns();
@@ -695,25 +660,31 @@ export class TableEditorModal implements OnInit {
   // ─────────────────────────────────────────────────────────────────────────
 
   buildQueryConfig(): TableQueryConfig | null {
-    if (!this.product || !this.entityList.length) return null;
+    if (!this.product || !this.rootEntity) return null;
 
     const normalCols  = this.visibleEditorCols.filter(c => !c.derived && c.entity);
     const derivedCols = this.visibleEditorCols.filter(c => c.derived && c.derivedDef);
 
     if (!normalCols.length && !derivedCols.length) return null;
 
-    // Only include actual display columns — NOT derived-column source fields.
-    // The query service automatically fetches source fields when computing derivedColumns.
-    // Adding source fields here would cause them to appear as extra columns in the output.
     const colSet = new Map<string, { entity: string; field: string }>();
     for (const c of normalCols) {
       colSet.set(c.key, { entity: c.entity, field: c.field });
     }
 
+    // Auto-compute the join path from rootEntity + all referenced entities
+    const used = new Set<string>([this.rootEntity]);
+    for (const c of normalCols) used.add(c.entity);
+    for (const c of derivedCols) {
+      if (c.derivedDef) for (const s of c.derivedDef.sources) used.add(s.entity);
+    }
+    if (this.sortDir && this.sortEntity) used.add(this.sortEntity);
+    for (const fg of this.filterGroups) for (const fc of fg.conditions) used.add(fc.entity);
+
     const existingQcfg = (this.widget.config as TableConfig).queryConfig;
     return {
       product:        this.product,
-      entities:       this.qsvc.buildEntityPath(this.product, this.entityList),
+      entities:       this.qsvc.buildEntityPath(this.product, [...used]),
       columns:        [...colSet.values()],
       derivedColumns: derivedCols.length ? derivedCols.map(c => c.derivedDef!) : undefined,
       filterGroups:   this.filterGroups.length ? this.filterGroups : undefined,

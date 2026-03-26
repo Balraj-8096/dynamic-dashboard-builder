@@ -2,12 +2,15 @@
      DASHCRAFT — Table Editor Modal
      Layout:
        1. Top bar       — icon + title + close
-       2. Meta row      — widget title · Source: product · entity path
-       3. Toolbar       — add-column controls · page size · display toggles
-       4. Filter shelf  — collapsible filter builder
-       5. Table         — interactive: drag cols, rename, sort, hide/show, remove
-       6. Bottom bar    — status auto-color toggle + legend
-       7. Footer        — Back · Save
+       2. Meta row      — widget title · Source: product · root entity
+       3. Toolbar       — fields toggle · derived · filters · display toggles
+       4. Field picker  — grouped clickable field chips (collapsible)
+       5. Derived panel — computed column creator (collapsible)
+       6. Filter shelf  — collapsible filter builder
+       7. Table         — interactive: drag cols, rename, sort, hide/show, remove
+       8. Bottom bar    — status auto-color toggle + legend
+       9. Dev Tools     — query/result/sql/payload (collapsible)
+      10. Footer        — Back · Save
 ════════════════════════════════════════════════════════════════ -->
 
 <div class="te-modal">
@@ -31,7 +34,7 @@
 
     <span class="te-meta__sep"></span>
 
-    <!-- Data source: product + entity join path -->
+    <!-- Data source: product + root entity -->
     <div class="te-meta__source">
       <span class="te-meta__source-label">Source</span>
 
@@ -45,33 +48,20 @@
       </select>
 
       @if (product) {
-        <div class="te-entity-path">
-          @for (e of entityList; track e; let i = $index) {
-            @if (i > 0) {
-              <span class="te-path-arrow">→</span>
-            }
-            <span class="te-entity-chip">
-              <span class="te-entity-chip__name">{{ e }}</span>
-              <button class="te-entity-chip__remove"
-                (click)="removeEntity(e)"
-                [title]="'Remove ' + e">×</button>
-            </span>
+        <select class="te-sel te-meta__entity-sel"
+          [(ngModel)]="rootEntity"
+          (ngModelChange)="onRootEntityChange($event)">
+          <option value="">— entity —</option>
+          @for (e of allEntities; track e.name) {
+            <option [value]="e.name">{{ e.name }}</option>
           }
+        </select>
 
-          @if (availableEntities.length) {
-            @if (entityList.length) {
-              <span class="te-path-arrow te-path-arrow--join">⊕</span>
-            }
-            <select class="te-sel te-entity-add-sel"
-              [(ngModel)]="newAddEntity"
-              (ngModelChange)="onNewEntitySelected($event)">
-              <option value="">{{ entityList.length ? 'join entity…' : 'select entity…' }}</option>
-              @for (e of availableEntities; track e.name) {
-                <option [value]="e.name">{{ e.name }}</option>
-              }
-            </select>
-          }
-        </div>
+        @if (rootEntity && reachableEntities.length > 1) {
+          <span class="te-meta__join-hint">
+            + {{ reachableEntities.length - 1 }} joinable
+          </span>
+        }
       }
     </div>
 
@@ -81,27 +71,12 @@
   <div class="te-toolbar">
 
     <div class="te-toolbar__left">
-      @if (entityList.length) {
-        <select class="te-sel te-sel--sm"
-          [(ngModel)]="newColEntity"
-          (ngModelChange)="onNewColEntityChange($event)">
-          @for (e of entityList; track e) {
-            <option [value]="e">{{ e }}</option>
-          }
-        </select>
-        <input class="te-field-search"
-          [ngModel]="colSearch"
-          (ngModelChange)="onColSearchChange($event)"
-          placeholder="search fields…" />
-        <select class="te-sel te-sel--sm te-sel--field" [(ngModel)]="newColField">
-          @for (f of filteredFields; track f.name) {
-            <option [value]="f.name">{{ f.name }}</option>
-          }
-        </select>
-        <button class="te-btn te-btn--add-col" (click)="addColumn()">+ Add Column</button>
-        <button class="te-btn te-btn--ghost"
-          (click)="addAllColumns()"
-          title="Add all fields from {{ newColEntity }}">All</button>
+      @if (rootEntity) {
+        <button class="te-icon-btn" [class.is-on]="showFieldPicker"
+          (click)="showFieldPicker = !showFieldPicker"
+          title="Browse and add fields">
+          ⊕ Fields
+        </button>
       }
     </div>
 
@@ -125,7 +100,7 @@
       <button class="te-icon-btn" [class.is-on]="compact"
         (click)="compact = !compact" title="Compact rows">⊟</button>
       <button class="te-icon-btn" [class.is-on]="showDerivedPanel"
-        [disabled]="!entityList.length"
+        [disabled]="!rootEntity"
         (click)="showDerivedPanel ? closeDerivedPanel() : openDerivedPanel()"
         title="Create a derived column combining multiple fields">⊕ Derived</button>
       <button class="te-icon-btn" [class.is-on]="showFilters"
@@ -140,7 +115,39 @@
 
   </div>
 
-  <!-- ── 4. DERIVED COLUMN CREATOR (collapsible) ──────────────── -->
+  <!-- ── 4. FIELD PICKER PANEL (collapsible) ───────────────────── -->
+  @if (showFieldPicker && rootEntity) {
+    <div class="te-field-picker-panel">
+      @for (entity of reachableEntities; track entity.name) {
+        <div class="te-fpick-group">
+          <div class="te-fpick-group__header">
+            <span class="te-fpick-group__name">{{ entity.name }}</span>
+            @if (entity.name !== rootEntity) {
+              <span class="te-fpick-group__badge">joined</span>
+            }
+            <button class="te-btn te-btn--ghost te-fpick-add-all"
+              (click)="addAllColumnsFromEntity(entity.name)"
+              title="Add all {{ entity.name }} fields">
+              All
+            </button>
+          </div>
+          <div class="te-fpick-group__fields">
+            @for (field of fieldsFor(entity.name); track field.name) {
+              <button class="te-fpick-chip"
+                [class.is-selected]="isColumnSelected(entity.name, field.name)"
+                (click)="toggleColumn(entity.name, field.name)"
+                [title]="entity.name + '.' + field.name + ' (' + field.type + ')'">
+                <span class="te-fpick-chip__name">{{ field.name }}</span>
+                <span class="te-fpick-chip__type">{{ field.type }}</span>
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ── 5. DERIVED COLUMN CREATOR (collapsible) ──────────────── -->
   @if (showDerivedPanel) {
   <div class="te-derived-panel">
 
@@ -182,7 +189,7 @@
         </div>
       </div>
 
-      <!-- Source fields -->
+      <!-- Source fields — entity options come from all reachable entities -->
       <div class="te-drv-field">
         <label class="te-drv-label">Source fields</label>
         <div class="te-drv-sources">
@@ -194,8 +201,8 @@
               <select class="te-sel te-sel--sm"
                 [ngModel]="src.entity"
                 (ngModelChange)="onDrvSrcEntityChange(si, $event)">
-                @for (e of entityList; track e) {
-                  <option [value]="e">{{ e }}</option>
+                @for (e of reachableEntities; track e.name) {
+                  <option [value]="e.name">{{ e.name }}</option>
                 }
               </select>
               <select class="te-sel te-sel--sm te-sel--field"
@@ -242,8 +249,8 @@
   </div>
   }
 
-  <!-- ── 5. FILTER SHELF (collapsible) ─────────────────────────── -->
-  @if (showFilters && product && entityList.length) {
+  <!-- ── 6. FILTER SHELF (collapsible) ─────────────────────────── -->
+  @if (showFilters && product && rootEntity) {
     <div class="te-filter-shelf">
       <app-filter-builder
         [product]="product"
@@ -253,14 +260,13 @@
     </div>
   }
 
-  <!-- ── 5. INTERACTIVE TABLE ───────────────────────────────────── -->
+  <!-- ── 7. INTERACTIVE TABLE ───────────────────────────────────── -->
   <div class="te-table-scroll">
 
     @if (editorCols.length) {
       <table class="te-table" [class.te-table--compact]="compact">
 
         <thead>
-          <!-- cdkDropList on <tr>, cdkDrag on each <th> — horizontal reorder -->
           <tr cdkDropList
             cdkDropListOrientation="horizontal"
             (cdkDropListDropped)="onColumnDrop($event)">
@@ -344,7 +350,7 @@
           } @else {
             <tr>
               <td [attr.colspan]="editorCols.length" class="te-empty-row">
-                @if (!product || !entityList.length) {
+                @if (!product || !rootEntity) {
                   Select a product and entity above to preview data
                 } @else if (visibleEditorCols.length === 0) {
                   All columns are hidden — click 👁 to show a column
@@ -361,14 +367,14 @@
     } @else {
       <div class="te-empty-state">
         <div class="te-empty-state__icon">⊞</div>
-        @if (!product || !entityList.length) {
+        @if (!product || !rootEntity) {
           <p class="te-empty-state__msg">No data source connected</p>
           <p class="te-empty-state__hint">Select a product and entity in the header above</p>
         } @else {
           <p class="te-empty-state__msg">No columns added yet</p>
-          <p class="te-empty-state__hint">Use the toolbar above to add columns</p>
+          <p class="te-empty-state__hint">Click <strong>⊕ Fields</strong> in the toolbar to browse and add fields</p>
           <button class="te-btn te-btn--add-col" (click)="addAllColumns()">
-            + Add all fields from {{ newColEntity || entityList[0] }}
+            + Add all fields from {{ rootEntity }}
           </button>
         }
       </div>
@@ -376,7 +382,7 @@
 
   </div>
 
-  <!-- ── 6. BOTTOM BAR ──────────────────────────────────────────── -->
+  <!-- ── 8. BOTTOM BAR ──────────────────────────────────────────── -->
   <div class="te-bottom-bar">
     <button class="te-bottom-toggle" (click)="statusColumn = !statusColumn">
       <span class="te-toggle-dot" [class.is-on]="statusColumn"></span>
@@ -395,7 +401,7 @@
     }
   </div>
 
-  <!-- ── 7. DEV TOOLS (collapsible) ───────────────────────────── -->
+  <!-- ── 9. DEV TOOLS (collapsible) ───────────────────────────── -->
   @if (showDevPanel) {
     <div class="te-dev-panel">
 
@@ -462,7 +468,7 @@
         @if (devQueryConfig?.product) {
           <pre class="te-dev-json te-dev-json--sql">{{ generatedSql }}</pre>
         } @else {
-          <div class="te-dev-idle">Configure a product and entities to see the equivalent SQL</div>
+          <div class="te-dev-idle">Configure a product and entity to see the equivalent SQL</div>
         }
       }
 
@@ -482,7 +488,7 @@
     </div>
   }
 
-  <!-- ── 8. FOOTER ──────────────────────────────────────────────── -->
+  <!-- ── 10. FOOTER ─────────────────────────────────────────────── -->
   <div class="te-footer">
     <button class="te-btn-back" (click)="cancel()">← Back</button>
     <button class="te-btn-save" [class.is-disabled]="!canSave" (click)="save()">

@@ -23,7 +23,7 @@ export class TableQueryBuilder implements OnInit {
 
   private readonly qsvc = inject(QueryService);
 
-  entityList: string[] = [];
+  rootEntity    = '';
   columns: Array<{ entity: string; field: string }> = [];
   sortEnabled   = false;
   sortEntity    = '';
@@ -32,22 +32,15 @@ export class TableQueryBuilder implements OnInit {
   pageSize      = 20;
   filterGroups: FilterGroup[] = [];
 
-  // New-column picker
-  newColEntity = '';
-  newColField  = '';
-
-  // Add-entity picker (explicit binding prevents stale DOM value)
-  newAddEntity = '';
-
   ngOnInit(): void {
     if (this.config) {
-      this.entityList   = [...this.config.entities];
-      this.columns      = [...this.config.columns];
-      this.sortEnabled  = !!this.config.sort;
-      this.sortEntity   = this.config.sort?.entity    ?? '';
-      this.sortField    = this.config.sort?.field     ?? '';
+      this.rootEntity    = this.config.entities[0] ?? '';
+      this.columns       = [...this.config.columns];
+      this.sortEnabled   = !!this.config.sort;
+      this.sortEntity    = this.config.sort?.entity    ?? '';
+      this.sortField     = this.config.sort?.field     ?? '';
       this.sortDirection = this.config.sort?.direction ?? SortDirection.Desc;
-      this.pageSize     = this.config.pageSize        ?? 20;
+      this.pageSize      = this.config.pageSize        ?? 20;
       if (this.config.filterGroups?.length) {
         this.filterGroups = [...this.config.filterGroups];
       } else if (this.config.filters?.length) {
@@ -57,17 +50,10 @@ export class TableQueryBuilder implements OnInit {
       }
     } else {
       const first = this.allEntities[0]?.name ?? '';
-      this.entityList  = first ? [first] : [];
-      this.newColEntity = first;
-      this.newColField  = this.fieldsFor(first)[0]?.name ?? '';
-      this.sortEntity   = first;
-      this.sortField    = this.fieldsFor(first)[0]?.name ?? '';
+      this.rootEntity = first;
+      this.sortEntity = first;
+      this.sortField  = this.fieldsFor(first)[0]?.name ?? '';
       this.emit();
-    }
-    // Initialise picker to first entity if not already set
-    if (!this.newColEntity && this.entityList.length) {
-      this.newColEntity = this.entityList[0];
-      this.newColField  = this.fieldsFor(this.newColEntity)[0]?.name ?? '';
     }
   }
 
@@ -76,12 +62,17 @@ export class TableQueryBuilder implements OnInit {
     return this.qsvc.getEntityList(this.product);
   }
 
-  get availableEntities(): EntityDef[] {
-    // Only show entities reachable via joins from already-selected entities
-    const reachable = this.entityList.length
-      ? this.qsvc.getReachableEntities(this.product, this.entityList)
-      : this.allEntities;
-    return reachable.filter(e => !this.entityList.includes(e.name));
+  /** All entities reachable from the root via joins (includes root itself). */
+  get reachableEntities(): EntityDef[] {
+    if (!this.rootEntity) return [];
+    return this.qsvc.getReachableEntities(this.product, [this.rootEntity]);
+  }
+
+  /** Entities that are currently referenced by selected columns (used to scope the sort picker). */
+  get usedEntities(): string[] {
+    const set = new Set<string>([this.rootEntity].filter(Boolean));
+    for (const col of this.columns) set.add(col.entity);
+    return [...set];
   }
 
   fieldsFor(entity: string): FieldDef[] {
@@ -92,36 +83,35 @@ export class TableQueryBuilder implements OnInit {
 
   sortDirections(): SortDirection[] { return Object.values(SortDirection); }
 
-  addEntity(entity: string): void {
-    if (!entity || this.entityList.includes(entity)) return;
-    this.entityList  = [...this.entityList, entity];
-    this.newAddEntity = '';   // reset picker so user must explicitly choose next
+  onRootEntityChange(entity: string): void {
+    this.rootEntity = entity;
+    const reachable = new Set(
+      this.qsvc.getReachableEntities(this.product, [entity]).map(e => e.name)
+    );
+    // Drop columns whose entity is no longer reachable from the new root
+    this.columns = this.columns.filter(c => reachable.has(c.entity));
+    // Reset sort entity if it became unreachable
+    if (!reachable.has(this.sortEntity)) {
+      this.sortEntity = entity;
+      this.sortField  = this.fieldsFor(entity)[0]?.name ?? '';
+    }
+    // Drop filter conditions whose entity is no longer reachable
+    this.filterGroups = this.filterGroups
+      .map(g => ({ ...g, conditions: g.conditions.filter(c => reachable.has(c.entity)) }))
+      .filter(g => g.conditions.length > 0);
     this.emit();
   }
 
-  removeEntity(entity: string): void {
-    this.entityList = this.entityList.filter(e => e !== entity);
-    this.columns    = this.columns.filter(c => c.entity !== entity);
-    // Reset dependent pickers if they pointed to the removed entity
-    if (this.newColEntity === entity) {
-      this.newColEntity = this.entityList[0] ?? '';
-      this.newColField  = this.fieldsFor(this.newColEntity)[0]?.name ?? '';
-    }
-    if (this.sortEntity === entity) {
-      this.sortEntity = this.entityList[0] ?? '';
-      this.sortField  = this.fieldsFor(this.sortEntity)[0]?.name ?? '';
-    }
-    this.emit();
+  isColumnSelected(entity: string, field: string): boolean {
+    return this.columns.some(c => c.entity === entity && c.field === field);
   }
 
-  onNewColEntityChange(entity: string): void {
-    this.newColEntity = entity;
-    this.newColField  = this.fieldsFor(entity)[0]?.name ?? '';
-  }
-
-  addColumn(): void {
-    if (!this.newColEntity || !this.newColField) return;
-    this.columns = [...this.columns, { entity: this.newColEntity, field: this.newColField }];
+  toggleColumn(entity: string, field: string): void {
+    if (this.isColumnSelected(entity, field)) {
+      this.columns = this.columns.filter(c => !(c.entity === entity && c.field === field));
+    } else {
+      this.columns = [...this.columns, { entity, field }];
+    }
     this.emit();
   }
 
@@ -137,14 +127,20 @@ export class TableQueryBuilder implements OnInit {
   }
 
   get filterScope(): string[] {
-    return this.entityList.filter(Boolean);
+    return this.usedEntities;
   }
 
   emit(): void {
+    // Compute entity join path from all entities referenced in columns, sort, and filters
+    const used = new Set<string>([this.rootEntity].filter(Boolean));
+    for (const col of this.columns) used.add(col.entity);
+    if (this.sortEnabled && this.sortEntity) used.add(this.sortEntity);
+    for (const fg of this.filterGroups) for (const c of fg.conditions) used.add(c.entity);
+
     const cfg: TableQueryConfig = {
-      product:  this.product,
-      entities: this.qsvc.buildEntityPath(this.product, this.entityList),
-      columns:  this.columns,
+      product:      this.product,
+      entities:     this.qsvc.buildEntityPath(this.product, [...used]),
+      columns:      this.columns,
       filterGroups: this.filterGroups.length ? this.filterGroups : undefined,
       sort: this.sortEnabled && this.sortEntity && this.sortField
         ? { entity: this.sortEntity, field: this.sortField, direction: this.sortDirection }

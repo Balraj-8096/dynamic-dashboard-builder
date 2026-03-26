@@ -1,63 +1,73 @@
-<!-- Entities -->
-<div class="section-hdr" style="padding-top:0">Entities</div>
-<div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px">
-  @for (e of entityList; track e) {
-    <span style="display:inline-flex; align-items:center; gap:4px;
-      background:var(--bg3); border:1px solid var(--bdr); border-radius:4px;
-      padding:3px 8px; font-size:12px; font-family:var(--font-mono)">
-      {{ e }}
-      <button class="btn-remove" style="padding:0 2px; font-size:10px"
-        (click)="removeEntity(e)">✕</button>
-    </span>
-  }
-</div>
-<div style="display:flex; gap:8px; margin-bottom:12px">
-  <select class="sel sel--sm" style="flex:1"
-    [(ngModel)]="newAddEntity">
-    <option value="">— add entity —</option>
-    @for (e of availableEntities; track e.name) {
+<!-- ── Data Source ─────────────────────────────────────────────────────── -->
+<div class="section-hdr" style="padding-top:0">Data Source</div>
+<div class="field-row" style="margin-bottom:4px">
+  <label class="field-label">Primary Entity</label>
+  <select class="sel sel--sm"
+    [(ngModel)]="rootEntity"
+    (ngModelChange)="onRootEntityChange($event)">
+    @for (e of allEntities; track e.name) {
       <option [value]="e.name">{{ e.name }}</option>
     }
   </select>
-  <button class="btn-add-dashed"
-    style="width:auto; padding:5px 14px; margin-top:0"
-    (click)="addEntity(newAddEntity)">
-    + Add
-  </button>
+</div>
+<div class="field-hint" style="margin-bottom:16px">
+  Related entities join automatically — just select the fields you need below.
 </div>
 
-<!-- Columns -->
-<div class="section-hdr">Columns</div>
-@for (col of columns; track $index) {
-  <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px">
-    <span style="flex:1; font-size:12px; font-family:var(--font-mono); color:var(--txt1)">
-      {{ col.entity }}.{{ col.field }}
-    </span>
-    <button class="btn-remove-sm" (click)="removeColumn($index)">✕</button>
+<!-- ── Columns ────────────────────────────────────────────────────────── -->
+<div class="section-hdr">
+  <span>Columns</span>
+  @if (columns.length) {
+    <span class="tqb-col-count">{{ columns.length }} selected</span>
+  }
+</div>
+
+<!-- Selected columns (ordered) -->
+@if (columns.length) {
+  <div class="tqb-selected-cols">
+    @for (col of columns; track $index) {
+      <span class="tqb-col-chip">
+        @if (col.entity !== rootEntity) {
+          <span class="tqb-col-chip__entity">{{ col.entity }}.</span>
+        }
+        <span class="tqb-col-chip__field">{{ col.field }}</span>
+        <button class="btn-remove" style="padding:0 3px; font-size:9px; line-height:1"
+          (click)="removeColumn($index)">✕</button>
+      </span>
+    }
+  </div>
+} @else {
+  <p class="empty-hint" style="margin-bottom:10px">No columns selected — click fields below to add them.</p>
+}
+
+<!-- Grouped field picker -->
+@if (rootEntity) {
+  <div class="tqb-field-picker">
+    @for (entity of reachableEntities; track entity.name) {
+      <div class="tqb-entity-group">
+        <div class="tqb-entity-group__header">
+          <span class="tqb-entity-group__name">{{ entity.name }}</span>
+          @if (entity.name !== rootEntity) {
+            <span class="tqb-entity-group__badge">joined</span>
+          }
+        </div>
+        <div class="tqb-entity-group__fields">
+          @for (field of fieldsFor(entity.name); track field.name) {
+            <button class="tqb-field-chip"
+              [class.is-selected]="isColumnSelected(entity.name, field.name)"
+              (click)="toggleColumn(entity.name, field.name)"
+              [title]="entity.name + '.' + field.name + ' (' + field.type + ')'">
+              <span class="tqb-field-chip__name">{{ field.name }}</span>
+              <span class="tqb-field-chip__type">{{ field.type }}</span>
+            </button>
+          }
+        </div>
+      </div>
+    }
   </div>
 }
-<div style="display:flex; gap:8px; margin-bottom:12px">
-  <select class="sel sel--sm" style="flex:1"
-    [(ngModel)]="newColEntity"
-    (ngModelChange)="onNewColEntityChange($event)">
-    @for (e of entityList; track e) {
-      <option [value]="e">{{ e }}</option>
-    }
-  </select>
-  <select class="sel sel--sm" style="flex:1"
-    [(ngModel)]="newColField">
-    @for (f of fieldsFor(newColEntity); track f.name) {
-      <option [value]="f.name">{{ f.name }}</option>
-    }
-  </select>
-  <button class="btn-add-dashed"
-    style="width:auto; padding:5px 14px; margin-top:0"
-    (click)="addColumn()">
-    + Add
-  </button>
-</div>
 
-<!-- Sort -->
+<!-- ── Sort ───────────────────────────────────────────────────────────── -->
 <div class="section-hdr">Sort</div>
 <div class="toggle-row" style="margin-bottom:8px">
   <label class="toggle-wrap" (click)="sortEnabled = !sortEnabled; emit()">
@@ -72,7 +82,7 @@
       <select class="sel sel--sm"
         [(ngModel)]="sortEntity"
         (ngModelChange)="onSortEntityChange($event)">
-        @for (e of entityList; track e) {
+        @for (e of usedEntities; track e) {
           <option [value]="e">{{ e }}</option>
         }
       </select>
@@ -100,7 +110,7 @@
   </div>
 }
 
-<!-- Pagination -->
+<!-- ── Pagination ─────────────────────────────────────────────────────── -->
 <div class="section-hdr">Pagination</div>
 <div class="field-row" style="margin-bottom:12px">
   <label class="field-label">Page Size</label>
@@ -114,7 +124,7 @@
   </select>
 </div>
 
-<!-- Filters -->
+<!-- ── Filters ────────────────────────────────────────────────────────── -->
 <app-filter-builder
   [product]="product"
   [entityScope]="filterScope"
