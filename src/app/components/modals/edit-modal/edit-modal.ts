@@ -9,6 +9,9 @@ import { QueryService } from '../../../services/query.service';
 import {
   StatQueryResult, ChartQueryResult, PieQueryResult, TableQueryResult,
 } from '../../../core/query-types';
+import {
+  generateStatSql, generateChartSql, generatePieSql, generateTableSql,
+} from '../../../core/sql-generator';
 import { EditStatConfig } from "../../shared/edit-stat-config/edit-stat-config";
 import { EditAnalyticsConfig } from "../../shared/edit-analytics-config/edit-analytics-config";
 import { EditSeriesConfig } from "../../shared/edit-series-config/edit-series-config";
@@ -52,6 +55,7 @@ export class EditModal implements OnInit {
   queryJsonOpen   = true;
   resultJsonOpen  = true;
   payloadJsonOpen = true;
+  sqlOpen         = true;
 
   // ── Query result state ────────────────────────────────────────
   queryResult:    StatQueryResult | ChartQueryResult | PieQueryResult | TableQueryResult | null = null;
@@ -178,6 +182,32 @@ export class EditModal implements OnInit {
       ...((t === WidgetType.Bar || t === WidgetType.Line) && cfg?.series
         ? [{ k: 'Series',   v: `${cfg.series.length}` }] : []),
     ];
+  }
+
+  // ── SQL generation ────────────────────────────────────────────
+  get generatedSql(): string {
+    const qcfg = this.queryCfg as any;
+    if (!qcfg?.product) return '-- Configure a product and entities to see the equivalent SQL.';
+    try {
+      const pc   = this.qsvc.getConfig(qcfg.product);
+      const gf   = this.qsvc.globalFilters();
+      const t    = this.widget.type;
+      if (t === WidgetType.Stat || t === WidgetType.Analytics || t === WidgetType.Progress) {
+        return generateStatSql(qcfg, pc, gf);
+      }
+      if (t === WidgetType.Bar || t === WidgetType.Line) {
+        return generateChartSql(qcfg, pc, gf);
+      }
+      if (t === WidgetType.Pie) {
+        return generatePieSql(qcfg, pc, gf);
+      }
+      if (t === WidgetType.Table) {
+        return generateTableSql(qcfg, pc, gf);
+      }
+      return '-- SQL generation not supported for this widget type.';
+    } catch (e) {
+      return `-- Error generating SQL: ${(e as Error).message}`;
+    }
   }
 
   // ── Actions ───────────────────────────────────────────────────

@@ -510,6 +510,12 @@
     color: #a78bfa;
     border: 1px solid color-mix(in srgb, #a78bfa 30%, transparent);
   }
+
+  &--sql {
+    background: color-mix(in srgb, #fbbf24 12%, transparent);
+    color: #fbbf24;
+    border: 1px solid color-mix(in srgb, #fbbf24 30%, transparent);
+  }
 }
 
 // JSON pre block
@@ -544,6 +550,12 @@
   &--payload {
     max-height: 260px;
     color: #c4b5fd;   // purple tint for payload
+  }
+
+  // Equivalent SQL: amber tint, tall enough for multi-query stat blocks
+  &--sql {
+    max-height: 320px;
+    color: #fbbf24;   // amber tint for SQL
   }
 }
 

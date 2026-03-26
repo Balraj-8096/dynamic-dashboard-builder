@@ -204,7 +204,24 @@
             }
           }
 
-          <!-- ── 3. Widget Payload JSON ────────────────────── -->
+          <!-- ── 3. Equivalent SQL ────────────────────────── -->
+          <button class="dev-section-toggle"
+            (click)="sqlOpen = !sqlOpen">
+            <span class="dev-section-label">Equivalent SQL</span>
+            <span class="dev-section-meta">
+              <span class="dev-badge dev-badge--sql">SQL</span>
+            </span>
+            <span class="dev-chevron">{{ sqlOpen ? '▲' : '▼' }}</span>
+          </button>
+          @if (sqlOpen) {
+            @if (queryCfg?.product) {
+              <pre class="dev-json dev-json--sql">{{ generatedSql }}</pre>
+            } @else {
+              <div class="dev-idle-block">Configure a product and entities to see the equivalent SQL</div>
+            }
+          }
+
+          <!-- ── 4. Widget Payload JSON ────────────────────── -->
           <button class="dev-section-toggle"
             (click)="payloadJsonOpen = !payloadJsonOpen">
             <span class="dev-section-label">Widget Payload</span>
