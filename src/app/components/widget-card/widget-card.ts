@@ -85,10 +85,6 @@ export class WidgetCard implements OnDestroy {
     return this.svc.activeId() === this.widget.id;
   }
 
-  get isFront(): boolean {
-    return this.svc.frontId() === this.widget.id;
-  }
-
   get isAnimating(): boolean {
     return this.svc.animatingId() === this.widget.id;
   }
@@ -128,7 +124,6 @@ export class WidgetCard implements OnDestroy {
   get zIndex(): number {
     if (this.isActive || this.isInteracting) return 200;
     if (this.isSelected) return 150;
-    if (this.isFront) return 100;
     return 1;
   }
 
@@ -241,10 +236,6 @@ export class WidgetCard implements OnDestroy {
     this.svc.lockWidget(this.widget.id);
   }
  
-  onBringFront(e: MouseEvent): void {
-    e.stopPropagation();
-    this.svc.bringFront(this.widget.id);
-  }
  
   onDelete(e: MouseEvent): void {
     e.stopPropagation();

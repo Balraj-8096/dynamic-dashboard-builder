@@ -297,6 +297,40 @@
   color: var(--txt1);
 }
 
+// ── Row-height picker ──────────────────────────────────────────
+.info-row--picker {
+  align-items: center;
+}
+
+.row-h-picker {
+  display: flex;
+  gap: 2px;
+}
+
+.row-h-btn {
+  padding: 2px 5px;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  border: 1px solid var(--bdr);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--txt2);
+  cursor: pointer;
+  line-height: 1.4;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+
+  &:hover {
+    background: var(--bg3);
+    color: var(--txt1);
+  }
+
+  &--active {
+    background: var(--acc);
+    border-color: var(--acc);
+    color: #fff;
+  }
+}
+
 // ── Spacer ────────────────────────────────────────────────────
 .spacer {
   flex: 1;

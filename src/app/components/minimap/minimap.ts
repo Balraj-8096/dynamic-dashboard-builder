@@ -41,7 +41,7 @@ export class Minimap {
     const colW = this.svc.colW();
     const offsetX = this.offsetX;
     return this.svc.widgets().map(w => {
-      const p = gridToPixel(w, colW);
+      const p = gridToPixel(w, colW, this.svc.rowH());
       const color = getCatalogColor(w.type);
       return {
         id: w.id,

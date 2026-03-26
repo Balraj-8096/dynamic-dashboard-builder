@@ -23,7 +23,7 @@ import {
 import { DashboardService } from '../../services/dashboard.service';
 import { AlignmentGuide, Widget, WidgetType } from '../../core/interfaces';
 import { gridToPixel, nudgeWidget } from '../../core/layout.utils';
-import { COLS, GAP, KB_BLOCKED_TAGS, ROW_H, ZOOM_MAX, ZOOM_MIN, clamp } from '../../core/constants';
+import { COLS, GAP, KB_BLOCKED_TAGS, ZOOM_MAX, ZOOM_MIN, clamp } from '../../core/constants';
 import { WidgetCard } from "../widget-card/widget-card.smooth";
 import { Sidebar } from "../sidebar/sidebar";
 import { getCatalogByIndex } from '../../core/catalog';
@@ -38,10 +38,11 @@ import { HelpModal } from '../modals/help-modal/help-modal';
 import { Minimap } from "../minimap/minimap";
 import { ContextMenu } from "../modals/context-menu/context-menu";
 import { GlobalFilterBarComponent } from "../shared/global-filter-bar/global-filter-bar";
+import { HistoryPanel } from "../history-panel/history-panel";
 
 @Component({
   selector: 'app-canvas',
-  imports: [CommonModule, WidgetCard, Sidebar, Toolbar, Minimap, ContextMenu, GlobalFilterBarComponent],
+  imports: [CommonModule, WidgetCard, Sidebar, Toolbar, Minimap, ContextMenu, GlobalFilterBarComponent, HistoryPanel],
   templateUrl: './canvas.html',
   styleUrl: './canvas.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -130,9 +131,12 @@ export class Canvas implements OnInit, OnDestroy {
       const found = widgets.find(w => w.id === pendingId);
       if (found) {
         this.svc.pendingScrollId = null;
-        requestAnimationFrame(() =>
-          this.mainRef?.nativeElement.scrollTo({ top: 99999, behavior: 'smooth' })
-        );
+        requestAnimationFrame(() => {
+          // Scroll to the widget's actual pixel position (not always bottom)
+          const pixelTop = gridToPixel(found, this.svc.colW(), this.svc.rowH()).top;
+          const scrollTarget = Math.max(0, pixelTop - 80); // 80px above widget
+          this.mainRef?.nativeElement.scrollTo({ top: scrollTarget, behavior: 'smooth' });
+        });
       }
     });
   }
@@ -283,12 +287,6 @@ export class Canvas implements OnInit, OnDestroy {
     this.svc.lockWidget(widget.id);
   }
 
-  bringSelectedWidgetFront(): void {
-    const widget = this.svc.selectedWidget();
-    if (!widget) return;
-    this.svc.bringFront(widget.id);
-  }
-
   deleteSelectedWidget(): void {
     const widget = this.svc.selectedWidget();
     if (!widget) return;
@@ -355,7 +353,7 @@ export class Canvas implements OnInit, OnDestroy {
     const relY = (e.clientY - rect.top)  / zoom;
 
     const gridX = clamp(Math.floor(relX / (colW + GAP)), 0, COLS - 1);
-    const gridY = Math.max(0, Math.floor(relY / (ROW_H + GAP)));
+    const gridY = Math.max(0, Math.floor(relY / (this.svc.rowH() + GAP)));
 
     const draft = createWidget(type, gridX, gridY);
     if (!draft) return;

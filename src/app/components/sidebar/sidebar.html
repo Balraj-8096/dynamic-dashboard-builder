@@ -84,9 +84,19 @@
       <span class="info-key">Columns</span>
       <span class="info-val">{{ COLS }}</span>
     </div>
-    <div class="info-row">
+    <div class="info-row info-row--picker">
       <span class="info-key">Row height</span>
-      <span class="info-val">{{ ROW_H }}px</span>
+      <div class="row-h-picker">
+        @for (h of ALLOWED_ROW_HEIGHTS; track h) {
+          <button
+            class="row-h-btn"
+            [class.row-h-btn--active]="svc.rowH() === h"
+            (click)="setRowH(h)"
+            [title]="h + 'px rows'">
+            {{ h }}
+          </button>
+        }
+      </div>
     </div>
     <div class="info-row">
       <span class="info-key">Col width</span>
@@ -133,6 +143,18 @@
       title="Toggle alignment guides while dragging and resizing"
     >
       {{ svc.showAlignmentGuides() ? 'on' : 'off' }}
+    </button>
+  </div>
+
+  <div class="minimap-row">
+    <span class="minimap-label">Snap to Widgets</span>
+    <button
+      class="minimap-toggle"
+      [class.is-on]="svc.showSnapToWidget()"
+      (click)="svc.toggleSnapToWidget()"
+      title="Snap dragged/resized widgets to nearby widget edges on drop"
+    >
+      {{ svc.showSnapToWidget() ? 'on' : 'off' }}
     </button>
   </div>
 

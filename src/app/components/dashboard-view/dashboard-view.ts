@@ -2,7 +2,7 @@ import { Component, ElementRef, HostListener, inject, OnDestroy, OnInit, ViewChi
 import { Router } from '@angular/router';
 import { fromEvent, Subject, takeUntil } from 'rxjs';
 import { getTypeBreakdown } from '../../core/catalog';
-import { COLS, MIN_CANVAS_W, ROW_H } from '../../core/constants';
+import { COLS, MIN_CANVAS_W } from '../../core/constants';
 import { computeColW, computeCanvasH } from '../../core/layout.utils';
 import { DashboardService } from '../../services/dashboard.service';
 import { ViewWidgetCard } from "../shared/view-widget-card/view-widget-card";
@@ -31,7 +31,7 @@ export class DashboardView  implements OnInit, OnDestroy {
   isFullscreen = false;
  
   readonly COLS  = COLS;
-  readonly ROW_H = ROW_H;
+  get rowH(): number { return this.svc.rowH(); }
  
   private clockTimer?: ReturnType<typeof setInterval>;
   private resizeObserver?: ResizeObserver;
@@ -98,7 +98,7 @@ export class DashboardView  implements OnInit, OnDestroy {
     // any chrome (header/footer are negligible for column math).
     const w = this.canvasRef.nativeElement.offsetWidth || window.innerWidth;
     this.colW    = computeColW(Math.max(w, MIN_CANVAS_W));
-    this.canvasH = computeCanvasH(this.widgets);
+    this.canvasH = computeCanvasH(this.widgets, this.svc.rowH());
     this.svc.setCanvasW(w);
     this.svc.setViewportH(this.mainRef.nativeElement.clientHeight);
     this.svc.setScrollTop(this.mainRef.nativeElement.scrollTop);

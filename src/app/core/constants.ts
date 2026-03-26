@@ -17,11 +17,17 @@
 export const COLS = 12;
 
 /**
- * Height of each grid row in pixels
- * Actual rendered pixel height of one row unit
- * widget.h = 2 means widget is (2 * ROW_H) + (1 * GAP) tall
+ * Default height of each grid row in pixels.
+ * Used as the initial value for the per-dashboard rowH signal.
+ * widget.h = 2 means widget is (2 * rowH) + (1 * GAP) tall
  */
-export const ROW_H = 80;
+export const DEFAULT_ROW_H = 80;
+
+/**
+ * Allowed row height options exposed in the sidebar Grid Info picker.
+ * Compact (60px) suits stat-heavy dashboards; tall (120px) suits charts.
+ */
+export const ALLOWED_ROW_HEIGHTS: number[] = [60, 80, 100, 120];
 
 /**
  * Gap between grid cells in pixels
@@ -76,6 +82,22 @@ export const MAX_LAYOUT_PASSES = 60;
  * Safety cap prevents infinite loop on degenerate layouts
  */
 export const MAX_PACK_ITERATIONS = 200;
+
+/**
+ * Pixel threshold for snap-to-widget-edge on pointerup.
+ * If the dragged/resized widget lands within this many pixels
+ * of another widget's edge, it snaps to align precisely.
+ * Intentionally wider than ALIGNMENT_THRESHOLD_PX (8px visual guide)
+ * so the snap fires slightly after the guide appears.
+ */
+export const SNAP_TO_WIDGET_PX = 12;
+
+/**
+ * Maximum number of history entries retained in the undo/redo stack.
+ * Oldest entries are trimmed when this limit is exceeded.
+ * Prevents unbounded memory growth during long editing sessions.
+ */
+export const MAX_HISTORY_ENTRIES = 100;
 
 /**
  * Widget save animation duration in milliseconds

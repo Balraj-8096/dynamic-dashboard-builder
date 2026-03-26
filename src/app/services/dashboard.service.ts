@@ -11,14 +11,15 @@ import {
   WidgetType,
   WidgetConfig,
   ContextMenuState,
-  HistoryEntry,
+  HistorySnapshot,
   DashboardExport,
   AlignmentGuide,
 } from '../core/interfaces';
 
 import {
   COLS,
-  ROW_H,
+  DEFAULT_ROW_H,
+  ALLOWED_ROW_HEIGHTS,
   GAP,
   MIN_CANVAS_W,
   SIDEBAR_W,
@@ -26,13 +27,14 @@ import {
   ZOOM_MIN,
   ZOOM_MAX,
   ZOOM_STEP,
+  MAX_HISTORY_ENTRIES,
   initialCanvasW,
   deepClone,
   clamp,
   uid,
   toFilename,
 } from '../core/constants';
-import { computeCanvasH, computeColW, getNextY, packLayout } from '../core/layout.utils';
+import { computeCanvasH, computeColW, findAdjacentPlacement, getNextY, packLayout } from '../core/layout.utils';
 import { buildSalesDemo, TEMPLATES } from '../core/Templates';
 
 @Injectable({
@@ -99,14 +101,6 @@ export class DashboardService {
   readonly activeId = signal<string | null>(null);
 
   /**
-   * ID of the widget raised to front via "Bring to Front".
-   * Front widget gets z-index 100 + purple border.
-   * Only one widget can be front at a time.
-   * null = no widget raised.
-   */
-  readonly frontId = signal<string | null>(null);
-
-  /**
    * ID of the widget currently flashing green after save.
    * Cleared automatically after SAVE_ANIMATION_MS (700ms).
    * null = no animation running.
@@ -142,6 +136,15 @@ export class DashboardService {
   readonly zoom = signal<number>(1);
 
   /**
+   * Per-dashboard row height in pixels.
+   * Selectable from ALLOWED_ROW_HEIGHTS (60 / 80 / 100 / 120).
+   * NOT stored in history — display preference, same as zoom.
+   * Serialized in exportLayout / importLayout so dashboards
+   * remember their row height across sessions.
+   */
+  readonly rowH = signal<number>(DEFAULT_ROW_H);
+
+  /**
    * Current canvas scroll position (scrollTop in pixels).
    * Updated reactively by scroll event listener in canvas.
    * Used by minimap to render the viewport rectangle.
@@ -159,6 +162,26 @@ export class DashboardService {
   readonly showAlignmentGuides = signal<boolean>(true);
   readonly alignmentGuides = signal<AlignmentGuide[]>([]);
   readonly showGridBackground = signal<boolean>(true);
+
+  /**
+   * Whether snap-to-widget-edge fires on drag/resize pointerup.
+   * When on, dropping a widget within SNAP_TO_WIDGET_PX of another
+   * widget's edge commits an aligned position automatically.
+   */
+  readonly showSnapToWidget = signal<boolean>(true);
+
+  /**
+   * ID of the widget currently flashing the snap-target highlight.
+   * Set for SNAP_HIGHLIGHT_MS when a snap fires on pointerup.
+   * null = no snap highlight running.
+   */
+  readonly snapHighlightId = signal<string | null>(null);
+
+  /**
+   * Whether the revision history side-panel is visible.
+   * Toggled by the toolbar clock button.
+   */
+  readonly showHistoryPanel = signal<boolean>(false);
 
 
   // ─────────────────────────────────────────────────────────────
@@ -236,7 +259,9 @@ export class DashboardService {
    * Critical: entries must be deep clones (A6 from audit).
    * Angular CDK / gridster mutations must not affect snapshots.
    */
-  readonly history = signal<HistoryEntry[]>([[]]);
+  readonly history = signal<HistorySnapshot[]>([
+    { widgets: [], timestamp: Date.now(), label: 'Initial state', widgetCount: 0 },
+  ]);
 
   /**
    * Current position in the history stack.
@@ -268,12 +293,12 @@ export class DashboardService {
 
   /**
    * Computed canvas height in pixels.
-   * Re-computed whenever widgets array changes.
+   * Re-computed whenever widgets array or rowH changes.
    * Ensures canvas is always tall enough to show all widgets.
    * Minimum 600px even on empty canvas.
    */
   readonly canvasH = computed(() =>
-    computeCanvasH(this.widgets())
+    computeCanvasH(this.widgets(), this.rowH())
   );
 
   /**
@@ -393,11 +418,6 @@ export class DashboardService {
     this.alignmentGuides.set(guides);
   }
 
-  /** Set the front-raised widget ID. */
-  setFront(id: string | null): void {
-    this.frontId.set(id);
-  }
-
   /** Update canvas width — called by ResizeObserver. */
   setCanvasW(w: number): void {
     this.canvasW.set(Math.max(MIN_CANVAS_W, w));
@@ -433,6 +453,18 @@ export class DashboardService {
     this.zoom.set(1);
   }
 
+  /**
+   * Set the per-dashboard row height.
+   * Value must be one of ALLOWED_ROW_HEIGHTS (60 / 80 / 100 / 120).
+   * Silently ignored if value is not in the allowed set.
+   * NOT pushed to history — display preference, same as zoom.
+   */
+  setRowH(h: number): void {
+    if (ALLOWED_ROW_HEIGHTS.includes(h)) {
+      this.rowH.set(h);
+    }
+  }
+
   /** Toggle minimap visibility. */
   toggleMinimap(): void {
     this.showMinimap.update(v => !v);
@@ -447,6 +479,39 @@ export class DashboardService {
 
   toggleGridBackground(): void {
     this.showGridBackground.update(v => !v);
+  }
+
+  toggleSnapToWidget(): void {
+    this.showSnapToWidget.update(v => !v);
+  }
+
+  toggleHistoryPanel(): void {
+    this.showHistoryPanel.update(v => !v);
+  }
+
+  /**
+   * Jump to any history entry by index.
+   * Restores the widget array from that snapshot and sets histIdx.
+   * Does NOT push a new entry — just navigates the existing stack.
+   */
+  jumpToHistory(idx: number): void {
+    const stack = this.history();
+    if (idx < 0 || idx >= stack.length) return;
+    this.histIdx.set(idx);
+    this.widgets.set(deepClone(stack[idx].widgets));
+    // Clear any stale selection/interaction state
+    this.selectedId.set(null);
+    this.activeId.set(null);
+  }
+
+  /**
+   * Flash the snap-target widget with a brief highlight ring.
+   * Called by widget-card when a snap fires on pointerup.
+   * The ring auto-clears after 400ms.
+   */
+  triggerSnapHighlight(id: string): void {
+    this.snapHighlightId.set(id);
+    setTimeout(() => this.snapHighlightId.set(null), 400);
   }
 
   /** Update sidebar search query. */
@@ -651,28 +716,39 @@ export class DashboardService {
    * - title changes
    * - modal state
    */
-  pushHistory(snapshot: Widget[]): void {
+  pushHistory(snapshot: Widget[], label: string): void {
     const currentIdx  = this.histIdx();
     const currentHist = this.history();
 
     // Truncate forward history — redo states are lost
     const truncated = currentHist.slice(0, currentIdx + 1);
-    const newEntry  = deepClone(snapshot);
+    const newEntry: HistorySnapshot = {
+      widgets:     deepClone(snapshot),
+      timestamp:   Date.now(),
+      label,
+      widgetCount: snapshot.length,
+    };
 
-    this.history.set([...truncated, newEntry]);
+    // Cap stack size — trim oldest entries beyond MAX_HISTORY_ENTRIES
+    const uncapped = [...truncated, newEntry];
+    const capped   = uncapped.length > MAX_HISTORY_ENTRIES
+      ? uncapped.slice(uncapped.length - MAX_HISTORY_ENTRIES)
+      : uncapped;
+
+    this.history.set(capped);
 
     // Synchronous update — no deferred sync needed (A1 audit)
-    this.histIdx.set(currentIdx + 1);
+    this.histIdx.set(capped.length - 1);
   }
 
   /**
    * Update widgets and push to history in one operation.
    * All widget ops that are undoable call this.
    */
-  private updateWidgets(fn: (prev: Widget[]) => Widget[]): void {
+  private updateWidgets(fn: (prev: Widget[]) => Widget[], label: string): void {
     const next = fn(this.widgets());
     this.widgets.set(next);
-    this.pushHistory(next);
+    this.pushHistory(next, label);
   }
 
   /**
@@ -687,7 +763,7 @@ export class DashboardService {
     const newIdx = idx - 1;
     // Synchronous update (A1 audit)
     this.histIdx.set(newIdx);
-    this.widgets.set(deepClone(this.history()[newIdx]));
+    this.widgets.set(deepClone(this.history()[newIdx].widgets));
   }
 
   /**
@@ -703,7 +779,7 @@ export class DashboardService {
     const newIdx = idx + 1;
     // Synchronous update (A1 audit)
     this.histIdx.set(newIdx);
-    this.widgets.set(deepClone(hist[newIdx]));
+    this.widgets.set(deepClone(hist[newIdx].widgets));
   }
 
 
@@ -734,7 +810,7 @@ export class DashboardService {
       y:      nextY,
     };
 
-    this.updateWidgets(prev => [...prev, placed]);
+    this.updateWidgets(prev => [...prev, placed], `Added "${placed.title}" (${placed.type})`);
 
     // Select and queue scroll — fires after DOM commit
     this.selectedId.set(newId);
@@ -752,7 +828,7 @@ export class DashboardService {
    */
   addWidgetAt(widget: Widget): Widget {
     const placed: Widget = { ...deepClone(widget), id: uid() };
-    this.updateWidgets(prev => [...prev, placed]);
+    this.updateWidgets(prev => [...prev, placed], `Dropped "${placed.title}" (${placed.type})`);
     this.selectedId.set(placed.id);
     return placed;
   }
@@ -775,21 +851,26 @@ export class DashboardService {
    * go through this method — consistent behavior.
    */
   duplicateWidget(widget: Widget): void {
-    const newId = uid();
-    const nextY = getNextY(this.widgets());
+    const newId  = uid();
+    const all    = this.widgets();
+    const { x, y, isAdjacent } = findAdjacentPlacement(widget, widget, all);
 
     const duplicate: Widget = {
       ...deepClone(widget),
       id: newId,
-      y:  nextY,
-      // x preserved from original (M2 audit)
+      x,
+      y,
     };
 
-    this.updateWidgets(prev => [...prev, duplicate]);
+    this.updateWidgets(prev => [...prev, duplicate], `Duplicated "${widget.title}"`);
 
-    // Select and queue scroll (A3 audit fix)
+    // Select the duplicate (A3 audit fix)
     this.selectedId.set(newId);
-    this.pendingScrollId = newId;
+    // Only scroll when placed at the canvas bottom (fallback).
+    // Adjacent placement is already in view — no scroll needed.
+    if (!isAdjacent) {
+      this.pendingScrollId = newId;
+    }
   }
 
   /**
@@ -818,7 +899,7 @@ export class DashboardService {
       y:  nextY,
     };
 
-    this.updateWidgets(prev => [...prev, pasted]);
+    this.updateWidgets(prev => [...prev, pasted], `Pasted "${source.title}"`);
     this.selectedId.set(newId);
     this.pendingScrollId = newId;
   }
@@ -834,13 +915,14 @@ export class DashboardService {
    * - Undoable
    */
   deleteWidget(id: string): void {
-    this.updateWidgets(prev => prev.filter(w => w.id !== id));
+    const target = this.widgets().find(w => w.id === id);
+    const label  = target ? `Deleted "${target.title}" (${target.type})` : 'Delete widget';
+    this.updateWidgets(prev => prev.filter(w => w.id !== id), label);
 
     // Angular fix (A2 audit):
     // Always clear stale IDs — unlike React which only cleared
     // selectedId on Del key, not on button/context-menu delete
     if (this.selectedId()  === id) this.selectedId.set(null);
-    if (this.frontId()     === id) this.frontId.set(null);
     if (this.animatingId() === id) this.animatingId.set(null);
     if (this.editingWidget()?.id === id) this.closeEditModal();
   }
@@ -863,8 +945,9 @@ export class DashboardService {
       return;
     }
 
-    this.updateWidgets(prev =>
-      prev.map(w => w.id === updated.id ? { ...updated } : w)
+    this.updateWidgets(
+      prev => prev.map(w => w.id === updated.id ? { ...updated } : w),
+      `Edited "${updated.title}" (${updated.type})`,
     );
 
     // Trigger green flash animation
@@ -894,22 +977,14 @@ export class DashboardService {
   }
 
   /**
-   * Raise a widget to the front (z-index elevation).
-   * Only one widget can be front at a time.
-   * Setting a new frontId replaces the previous one.
-   */
-  bringFront(id: string): void {
-    this.frontId.set(id);
-  }
-
-  /**
    * Clear all widgets from the canvas.
    * Undoable — goes through pushHistory.
    * Contrast with loadTemplate/importLayout which RESET history.
    * Edge case C9 from audit: clearAll IS undoable.
    */
   clearAll(): void {
-    this.updateWidgets(() => []);
+    const count = this.widgets().length;
+    this.updateWidgets(() => [], `Cleared all (${count} widget${count === 1 ? '' : 's'})`);
   }
 
   /**
@@ -918,7 +993,7 @@ export class DashboardService {
    * Undoable — goes through pushHistory.
    */
   applyPackLayout(): void {
-    this.updateWidgets(prev => packLayout(prev));
+    this.updateWidgets(prev => packLayout(prev), 'Pack layout');
   }
 
   /**
@@ -939,7 +1014,9 @@ export class DashboardService {
    * Pushes the final resolved layout as one history entry.
    */
   commitDragResize(): void {
-    this.pushHistory(this.widgets());
+    const active = this.widgets().find(w => w.id === this.activeId());
+    const label  = active ? `Moved "${active.title}"` : 'Move / resize';
+    this.pushHistory(this.widgets(), label);
     this.alignmentGuides.set([]);
     this.activeId.set(null);
   }
@@ -979,7 +1056,7 @@ export class DashboardService {
     this.widgets.set(built);
 
     // RESET history — not undoable back (C3 audit)
-    this.history.set([deepClone(built)]);
+    this.history.set([{ widgets: deepClone(built), timestamp: Date.now(), label: 'Load template', widgetCount: built.length }]);
 
     // Synchronous reset (A1 audit)
     this.histIdx.set(0);
@@ -987,9 +1064,12 @@ export class DashboardService {
     // Update title
     this.dashTitle.set(template.name);
 
+    // Reset display preferences
+    this.rowH.set(DEFAULT_ROW_H);
+
     // Clear selection state
     this.selectedId.set(null);
-    this.frontId.set(null);
+
     this.animatingId.set(null);
 
     // Close modal
@@ -1007,11 +1087,12 @@ export class DashboardService {
     const demo = buildSalesDemo();
 
     this.widgets.set(demo);
-    this.history.set([deepClone(demo)]);
+    this.history.set([{ widgets: deepClone(demo), timestamp: Date.now(), label: 'Load demo', widgetCount: demo.length }]);
     this.histIdx.set(0);
     this.dashTitle.set('My Dashboard');
+    this.rowH.set(DEFAULT_ROW_H);
     this.selectedId.set(null);
-    this.frontId.set(null);
+
     this.animatingId.set(null);    // B7 fix: clear any in-flight save animation
     this.closeSidebar();
     this.closeToolbarMenu();
@@ -1026,6 +1107,7 @@ export class DashboardService {
     const data: DashboardExport = {
       title:   this.dashTitle(),
       widgets: this.widgets(),
+      rowH:    this.rowH(),
     };
 
     const json     = JSON.stringify(data, null, 2);
@@ -1085,15 +1167,21 @@ export class DashboardService {
       this.widgets.set(refreshed);
 
       // RESET history (A1 audit — synchronous)
-      this.history.set([deepClone(refreshed)]);
+      this.history.set([{ widgets: deepClone(refreshed), timestamp: Date.now(), label: 'Import', widgetCount: refreshed.length }]);
       this.histIdx.set(0);
 
-      // Update title
+      // Update title and display preferences
       this.dashTitle.set(title);
+      // Restore row height if present in export; fall back to default (backward-compat)
+      if (!Array.isArray(parsed) && typeof parsed.rowH === 'number') {
+        this.setRowH(parsed.rowH);
+      } else {
+        this.rowH.set(DEFAULT_ROW_H);
+      }
 
       // Clear selection state
       this.selectedId.set(null);
-      this.frontId.set(null);
+  
       this.animatingId.set(null);
 
       // Close import modal

@@ -26,7 +26,7 @@ export class ContextMenu {
     return this.svc.widgets().find(w => w.id === this.state.id);
   }
 
-  get isLocked(): boolean { return !!this.widget?.locked; }
+  get isLocked(): boolean  { return !!this.widget?.locked; }
 
   get menuItems(): (MenuItem | null)[] {
     const w = this.widget;
@@ -50,12 +50,6 @@ export class ContextMenu {
         label: this.isLocked ? 'Unlock widget' : 'Lock widget',
         color: 'var(--amb)',
         action: () => { this.svc.lockWidget(w.id); this.close(); },
-      },
-      {
-        icon: '↑',
-        label: 'Bring to front',
-        color: 'var(--txt1)',
-        action: () => { this.svc.bringFront(w.id); this.close(); },
       },
       null, // divider
       {

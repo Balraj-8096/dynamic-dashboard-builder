@@ -14,7 +14,7 @@
 import { Widget, PixelRect } from './interfaces';
 import {
   COLS,
-  ROW_H,
+  DEFAULT_ROW_H,
   GAP,
   MAX_LAYOUT_PASSES,
   MAX_PACK_ITERATIONS,
@@ -192,11 +192,11 @@ export function resolveLayout(
 ): Widget[] | null {
 
   // ── Hard block check ──────────────────────────────────────────
-  // If proposed position overlaps any locked widget → null
+  // If proposed position overlaps any locked OR pinned widget → null
   // Caller will try fallback positions (x-only, y-only, no move)
   const lockedBlock = all.some(
     w => w.id !== proposed.id &&
-         w.locked === true &&
+         (w.locked === true || w.pinned === true) &&
          collides(proposed, w)
   );
   if (lockedBlock) return null;
@@ -228,10 +228,12 @@ export function resolveLayout(
         if (!collides(a, b)) continue;
 
         // ── Determine anchor vs mover ──────────────────────────
-        // Active widget and locked widgets are always anchors
-        // (they cannot be displaced by push)
+        // Active widget, locked widgets, and PINNED widgets are anchors
+        // (they cannot be displaced by push).
+        // locked  = edit protection (no drag/resize/delete)
+        // pinned  = layout anchor   (not pushed by resolve/pack)
         const isAnchor = (w: Widget): boolean =>
-          w.id === proposed.id || w.locked === true;
+          w.id === proposed.id || w.locked === true || w.pinned === true;
 
         // Both immovable — cannot resolve this pair, skip
         if (isAnchor(a) && isAnchor(b)) continue;
@@ -435,13 +437,14 @@ export function resolveResize(
  */
 export function gridToPixel(
   widget: Pick<Widget, 'x' | 'y' | 'w' | 'h'>,
-  colW:   number
+  colW:   number,
+  rowH:   number = DEFAULT_ROW_H
 ): PixelRect {
   return {
     left:   widget.x * (colW + GAP) + GAP,
-    top:    widget.y * (ROW_H + GAP) + GAP,
+    top:    widget.y * (rowH + GAP) + GAP,
     width:  widget.w * (colW + GAP) - GAP,
-    height: widget.h * ROW_H + (widget.h - 1) * GAP,
+    height: widget.h * rowH + (widget.h - 1) * GAP,
   };
 }
 
@@ -489,11 +492,12 @@ export function computeColW(canvasW: number): number {
  * // → Math.max(600, 8 * (80+10) + 120) = Math.max(600, 840) = 840
  */
 export function computeCanvasH(
-  widgets: Pick<Widget, 'y' | 'h'>[]
+  widgets: Pick<Widget, 'y' | 'h'>[],
+  rowH:    number = DEFAULT_ROW_H
 ): number {
   if (!widgets.length) return 600;
   const maxBottom = Math.max(
-    ...widgets.map(w => (w.y + w.h) * (ROW_H + GAP))
+    ...widgets.map(w => (w.y + w.h) * (rowH + GAP))
   );
   // B1 fix: 120px padding matches React source (was 60px — too tight)
   return Math.max(600, maxBottom + 120);
@@ -531,12 +535,21 @@ export function computeCanvasH(
  */
 export function packLayout(widgets: Widget[]): Widget[] {
 
-  // Sort by y first, then x — process top-to-bottom, left-to-right
-  const sorted = [...widgets].sort((a, b) =>
+  // ── Anchor pre-pass ────────────────────────────────────────────
+  // Locked (and backward-compat pinned) widgets are layout anchors —
+  // pack must not move them. Pre-populate `placed` with all anchor
+  // widgets at their current positions so the compaction loop treats
+  // them as immovable obstacles.
+  const anchors = widgets.filter(w => w.locked === true || w.pinned === true);
+  const free    = widgets.filter(w => w.locked !== true && w.pinned !== true);
+
+  // Sort free widgets by y then x — process top-to-bottom, left-to-right
+  const sorted = [...free].sort((a, b) =>
     a.y !== b.y ? a.y - b.y : a.x - b.x
   );
 
-  const placed: Widget[] = [];
+  // Seed placed with all anchor widgets at their fixed positions
+  const placed: Widget[] = [...anchors];
 
   for (const widget of sorted) {
 
@@ -617,6 +630,101 @@ export function nudgeWidget(
 }
 
 
+// ───────────────────────────────────────────────────────────────
+//  SNAP-TO-WIDGET-EDGE  (Feature 3)
+// ───────────────────────────────────────────────────────────────
+
+/**
+ * Result returned by snapToWidgetEdge().
+ * snapLeft / snapTop are the NEW pixel left / top for the dragged
+ * widget after alignment, or null if no snap fired on that axis.
+ * targetId is the widget whose edge triggered the snap (used for
+ * the brief highlight animation on the snap target).
+ */
+export interface SnapResult {
+  snapLeft: number | null;
+  snapTop:  number | null;
+  targetId: string | null;
+}
+
+/**
+ * Snap-to-widget-edge — fires once on pointerup (NOT during drag).
+ *
+ * Checks all four edges (left, right, top, bottom) of the dragged
+ * widget's landing rect against the same four edges of every other
+ * widget's pixel rect. When any pair is within `threshold` pixels,
+ * the dragged widget's position is adjusted to align them exactly.
+ *
+ * Returns the new pixel left/top for the dragged widget, plus the
+ * ID of the widget that triggered the snap. The caller converts
+ * those pixel values back to grid coordinates, re-runs resolveDrag,
+ * and commits the snapped layout if resolveDrag succeeds.
+ *
+ * If multiple edges are within threshold, the closest pair wins
+ * independently on each axis.
+ *
+ * Pinned widgets are naturally the "best" snap targets because they
+ * are already in a stable position on the grid.
+ *
+ * @param dragged   - Pixel rect of the widget at its landing position
+ * @param others    - Pixel rects of all other widgets plus their IDs
+ * @param threshold - Max distance in px that triggers a snap
+ * @returns SnapResult with new pixel position and target widget ID
+ */
+export function snapToWidgetEdge(
+  dragged:   PixelRect,
+  others:    Array<{ rect: PixelRect; id: string }>,
+  threshold: number
+): SnapResult {
+  // Source edge points on X and Y axes
+  const srcLeft   = dragged.left;
+  const srcRight  = dragged.left + dragged.width;
+  const srcTop    = dragged.top;
+  const srcBottom = dragged.top  + dragged.height;
+
+  let snapLeft:  number | null = null;
+  let snapTop:   number | null = null;
+  let targetId:  string | null = null;
+  let bestDeltaX = threshold + 1;
+  let bestDeltaY = threshold + 1;
+  let bestTargetX: string | null = null;
+  let bestTargetY: string | null = null;
+
+  for (const { rect: other, id } of others) {
+    const tgtEdgesX = [other.left, other.left + other.width];
+    const tgtEdgesY = [other.top,  other.top  + other.height];
+
+    // ── X-axis snap ─────────────────────────────────────────────
+    for (const srcEdge of [srcLeft, srcRight]) {
+      for (const tgtEdge of tgtEdgesX) {
+        const delta = Math.abs(srcEdge - tgtEdge);
+        if (delta > threshold || delta >= bestDeltaX) continue;
+        bestDeltaX = delta;
+        // Shift the entire rect so this source edge aligns with the target
+        snapLeft = dragged.left - (srcEdge - tgtEdge);
+        bestTargetX = id;
+      }
+    }
+
+    // ── Y-axis snap ─────────────────────────────────────────────
+    for (const srcEdge of [srcTop, srcBottom]) {
+      for (const tgtEdge of tgtEdgesY) {
+        const delta = Math.abs(srcEdge - tgtEdge);
+        if (delta > threshold || delta >= bestDeltaY) continue;
+        bestDeltaY = delta;
+        snapTop = dragged.top - (srcEdge - tgtEdge);
+        bestTargetY = id;
+      }
+    }
+  }
+
+  // targetId: prefer X-snap target; fall back to Y-snap target
+  targetId = bestTargetX ?? bestTargetY;
+
+  return { snapLeft, snapTop, targetId };
+}
+
+
 /**
  * Find the next available Y position for adding a new widget.
  * New widgets are always placed at the bottom of the canvas.
@@ -634,4 +742,49 @@ export function getNextY(
 ): number {
   if (!widgets.length) return 0;
   return Math.max(...widgets.map(w => w.y + w.h));
+}
+
+
+/**
+ * Find the best placement position for a duplicate of `source`.
+ *
+ * Priority (first free slot wins):
+ *   1. Right  — same row, immediately to the right (if fits in COLS)
+ *   2. Below  — same column, immediately below
+ *   3. Left   — same row, immediately to the left (if x >= 0)
+ *   4. Bottom — getNextY() fallback (original behaviour)
+ *
+ * A slot is "free" when the candidate rectangle does not collide
+ * with any existing widget in `all` (the duplicate itself is not
+ * yet in `all`, so no self-exclusion needed).
+ *
+ * @param source - The widget being duplicated
+ * @param dupe   - The candidate duplicate (same w/h, needs x/y set)
+ * @param all    - Current widget array (source is included)
+ * @returns      - { x, y } grid position for the duplicate
+ */
+export function findAdjacentPlacement(
+  source: Pick<Widget, 'x' | 'y' | 'w' | 'h'>,
+  dupe:   Pick<Widget, 'w' | 'h'>,
+  all:    Pick<Widget, 'id' | 'x' | 'y' | 'w' | 'h'>[]
+): { x: number; y: number; isAdjacent: boolean } {
+  const candidates: Array<{ x: number; y: number }> = [
+    // 1. Right
+    { x: source.x + source.w,  y: source.y },
+    // 2. Below
+    { x: source.x,              y: source.y + source.h },
+    // 3. Left
+    { x: source.x - dupe.w,    y: source.y },
+  ];
+
+  for (const { x, y } of candidates) {
+    if (x < 0 || x + dupe.w > COLS || y < 0) continue;
+    const candidate = { id: '__dupe__', x, y, w: dupe.w, h: dupe.h };
+    if (!all.some(w => collides(candidate, w))) {
+      return { x, y, isAdjacent: true };
+    }
+  }
+
+  // 4. Bottom fallback — original behaviour
+  return { x: source.x, y: getNextY(all), isAdjacent: false };
 }

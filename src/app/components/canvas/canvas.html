@@ -83,6 +83,10 @@
         <app-minimap />
         }
 
+        @if (svc.showHistoryPanel()) {
+        <app-history-panel />
+        }
+
         @if (svc.compactViewport() && svc.selectedWidget(); as selectedWidget) {
         <div class="mobile-action-bar">
             <div class="mobile-action-bar__meta">
@@ -95,7 +99,6 @@
                 <button class="mobile-action-btn" (click)="toggleSelectedWidgetLock()">
                     {{ selectedWidget.locked ? 'Unlock' : 'Lock' }}
                 </button>
-                <button class="mobile-action-btn" (click)="bringSelectedWidgetFront()">Front</button>
                 <button class="mobile-action-btn mobile-action-btn--danger"
                     (click)="deleteSelectedWidget()">Delete</button>
             </div>

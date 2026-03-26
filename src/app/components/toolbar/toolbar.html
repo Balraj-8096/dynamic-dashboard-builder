@@ -101,6 +101,14 @@
       ⬇ export
     </button>
 
+    <!-- History panel -->
+    <button
+      class="btn-icon"
+      [class.is-active]="svc.showHistoryPanel()"
+      title="Revision history"
+      (click)="svc.toggleHistoryPanel()"
+    >⏱</button>
+
     <!-- Help -->
     <button class="btn-icon" title="How to use (help)" (click)="svc.openHelp()">?</button>
 

@@ -10,13 +10,13 @@ import { CommonModule } from '@angular/common';
 
 import { DashboardService } from '../../services/dashboard.service';
 import { AlignmentGuide, PixelRect, ResizeDirection, Widget } from '../../core/interfaces';
-import { gridToPixel, resolveDrag, resolveResize } from '../../core/layout.utils';
+import { gridToPixel, resolveDrag, resolveResize, snapToWidgetEdge } from '../../core/layout.utils';
 import {
   COLS,
   GAP,
   HDR_H,
   MAX_WIDGET_H,
-  ROW_H,
+  SNAP_TO_WIDGET_PX,
   clamp,
 } from '../../core/constants';
 import { getCatalogItem } from '../../core/catalog';
@@ -111,7 +111,7 @@ export class WidgetCard implements OnDestroy {
   private resizeCancelHandler!: (e: PointerEvent) => void;
 
   get pixelRect(): PixelRect {
-    return gridToPixel(this.widget, this.svc.colW());
+    return gridToPixel(this.widget, this.svc.colW(), this.svc.rowH());
   }
 
   get currentRect(): PixelRect {
@@ -130,16 +130,16 @@ export class WidgetCard implements OnDestroy {
     return this.svc.activeId() === this.widget.id;
   }
 
-  get isFront(): boolean {
-    return this.svc.frontId() === this.widget.id;
-  }
-
   get isAnimating(): boolean {
     return this.svc.animatingId() === this.widget.id;
   }
 
   get isLocked(): boolean {
     return this.widget.locked;
+  }
+
+  get isSnapTarget(): boolean {
+    return this.svc.snapHighlightId() === this.widget.id;
   }
 
   get isDragging(): boolean {
@@ -173,7 +173,6 @@ export class WidgetCard implements OnDestroy {
   get zIndex(): number {
     if (this.isActive || this.isInteracting) return 200;
     if (this.isSelected) return 150;
-    if (this.isFront) return 100;
     return 1;
   }
 
@@ -260,10 +259,6 @@ export class WidgetCard implements OnDestroy {
     this.svc.lockWidget(this.widget.id);
   }
 
-  onBringFront(e: MouseEvent): void {
-    e.stopPropagation();
-    this.svc.bringFront(this.widget.id);
-  }
 
   onDelete(e: MouseEvent): void {
     e.stopPropagation();
@@ -334,7 +329,7 @@ export class WidgetCard implements OnDestroy {
     e.preventDefault();
     e.stopPropagation();
 
-    const baseRect = gridToPixel(this.widget, this.svc.colW());
+    const baseRect = gridToPixel(this.widget, this.svc.colW(), this.svc.rowH());
     this.resizeRef = {
       pointerId: e.pointerId,
       dir,
@@ -381,8 +376,10 @@ export class WidgetCard implements OnDestroy {
   private onDragUp(up: PointerEvent): void {
     if (this.dragRef && up.pointerId !== this.dragRef.pointerId) return;
 
-    const nextLayout = this.dragRef?.previewLayout ?? null;
+    let nextLayout = this.dragRef?.previewLayout ?? null;
     const shouldCommit = !!this.dragRef?.engaged && !!nextLayout && this.layoutChanged(nextLayout);
+    // Capture previewRect before clearing dragRef — needed for snap calculation below
+    const capturedPreviewRect = this.dragRef?.previewRect ?? null;
 
     this.clearTouchDragHoldTimer();
     this.dragRef = null;
@@ -394,6 +391,45 @@ export class WidgetCard implements OnDestroy {
     this.removeDragListeners();
 
     if (shouldCommit && nextLayout) {
+      // ── Snap-to-widget-edge on pointerup (Feature 3) ────────────
+      // Only fires here — never during movement to avoid jitter.
+      // If snap is off or no previewRect available, falls through to
+      // the original nextLayout unchanged.
+      if (this.svc.showSnapToWidget() && capturedPreviewRect) {
+        const colW   = this.svc.colW();
+        const rowH   = this.svc.rowH();
+        const others = this.svc.widgets()
+          .filter(w => w.id !== this.widget.id)
+          .map(w => ({ rect: gridToPixel(w, colW, rowH), id: w.id }));
+
+        const snap = snapToWidgetEdge(capturedPreviewRect, others, SNAP_TO_WIDGET_PX);
+
+        if (snap.snapLeft !== null || snap.snapTop !== null) {
+          const newLeft = snap.snapLeft ?? capturedPreviewRect.left;
+          const newTop  = snap.snapTop  ?? capturedPreviewRect.top;
+          const snappedX = clamp(
+            Math.round((newLeft - GAP) / (colW + GAP)),
+            0,
+            COLS - this.widget.w
+          );
+          const snappedY = clamp(
+            Math.round((newTop - GAP) / (rowH + GAP)),
+            0,
+            50
+          );
+
+          const snappedLayout = resolveDrag(
+            this.widget, snappedX, snappedY, this.svc.widgets()
+          );
+          // Only accept snap if resolveDrag succeeds (guards against
+          // snapping into a locked/pinned widget's space)
+          if (snappedLayout) {
+            nextLayout = snappedLayout;
+            if (snap.targetId) this.svc.triggerSnapHighlight(snap.targetId);
+          }
+        }
+      }
+
       this.svc.setWidgetPositions(nextLayout);
       this.svc.commitDragResize();
     } else {
@@ -413,8 +449,11 @@ export class WidgetCard implements OnDestroy {
   private onResizeUp(up: PointerEvent): void {
     if (this.resizeRef && up.pointerId !== this.resizeRef.pointerId) return;
 
-    const nextLayout = this.resizeRef?.previewLayout ?? null;
+    let nextLayout = this.resizeRef?.previewLayout ?? null;
     const shouldCommit = !!nextLayout && this.layoutChanged(nextLayout);
+    // Capture previewRect + dir before clearing resizeRef
+    const capturedPreviewRect = this.resizeRef?.previewRect ?? null;
+    const capturedDir         = this.resizeRef?.dir ?? null;
 
     this.resizeRef = null;
     if (this.resizeRafId !== null) {
@@ -424,6 +463,72 @@ export class WidgetCard implements OnDestroy {
     this.removeResizeListeners();
 
     if (shouldCommit && nextLayout) {
+      // ── Snap-to-widget-edge on resize pointerup (Feature 3) ─────
+      // Snaps the moving edges of the resize to nearby widget edges.
+      // For E/SE handles the right edge snaps; for S/SE the bottom edge.
+      // Position (left/top) is snapped for N/W handles.
+      if (this.svc.showSnapToWidget() && capturedPreviewRect && capturedDir) {
+        const colW   = this.svc.colW();
+        const rowH   = this.svc.rowH();
+        const others = this.svc.widgets()
+          .filter(w => w.id !== this.widget.id)
+          .map(w => ({ rect: gridToPixel(w, colW, rowH), id: w.id }));
+
+        const snap = snapToWidgetEdge(capturedPreviewRect, others, SNAP_TO_WIDGET_PX);
+
+        if (snap.snapLeft !== null || snap.snapTop !== null) {
+          // Derive new grid x/y/w/h from snapped pixel rect edges
+          const origX = this.widget.x;
+          const origY = this.widget.y;
+
+          // For handles that move the RIGHT edge, compute new w from snapLeft offset
+          // snapLeft represents new left of rect; right edge = snapLeft + capturedPreviewRect.width
+          const newLeft = snap.snapLeft ?? capturedPreviewRect.left;
+          const newTop  = snap.snapTop  ?? capturedPreviewRect.top;
+
+          // For E/W/SE/SW: use snapped left to derive x and w
+          let snappedX = capturedDir.includes('w')
+            ? clamp(Math.round((newLeft - GAP) / (colW + GAP)), 0, origX + this.widget.w - 1)
+            : origX;
+          let snappedW = capturedDir.includes('e')
+            ? clamp(
+                Math.round(((newLeft + capturedPreviewRect.width) - GAP) / (colW + GAP)) - snappedX,
+                1,
+                COLS - snappedX
+              )
+            : capturedDir.includes('w')
+              ? (origX + this.widget.w) - snappedX
+              : this.widget.w;
+
+          // For N/S/SE/SW: use snapped top to derive y and h
+          let snappedY = capturedDir.includes('n')
+            ? clamp(Math.round((newTop - GAP) / (rowH + GAP)), 0, origY + this.widget.h - 1)
+            : origY;
+          let snappedH = capturedDir.includes('s')
+            ? clamp(
+                Math.round(((newTop + capturedPreviewRect.height) - GAP) / (rowH + GAP)) - snappedY,
+                1,
+                20
+              )
+            : capturedDir.includes('n')
+              ? (origY + this.widget.h) - snappedY
+              : this.widget.h;
+
+          // Guard: ensure dimensions are valid
+          snappedW = Math.max(1, Math.min(snappedW, COLS - snappedX));
+          snappedH = Math.max(1, snappedH);
+
+          const snappedWidget = { ...this.widget, x: snappedX, y: snappedY, w: snappedW, h: snappedH };
+          const snappedLayout = resolveResize(
+            this.widget, snappedWidget, capturedDir, this.svc.widgets()
+          );
+          if (snappedLayout) {
+            nextLayout = snappedLayout;
+            if (snap.targetId) this.svc.triggerSnapHighlight(snap.targetId);
+          }
+        }
+      }
+
       this.svc.setWidgetPositions(nextLayout);
       this.svc.commitDragResize();
     } else {
@@ -496,7 +601,7 @@ export class WidgetCard implements OnDestroy {
       COLS - this.widget.w
     );
     const snappedY = clamp(
-      ref.origY + Math.round(dy / (ROW_H + GAP)),
+      ref.origY + Math.round(dy / (this.svc.rowH() + GAP)),
       0,
       50
     );
@@ -505,7 +610,8 @@ export class WidgetCard implements OnDestroy {
     ref.previewLayout = resolved;
     ref.previewRect = gridToPixel(
       resolved?.find(w => w.id === this.widget.id) ?? this.widget,
-      colW
+      colW,
+      this.svc.rowH()
     );
     this.updateAlignmentGuides(
       this.translateRect(this.pixelRect, ref.translateX, ref.translateY)
@@ -530,7 +636,8 @@ export class WidgetCard implements OnDestroy {
     ref.previewLayout = resolved;
     ref.previewRect = gridToPixel(
       resolved?.find(w => w.id === this.widget.id) ?? snappedWidget,
-      colW
+      colW,
+      this.svc.rowH()
     );
     this.updateAlignmentGuides(ref.liveRect);
 
@@ -635,7 +742,7 @@ export class WidgetCard implements OnDestroy {
   }
 
   private gridHeightPx(rows: number): number {
-    return rows * ROW_H + (rows - 1) * GAP;
+    return rows * this.svc.rowH() + (rows - 1) * GAP;
   }
 
   private buildResizePreviewWidget(
@@ -644,7 +751,7 @@ export class WidgetCard implements OnDestroy {
     dy: number
   ): Widget {
     const dcols = Math.round(dx / (this.svc.colW() + GAP));
-    const drows = Math.round(dy / (ROW_H + GAP));
+    const drows = Math.round(dy / (this.svc.rowH() + GAP));
     const right = ref.origX + ref.origW;
     const bottom = ref.origY + ref.origH;
 
@@ -681,7 +788,7 @@ export class WidgetCard implements OnDestroy {
     dx: number,
     dy: number
   ): PixelRect {
-    const baseRect = gridToPixel(this.widget, this.svc.colW());
+    const baseRect = gridToPixel(this.widget, this.svc.colW(), this.svc.rowH());
     const right = baseRect.left + baseRect.width;
     const bottom = baseRect.top + baseRect.height;
     const minWidth = this.gridWidthPx(1);
@@ -753,7 +860,7 @@ export class WidgetCard implements OnDestroy {
   private buildAlignmentGuides(source: PixelRect): AlignmentGuide[] {
     const others = this.svc.widgets()
       .filter(widget => widget.id !== this.widget.id)
-      .map(widget => gridToPixel(widget, this.svc.colW()));
+      .map(widget => gridToPixel(widget, this.svc.colW(), this.svc.rowH()));
 
     if (!others.length) return [];
 

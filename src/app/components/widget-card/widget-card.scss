@@ -41,12 +41,6 @@
                 0 0 0 1px color-mix(in srgb, var(--acc) 22%, transparent);
   }
 
-  &.is-front {
-    border-color: var(--pur);
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--pur) 30%, transparent),
-                var(--shadow-card);
-  }
-
   &.is-animating {
     border-color: var(--grn);
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--grn) 25%, transparent),
@@ -58,6 +52,13 @@
 
   &.is-locked {
     opacity: 0.88;
+  }
+
+  &.is-snap-target {
+    border-color: var(--cyn, #06b6d4);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--cyn, #06b6d4) 35%, transparent),
+                0 0 12px color-mix(in srgb, var(--cyn, #06b6d4) 20%, transparent);
+    transition: border-color 80ms ease, box-shadow 80ms ease;
   }
 }
 
@@ -118,11 +119,6 @@
     border: 1px solid color-mix(in srgb, var(--amb) 25%, transparent);
   }
 
-  &--front {
-    background: color-mix(in srgb, var(--pur) 12%, transparent);
-    color: var(--pur);
-    border: 1px solid color-mix(in srgb, var(--pur) 25%, transparent);
-  }
 }
 
 .header-right {

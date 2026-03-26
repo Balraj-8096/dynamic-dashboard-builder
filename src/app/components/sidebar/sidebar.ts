@@ -32,7 +32,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { DashboardService } from '../../services/dashboard.service';
 import { filterCatalog } from '../../core/catalog';
-import { COLS, KEYBOARD_SHORTCUTS, ROW_H } from '../../core/constants';
+import { ALLOWED_ROW_HEIGHTS, COLS, KEYBOARD_SHORTCUTS } from '../../core/constants';
 import { WidgetType } from '../../core/interfaces';
 
 @Component({
@@ -47,7 +47,7 @@ export class Sidebar {
 
   // Expose constants to template
   readonly COLS = COLS;
-  readonly ROW_H = ROW_H;
+  readonly ALLOWED_ROW_HEIGHTS = ALLOWED_ROW_HEIGHTS;
   readonly KEYBOARD_SHORTCUTS = KEYBOARD_SHORTCUTS;
 
   /** Palette items driven by the sidebar search signal */
@@ -79,6 +79,10 @@ export class Sidebar {
     if (!e.dataTransfer) return;
     e.dataTransfer.effectAllowed = 'copy';
     e.dataTransfer.setData('text/plain', type);
+  }
+
+  setRowH(h: number): void {
+    this.svc.setRowH(h);
   }
 
 }

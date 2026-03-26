@@ -11,9 +11,9 @@
   [class.can-drag]="!isLocked"
   [class.is-selected]="isSelected"
   [class.is-active]="isActive"
-  [class.is-front]="isFront"
   [class.is-animating]="isAnimating"
   [class.is-locked]="isLocked"
+  [class.is-snap-target]="isSnapTarget"
   [class.is-interacting]="isInteracting"
   (click)="onCardClick($event)"
   (pointerdown)="onSurfacePointerDown($event)"
@@ -29,9 +29,6 @@
       <span class="header-title">{{ widget.title }}</span>
       @if (isLocked) {
         <span class="badge badge--locked">locked</span>
-      }
-      @if (isFront) {
-        <span class="badge badge--front">front</span>
       }
     </div>
 
@@ -49,8 +46,6 @@
           (click)="onLock($event)">
           {{ isLocked ? '🔒' : '🔓' }}
         </button>
-        <!-- Bring to front -->
-        <button class="action-btn" title="Bring to front" (click)="onBringFront($event)">↑</button>
         <!-- Delete -->
         <button class="action-btn action-btn--delete" title="Delete" (click)="onDelete($event)">✕</button>
       </div>
@@ -72,7 +67,7 @@
     }
   </div>
 
-  <!-- ── RESIZE HANDLES (hidden when locked) ───────────────── -->
+  <!-- ── RESIZE HANDLES (hidden when locked) ───────── -->
   @if (!isLocked) {
     <div class="resize-handle resize-handle--n"
       (pointerdown)="onResizePointerDown($event, RD.N)"></div>

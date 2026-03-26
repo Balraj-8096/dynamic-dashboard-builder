@@ -1,0 +1,49 @@
+<div class="history-panel">
+
+  <!-- ── Header ── -->
+  <div class="hp-header">
+    <span class="hp-title">Revision History</span>
+    <span class="hp-count">{{ svc.history().length }} entries</span>
+    <button class="hp-close" title="Close history panel" (click)="svc.toggleHistoryPanel()">✕</button>
+  </div>
+
+  <!-- ── Entry list ── -->
+  <div class="hp-list">
+    @for (entry of svc.history(); track trackEntry($index, entry); let i = $index) {
+      <button
+        class="hp-entry"
+        [class.hp-entry--current]="i === svc.histIdx()"
+        [class.hp-entry--past]="i < svc.histIdx()"
+        (click)="svc.jumpToHistory(i)"
+        [title]="entry.label + ' — ' + formatTime(entry.timestamp)"
+      >
+        <!-- Index -->
+        <span class="hp-entry__index">{{ i + 1 }}</span>
+
+        <!-- Label + meta row -->
+        <span class="hp-entry__body">
+          <span class="hp-entry__label">{{ entry.label }}</span>
+          <span class="hp-entry__meta">
+            <span class="hp-entry__widgets">{{ entry.widgetCount }} widget{{ entry.widgetCount === 1 ? '' : 's' }}</span>
+            @if (i > 0) {
+              @let delta = entry.widgetCount - svc.history()[i - 1].widgetCount;
+              @if (delta > 0) {
+                <span class="hp-entry__delta hp-entry__delta--add">+{{ delta }}</span>
+              } @else if (delta < 0) {
+                <span class="hp-entry__delta hp-entry__delta--remove">{{ delta }}</span>
+              }
+            }
+          </span>
+        </span>
+
+        <!-- Time -->
+        <span class="hp-entry__time">{{ formatTime(entry.timestamp) }}</span>
+
+        @if (i === svc.histIdx()) {
+          <span class="hp-entry__badge">now</span>
+        }
+      </button>
+    }
+  </div>
+
+</div>

@@ -399,11 +399,24 @@ export type WidgetConfig =
  * Every widget on the canvas is one of these
  */
 export interface Widget extends GridPosition {
-  id:     string;       // uid() — random 7-char alphanumeric
-  type:   WidgetType;   // one of the 9 types
-  title:  string;       // display title in header
-  locked: boolean;      // drag/resize/delete locked
-  config: WidgetConfig; // type-specific configuration
+  id:      string;       // uid() — random 7-char alphanumeric
+  type:    WidgetType;   // one of the 9 types
+  title:   string;       // display title in header
+  locked:  boolean;      // drag/resize/delete locked
+  config:  WidgetConfig; // type-specific configuration
+  /**
+   * Layout anchor flag (Feature 1 — Widget Pinning).
+   * When true the widget is immune to push-displacement by
+   * resolveLayout() and to compaction by packLayout().
+   * The user can still manually drag a pinned widget.
+   *
+   * Distinct from `locked`:
+   *   locked  = edit protection (no drag/resize/delete)
+   *   pinned  = layout anchor   (not pushed by other widgets / pack)
+   *
+   * Optional — absent on all existing widgets; treated as false.
+   */
+  pinned?: boolean;
 }
 
 
@@ -536,6 +549,8 @@ export interface DashboardTemplate {
 export interface DashboardExport {
   title:   string;
   widgets: Widget[];
+  /** Per-dashboard row height in pixels. Optional — absent = DEFAULT_ROW_H (80). */
+  rowH?:   number;
 }
 
 
@@ -618,10 +633,27 @@ export type { StatusValueDef } from './query-types';
 // ───────────────────────────────────────────────────────────────
 
 /**
- * History stack entry — full deep-cloned snapshot of widgets[]
- * Each entry is a complete, independent copy
+ * @deprecated Use HistorySnapshot. Kept as a type alias for any
+ * external code that imports HistoryEntry directly.
  */
 export type HistoryEntry = Widget[];
+
+/**
+ * Enriched history stack entry — deep-cloned widget snapshot
+ * plus metadata for the Revision History Browser (Feature 5).
+ *
+ * widgets   — complete, independent deep clone of Widget[]
+ * timestamp — Date.now() at the moment the entry was pushed
+ * label     — human-readable description of the action that
+ *             produced this snapshot (e.g. "Add widget",
+ *             "Delete widget", "Move / resize")
+ */
+export interface HistorySnapshot {
+  widgets:     Widget[];
+  timestamp:   number;
+  label:       string;
+  widgetCount: number;  // snapshot.length — used for delta display in history panel
+}
 
 
 // ───────────────────────────────────────────────────────────────
@@ -640,19 +672,19 @@ export interface DashboardState {
   // Selection & interaction
   selectedId:  string | null;
   activeId:    string | null;
-  frontId:     string | null;
   animatingId: string | null;
 
   // Canvas
   canvasW:     number;
   zoom:        number;
+  rowH:        number;
   scrollTop:   number;
   showMinimap: boolean;
   showAlignmentGuides: boolean;
   alignmentGuides: AlignmentGuide[];
 
   // History
-  history:     HistoryEntry[];
+  history:     HistorySnapshot[];
   histIdx:     number;
 
   // Modal visibility flags
