@@ -613,9 +613,11 @@ export class WidgetCard implements OnDestroy {
       colW,
       this.svc.rowH()
     );
-    this.updateAlignmentGuides(
-      this.translateRect(this.pixelRect, ref.translateX, ref.translateY)
-    );
+    // C26 fix: use previewRect (grid-snapped position) for guide detection so that
+    // guides appear exactly when and where snap-to-widget will fire on pointerup.
+    // Using the raw translateRect here caused guides to track cursor position instead
+    // of grid position, making guides appear/disappear without a corresponding snap.
+    this.updateAlignmentGuides(ref.previewRect);
 
     this.cdr.markForCheck();
   }
@@ -639,7 +641,8 @@ export class WidgetCard implements OnDestroy {
       colW,
       this.svc.rowH()
     );
-    this.updateAlignmentGuides(ref.liveRect);
+    // C26 fix: use previewRect (grid-snapped rect) so resize guides match snap position.
+    this.updateAlignmentGuides(ref.previewRect);
 
     this.cdr.markForCheck();
   }
