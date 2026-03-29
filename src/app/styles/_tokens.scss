@@ -143,6 +143,25 @@
   // ── Canvas Decoration ────────────────────────────────────────
   --canvas-inset-highlight: inset 0 1px 0 color-mix(in srgb, white 4%, transparent);
 
+  // Shared gradient surfaces
+  --gradient-surface-header:
+    linear-gradient(10deg,
+      color-mix(in srgb, var(--bg2) 60%, white 6%) 0%,
+      color-mix(in srgb, var(--bg1) 64%, transparent) 100%);
+  --gradient-surface-floating:
+    linear-gradient(10deg,
+      color-mix(in srgb, var(--bg1) 86%, white 6%) 0%,
+      color-mix(in srgb, var(--bg1) 74%, var(--bg0) 26%) 100%);
+  --gradient-surface-emphasis:
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--acc) 16%, var(--bg1)) 0%,
+      color-mix(in srgb, var(--acc2) 8%, var(--bg1)) 62%,
+      color-mix(in srgb, white 3%, var(--bg1)) 100%);
+  --gradient-surface-card:
+    linear-gradient(10deg,
+      color-mix(in srgb, var(--bg1) 96%, white 3%) 0%,
+      color-mix(in srgb, var(--bg1) 88%, var(--bg0) 12%) 100%);
+
   // ── Status Badge Colors ──────────────────────────────────────
   --status-paid-bg:     #052e16;
   --status-paid-fg:     #22c55e;
@@ -238,6 +257,25 @@
   // ── Canvas Decoration ────────────────────────────────────────
   --canvas-inset-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.85),
                             inset 0 0 0 1px color-mix(in srgb, var(--bdr) 40%, transparent);
+
+  // Shared gradient surfaces
+  --gradient-surface-header:
+    linear-gradient(0deg,
+      color-mix(in srgb, white 80%, var(--acc) 8%) 0%,
+      color-mix(in srgb, white 94%, transparent) 100%);
+  --gradient-surface-floating:
+    linear-gradient(0deg,
+      color-mix(in srgb, white 84%, var(--acc)8%) 0%,
+      color-mix(in srgb, white 74%, var(--bg0) 26%) 100%);
+  --gradient-surface-emphasis:
+    linear-gradient(135deg,
+      color-mix(in srgb, white 84%, var(--acc) 10%) 0%,
+      color-mix(in srgb, white 88%, var(--acc2) 7%) 58%,
+      color-mix(in srgb, white 92%, #000 1%) 100%);
+  --gradient-surface-card:
+    linear-gradient(10deg,
+      color-mix(in srgb, white 96%, var(--acc) 2%) 0%,
+      color-mix(in srgb, white 90%, var(--bg0) 10%) 100%);
 
   // ── Status Badge Colors ──────────────────────────────────────
   --status-paid-bg:     #dcfce7;

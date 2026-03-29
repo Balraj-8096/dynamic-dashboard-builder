@@ -7,6 +7,7 @@
   max-height: min(92dvh, 920px);
   overflow: hidden;
   box-shadow: var(--shadow-modal);
+  backdrop-filter: blur(20px) saturate(1.08);
 
   // Table editor fills the full dialog height so the table section
   // has room to scroll independently — matches the dialog height set in canvas.ts
@@ -23,6 +24,7 @@
   gap: 16px;
   padding: 16px 22px 14px;
   border-bottom: 1px solid var(--bdr);
+  background: var(--gradient-surface-header);
   flex-shrink: 0;
   min-width: 0;
 }
@@ -196,7 +198,7 @@
   flex-wrap: wrap;
   padding: 12px 20px;
   flex-shrink: 0;
-  background: var(--bg1);
+  background: var(--gradient-surface-header);
 }
 
 .btn-cancel {
@@ -233,7 +235,7 @@
   min-width: 280px;
   min-height: 0;
   flex-shrink: 0;
-  background: var(--bg0);
+  background: color-mix(in srgb, var(--bg0) 82%, transparent);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -246,6 +248,7 @@
 .preview-hdr {
   padding: 14px 18px 10px;
   border-bottom: 1px solid var(--bdr);
+  background: var(--gradient-surface-header);
   flex-shrink: 0;
 }
 

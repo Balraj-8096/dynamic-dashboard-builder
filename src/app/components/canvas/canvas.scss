@@ -41,7 +41,11 @@
   right: 0;
   bottom: 0;
   left: 0;
-  background: rgba(8, 11, 18, 0.46);
+  background:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--bg0) 78%, transparent),
+      color-mix(in srgb, var(--bg0) 88%, black 12%));
+  backdrop-filter: blur(8px);
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--transition-base);
@@ -390,11 +394,11 @@
   justify-content: space-between;
   gap: 12px;
   padding: 10px 12px;
-  border-radius: 14px;
-  border: 1px solid color-mix(in srgb, var(--acc) 20%, var(--bdr));
-  background: color-mix(in srgb, var(--bg1) 94%, black 6%);
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--acc) 18%, var(--bdrH));
+  background: var(--gradient-surface-floating);
   box-shadow: var(--shadow-panel);
-  backdrop-filter: blur(14px);
+  backdrop-filter: blur(18px) saturate(1.08);
   z-index: 320;
 }
 

@@ -17,10 +17,11 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
-  background: var(--bg1);
+  background: var(--gradient-surface-header);
   border-bottom: 1px solid var(--bdr);
   flex-shrink: 0;
   box-shadow: var(--shadow-header);
+  backdrop-filter: blur(16px) saturate(1.05);
   gap: 12px;
 }
 
@@ -194,9 +195,10 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 20px;
-  background: var(--bg1);
+  background: var(--gradient-surface-header);
   border-top: 1px solid var(--bdr);
   flex-shrink: 0;
+  backdrop-filter: blur(16px) saturate(1.05);
 }
 
 .footer-left,

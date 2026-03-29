@@ -8,6 +8,7 @@
   max-height: 88vh;
   overflow: hidden;
   box-shadow: var(--shadow-modal);
+  backdrop-filter: blur(20px) saturate(1.08);
 }
 
 // ── Header ────────────────────────────────────────────────────
@@ -17,6 +18,7 @@
   align-items: flex-start;
   padding: 20px 24px 16px;
   border-bottom: 1px solid var(--bdr);
+  background: var(--gradient-surface-header);
   flex-shrink: 0;
 }
 
@@ -57,7 +59,10 @@
   gap: 8px;
   margin: 16px 24px 0;
   padding: 10px 14px;
-  background: color-mix(in srgb, var(--amb) 6%, transparent);
+  background:
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--amb) 10%, transparent),
+      color-mix(in srgb, var(--amb) 4%, transparent));
   border: 1px solid color-mix(in srgb, var(--amb) 22%, transparent);
   border-radius: var(--radius-md);
   font-size: 11px;

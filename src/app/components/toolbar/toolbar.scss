@@ -1,6 +1,6 @@
 .toolbar {
   height: var(--toolbar-h);
-  background: var(--bg1);
+  background: var(--gradient-surface-floating);
   border-bottom: 1px solid var(--bdr);
   display: flex;
   position: relative;
@@ -9,6 +9,8 @@
   padding: 0 14px;
   gap: 10px;
   flex-shrink: 0;
+  box-shadow: inset 1px -1px 18px 1px color-mix(in srgb, #f2f2f2 10%, transparent);
+  backdrop-filter: blur(8px) saturate(1.01);
 }
 
 .desktop-only {
@@ -21,8 +23,13 @@
   align-items: center;
   gap: 5px;
 
-  &--left  { min-width: 0; }
-  &--right { flex-shrink: 0; }
+  &--left {
+    min-width: 0;
+  }
+
+  &--right {
+    flex-shrink: 0;
+  }
 }
 
 // ── Vertical divider ──────────────────────────────────────────
@@ -45,9 +52,17 @@
   gap: 0;
 }
 
-.logo-diamond { color: var(--acc); }
-.logo-dash    { color: var(--txt0); }
-.logo-craft   { color: var(--acc2); }
+.logo-diamond {
+  color: var(--acc);
+}
+
+.logo-dash {
+  color: var(--txt0);
+}
+
+.logo-craft {
+  color: var(--acc2);
+}
 
 // ── Title ─────────────────────────────────────────────────────
 .title-span {
@@ -64,7 +79,9 @@
   white-space: nowrap;
   transition: border-color var(--transition-base);
 
-  &:hover { border-color: var(--bdrH); }
+  &:hover {
+    border-color: var(--bdrH);
+  }
 }
 
 .title-input {
@@ -156,7 +173,9 @@
   padding: 6px 16px;
   border-radius: var(--radius-sm);
   border: 1px solid color-mix(in srgb, var(--grn) 40%, transparent);
-  background: color-mix(in srgb, var(--grn) 7%, transparent);
+  background: linear-gradient(135deg,
+      color-mix(in srgb, var(--grn) 18%, transparent),
+      color-mix(in srgb, var(--grn) 7%, transparent));
   color: var(--grn);
   cursor: pointer;
   font-size: 12px;
@@ -183,7 +202,7 @@
   padding: 3px;
   border: 1px solid var(--bdr);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--bg2) 76%, transparent);
+  background: var(--bg1);
 }
 
 .btn-sidebar-toggle,
@@ -206,9 +225,10 @@
   gap: 4px;
   padding: 8px;
   border-radius: 12px;
-  border: 1px solid var(--bdr);
-  background: color-mix(in srgb, var(--bg1) 96%, black 4%);
+  border: 1px solid color-mix(in srgb, var(--bdrH) 72%, transparent);
+  background: var(--gradient-surface-floating);
   box-shadow: var(--shadow-panel);
+  backdrop-filter: blur(18px) saturate(1.08);
   z-index: 500;
 }
 

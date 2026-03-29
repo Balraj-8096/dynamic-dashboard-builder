@@ -1,13 +1,15 @@
 :host { display: block; }
 
 .view-card {
-  background: var(--bg1);
-  border: 1px solid var(--bdr);
-  border-radius: var(--radius-lg);
+  background: var(--gradient-surface-card);
+  border: 1px solid color-mix(in srgb, var(--bdr) 88%, transparent);
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+  box-shadow:
+    0 2px 12px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 color-mix(in srgb, white 7%, transparent);
   cursor: default; // read-only — no pointer/grab
 }
 
@@ -19,7 +21,7 @@
   height: var(--hdr-h); // 40px
   flex-shrink: 0;
   border-bottom: 1px solid var(--bdr);
-  background: linear-gradient(180deg, var(--bg2) 0%, var(--bg1) 100%);
+  background: var(--gradient-surface-header);
 }
 
 .card-icon {
