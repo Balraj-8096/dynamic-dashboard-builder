@@ -4,9 +4,9 @@
   <div class="cluster cluster--left">
 
     @if (svc.compactViewport()) {
-      <button class="btn-icon btn-sidebar-toggle" title="Open widget tools" (click)="toggleSidebar()">
-        Menu
-      </button>
+    <button class="btn-icon btn-sidebar-toggle" title="Open widget tools" (click)="toggleSidebar()">
+      Menu
+    </button>
     }
 
     <!-- Logo -->
@@ -19,18 +19,12 @@
 
     <!-- Dashboard title (editable) -->
     @if (svc.editingTitle()) {
-      <input
-        #titleInput
-        class="title-input"
-        type="text"
-        [value]="svc.dashTitle()"
-        (blur)="onTitleBlur($any($event.target).value)"
-        (keydown)="onTitleKeyDown($event, $any($event.target).value)"
-      />
+    <input #titleInput class="title-input" type="text" [value]="svc.dashTitle()"
+      (blur)="onTitleBlur($any($event.target).value)" (keydown)="onTitleKeyDown($event, $any($event.target).value)" />
     } @else {
-      <span class="title-span" title="Click to rename" (click)="startEditTitle()">
-        {{ svc.dashTitle() }} ✏
-      </span>
+    <span class="title-span" title="Click to rename" (click)="startEditTitle()">
+      {{ svc.dashTitle() }} ✏
+    </span>
     }
   </div>
 
@@ -38,59 +32,45 @@
   <div class="cluster cluster--right">
 
     <div class="utility-group desktop-only">
-    <!-- Import -->
-    <button class="btn-text btn-text--utility" title="Import JSON layout" (click)="svc.openImport()">
-      ⬆ import
-    </button>
+      <!-- Import -->
+      <button class="btn-text btn-text--utility" title="Import JSON layout" (click)="svc.openImport()">
+        ⬆ import
+      </button>
 
-    <!-- Export -->
-    <button class="btn-text btn-text--utility" title="Export layout as JSON" (click)="svc.exportLayout()">
-      ⬇ export
-    </button>
+      <!-- Export -->
+      <button class="btn-text btn-text--utility" title="Export layout as JSON" (click)="svc.exportLayout()">
+        ⬇ export
+      </button>
 
-    <!-- History panel -->
-    <button
-      class="btn-icon"
-      [class.is-active]="svc.showHistoryPanel()"
-      title="Revision history"
-      (click)="svc.toggleHistoryPanel()"
-    >⏱</button>
-
-    <!-- Theme toggle -->
-    <button
-      class="btn-icon btn-theme"
-      [title]="themeSvc.theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
-      (click)="themeSvc.toggle()"
-    >{{ themeSvc.theme() === 'dark' ? '☀' : '☾' }}</button>
+      <!-- Theme toggle -->
+      <button class="btn-icon btn-theme"
+        [title]="themeSvc.theme() === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+        (click)="themeSvc.toggle()">{{ themeSvc.theme() === 'dark' ? '☀' : '☾' }}</button>
 
     </div>
 
     <!-- View Dashboard -->
-    <button
-      class="btn-view"
-      title="Preview the dashboard in view-only mode"
-      [disabled]="svc.widgetCount() === 0"
-      (click)="goToView()"
-    >
+    <button class="btn-view" title="Preview the dashboard in view-only mode" [disabled]="svc.widgetCount() === 0"
+      (click)="goToView()">
       ▶ View
     </button>
     @if (svc.compactViewport()) {
-      <button class="btn-icon btn-overflow" title="More actions" (click)="toggleToolbarMenu()">
-        More
-      </button>
+    <button class="btn-icon btn-overflow" title="More actions" (click)="toggleToolbarMenu()">
+      More
+    </button>
     }
   </div>
 
   @if (svc.compactViewport() && svc.toolbarMenuOpen()) {
-    <div class="toolbar-menu">
-      <button class="toolbar-menu__item" (click)="runPackLayout()">Pack Layout</button>
-      <button class="toolbar-menu__item toolbar-menu__item--danger" (click)="clearAll()">Clear All</button>
-      <button class="toolbar-menu__item" (click)="openImport()">Import Layout</button>
-      <button class="toolbar-menu__item" (click)="exportLayout()">Export Layout</button>
-      <button class="toolbar-menu__item" (click)="toggleTheme()">
-        {{ themeSvc.theme() === 'dark' ? 'Light Mode' : 'Dark Mode' }}
-      </button>
-    </div>
+  <div class="toolbar-menu">
+    <button class="toolbar-menu__item" (click)="runPackLayout()">Pack Layout</button>
+    <button class="toolbar-menu__item toolbar-menu__item--danger" (click)="clearAll()">Clear All</button>
+    <button class="toolbar-menu__item" (click)="openImport()">Import Layout</button>
+    <button class="toolbar-menu__item" (click)="exportLayout()">Export Layout</button>
+    <button class="toolbar-menu__item" (click)="toggleTheme()">
+      {{ themeSvc.theme() === 'dark' ? 'Light Mode' : 'Dark Mode' }}
+    </button>
+  </div>
   }
 
 </header>

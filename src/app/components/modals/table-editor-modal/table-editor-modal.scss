@@ -477,7 +477,7 @@
 .te-table-scroll {
   flex: 1; overflow: auto; min-height: 0;
   background: var(--bg0);
-  &::-webkit-scrollbar { width: 6px; height: 6px; }
+  &::-webkit-scrollbar { width: 4px; height: 4px; }
   &::-webkit-scrollbar-thumb { background: var(--bdr); border-radius: 4px; }
   &::-webkit-scrollbar-corner { background: var(--bg0); }
 }

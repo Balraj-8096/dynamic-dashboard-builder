@@ -3,158 +3,171 @@
 
     <div class="workspace-layout">
 
-    <!-- ── SIDEBAR ── -->
-    @if (!svc.compactViewport()) {
-    <div class="workspace-sidebar">
-        <app-sidebar />
-    </div>
-    } @else {
-    <div class="compact-backdrop" [class.is-visible]="svc.sidebarOpen() || svc.toolbarMenuOpen()"
-        (click)="closeCompactChrome()"></div>
-    <div class="compact-sidebar-shell" [class.is-open]="svc.sidebarOpen()">
-        <app-sidebar />
-    </div>
-    }
-
-    <!-- ── MAIN AREA ── -->
-    <div class="main-area">
-
-        <!-- ── TOOLBAR ── -->
-        <section class="workspace-stage">
-
-        <!-- ── GLOBAL FILTER BAR ── -->
-        <!-- <app-global-filter-bar /> -->
-
-        <!-- ── CANVAS AREA (scroll + floating HUDs) ── -->
-        <div class="canvas-area-wrapper">
-
-            <!-- ── SCROLL CONTAINER ── -->
-            <main class="scroll-area" #mainRef (click)="onCanvasClick()">
-
-                <!-- Zoom wrapper -->
-                <div class="zoom-wrapper" [ngStyle]="zoomStyle">
-
-                    <!-- Canvas -->
-                    <div class="canvas" #canvasRef [style.min-height.px]="svc.canvasH()"
-                        [class.no-grid]="!svc.showGridBackground()" [class.drag-over]="isDragOver"
-                        (dragover)="onCanvasDragOver($event)" (dragleave)="onCanvasDragLeave($event)"
-                        (drop)="onCanvasDrop($event)">
-                        <!-- Column snap guides (during active drag) -->
-                        @if (svc.activeId()) {
-                        @for (i of colIndices; track i) {
-                        <div class="snap-guide" [style.left.px]="i * (svc.colW() + 10) + 10" [style.width.px]="svc.colW()">
-                        </div>
-                        }
-                        }
-
-                        @if (svc.showAlignmentGuides() && svc.alignmentGuides().length) {
-                        @for (guide of svc.alignmentGuides(); track $index) {
-                        <div class="alignment-guide" [class.alignment-guide--vertical]="guide.axis === 'x'"
-                            [class.alignment-guide--horizontal]="guide.axis === 'y'" [ngStyle]="alignmentGuideStyle(guide)">
-                        </div>
-                        }
-                        }
-
-                        <!-- Empty state -->
-                        @if (svc.widgetCount() === 0) {
-                        <div class="empty-state">
-                            <div class="empty-icon">◈</div>
-                            <div class="empty-title">Start with a flexible layout, then shape it as you go.</div>
-                            <div class="empty-hint">Add a widget from scratch, load a demo, or begin from a template and
-                                refine the canvas once the data is in place.</div>
-                            <div class="empty-actions">
-                                <button class="empty-btn empty-btn--primary" (click)="openAddWidgetWizard()">+ Add
-                                    Widget</button>
-                                <button class="empty-btn" (click)="openTemplates()">Browse Templates</button>
-                                <button class="empty-btn empty-btn--accent" (click)="loadDemo()">Load Demo</button>
-                            </div>
-                        </div>
-                        }
-
-                        <!-- Widget cards -->
-                        @for (widget of svc.widgets(); track trackWidget($index, widget)) {
-                        <app-widget-card [widget]="widget" />
-                        }
-
-                    </div><!-- /canvas -->
-                </div><!-- /zoom-wrapper -->
-
-            </main><!-- /scroll-area -->
-
-            <!-- ── MINIMAP — bottom-right, independent navigator ── -->
-            @if (svc.showMinimap() && svc.widgetCount() > 0) {
-            <app-minimap />
-            }
-
-            <!-- ── UNIFIED BOTTOM BAR — centred, all canvas controls ── -->
-            <div class="canvas-bottom-bar"
-                [class.is-lifted]="svc.compactViewport() && !!svc.selectedWidget()">
-
-                <!-- Primary action -->
-                <button class="corner-btn corner-btn--primary"
-                    title="Add Widget (Ctrl+1–9)"
-                    (click)="openAddWidgetWizard()">+</button>
-
-                <div class="bar-sep"></div>
-
-                <!-- History -->
-                <button class="corner-btn" title="Undo (Ctrl+Z)" [disabled]="!svc.canUndo()" (click)="svc.undo()">↩</button>
-                <button class="corner-btn" title="Redo (Ctrl+Y)" [disabled]="!svc.canRedo()" (click)="svc.redo()">↪</button>
-
-                <div class="bar-sep"></div>
-
-                <!-- Layout ops -->
-                <button class="corner-btn corner-btn--green" title="Pack layout — collapse empty rows" (click)="svc.applyPackLayout()">⊕</button>
-                <button class="corner-btn corner-btn--red" title="Clear all widgets" (click)="svc.clearAll()">✕</button>
-
-                <!-- Stronger divider between edit and view sections -->
-                <div class="bar-sep bar-sep--strong"></div>
-
-                <!-- Zoom -->
-                <button class="corner-btn" title="Zoom out (Ctrl+scroll)" (click)="svc.zoomOut()">−</button>
-                <button class="corner-btn corner-btn--pct"
-                    [class.corner-btn--active]="!svc.isDefaultZoom()"
-                    title="Reset zoom to 100%"
-                    (click)="svc.resetZoom()">{{ svc.zoomPercent() }}</button>
-                <button class="corner-btn" title="Zoom in (Ctrl+scroll)" (click)="svc.zoomIn()">+</button>
-
-                <div class="bar-sep"></div>
-
-                <!-- Help -->
-                <button class="corner-btn" title="Help — keyboard shortcuts & guide" (click)="svc.openHelp()">?</button>
-
-            </div>
-
-        </div><!-- /canvas-area-wrapper -->
-        </section>
-
-        <!-- ── CONTEXT MENU (Step 29) — outside scroll-area so fixed positioning works ── -->
-        @if (svc.contextMenu()) {
-        <app-context-menu />
-        }
-
-        @if (svc.showHistoryPanel()) {
-        <app-history-panel />
-        }
-
-        @if (svc.compactViewport() && svc.selectedWidget(); as selectedWidget) {
-        <div class="mobile-action-bar">
-            <div class="mobile-action-bar__meta">
-                <span class="mobile-action-bar__label">{{ selectedWidget.title }}</span>
-                <span class="mobile-action-bar__type">{{ selectedWidget.type }}</span>
-            </div>
-            <div class="mobile-action-bar__actions">
-                <button class="mobile-action-btn" (click)="openSelectedWidgetEditor()">Edit</button>
-                <button class="mobile-action-btn" (click)="duplicateSelectedWidget()">Copy</button>
-                <button class="mobile-action-btn" (click)="toggleSelectedWidgetLock()">
-                    {{ selectedWidget.locked ? 'Unlock' : 'Lock' }}
-                </button>
-                <button class="mobile-action-btn mobile-action-btn--danger"
-                    (click)="deleteSelectedWidget()">Delete</button>
-            </div>
+        <!-- ── SIDEBAR ── -->
+        @if (!svc.compactViewport()) {
+        <div class="workspace-sidebar">
+            <app-sidebar />
+        </div>
+        } @else {
+        <div class="compact-backdrop" [class.is-visible]="svc.sidebarOpen() || svc.toolbarMenuOpen()"
+            (click)="closeCompactChrome()"></div>
+        <div class="compact-sidebar-shell" [class.is-open]="svc.sidebarOpen()">
+            <app-sidebar />
         </div>
         }
 
-    </div><!-- /main-area -->
+        <!-- ── MAIN AREA ── -->
+        <div class="main-area">
+
+            <!-- ── TOOLBAR ── -->
+            <section class="workspace-stage">
+
+                <!-- ── GLOBAL FILTER BAR ── -->
+                <!-- <app-global-filter-bar /> -->
+
+                <!-- ── CANVAS AREA (scroll + floating HUDs) ── -->
+                <div class="canvas-area-wrapper">
+
+                    <!-- ── SCROLL CONTAINER ── -->
+                    <main class="scroll-area" #mainRef (click)="onCanvasClick()">
+
+                        <!-- Zoom wrapper -->
+                        <div class="zoom-wrapper" [ngStyle]="zoomStyle">
+
+                            <!-- Canvas -->
+                            <div class="canvas" #canvasRef [style.min-height.px]="svc.canvasH()"
+                                [class.no-grid]="!svc.showGridBackground()" [class.drag-over]="isDragOver"
+                                (dragover)="onCanvasDragOver($event)" (dragleave)="onCanvasDragLeave($event)"
+                                (drop)="onCanvasDrop($event)">
+                                <!-- Column snap guides (during active drag) -->
+                                @if (svc.activeId()) {
+                                @for (i of colIndices; track i) {
+                                <div class="snap-guide" [style.left.px]="i * (svc.colW() + 10) + 10"
+                                    [style.width.px]="svc.colW()">
+                                </div>
+                                }
+                                }
+
+                                @if (svc.showAlignmentGuides() && svc.alignmentGuides().length) {
+                                @for (guide of svc.alignmentGuides(); track $index) {
+                                <div class="alignment-guide" [class.alignment-guide--vertical]="guide.axis === 'x'"
+                                    [class.alignment-guide--horizontal]="guide.axis === 'y'"
+                                    [ngStyle]="alignmentGuideStyle(guide)">
+                                </div>
+                                }
+                                }
+
+                                <!-- Empty state -->
+                                @if (svc.widgetCount() === 0) {
+                                <div class="empty-state">
+                                    <div class="empty-icon">◈</div>
+                                    <div class="empty-title">Start with a flexible layout, then shape it as you go.
+                                    </div>
+                                    <div class="empty-hint">Add a widget from scratch, load a demo, or begin from a
+                                        template and
+                                        refine the canvas once the data is in place.</div>
+                                    <div class="empty-actions">
+                                        <button class="empty-btn empty-btn--primary" (click)="openAddWidgetWizard()">+
+                                            Add
+                                            Widget</button>
+                                        <button class="empty-btn" (click)="openTemplates()">Browse Templates</button>
+                                        <button class="empty-btn empty-btn--accent" (click)="loadDemo()">Load
+                                            Demo</button>
+                                    </div>
+                                </div>
+                                }
+
+                                <!-- Widget cards -->
+                                @for (widget of svc.widgets(); track trackWidget($index, widget)) {
+                                <app-widget-card [widget]="widget" />
+                                }
+
+                            </div><!-- /canvas -->
+                        </div><!-- /zoom-wrapper -->
+
+                    </main><!-- /scroll-area -->
+
+                    <!-- ── MINIMAP — bottom-right, independent navigator ── -->
+                    @if (svc.showMinimap() && svc.widgetCount() > 0) {
+                    <app-minimap />
+                    }
+
+                    <!-- ── UNIFIED BOTTOM BAR — centred, all canvas controls ── -->
+                    <div class="canvas-bottom-bar" [class.is-lifted]="svc.compactViewport() && !!svc.selectedWidget()">
+
+                        <!-- Primary action -->
+                        <button class="corner-btn corner-btn--primary" title="Add Widget (Ctrl+1–9)"
+                            (click)="openAddWidgetWizard()">+</button>
+
+                        <div class="bar-sep"></div>
+
+                        <!-- History -->
+                        <button class="corner-btn" title="Undo (Ctrl+Z)" [disabled]="!svc.canUndo()"
+                            (click)="svc.undo()">↩</button>
+                        <button class="corner-btn" title="Redo (Ctrl+Y)" [disabled]="!svc.canRedo()"
+                            (click)="svc.redo()">↪</button>
+
+                        <div class="bar-sep"></div>
+
+                        <!-- Layout ops -->
+                        <button class="corner-btn corner-btn--green" title="Pack layout — collapse empty rows"
+                            (click)="svc.applyPackLayout()">⊕</button>
+                        <button class="corner-btn corner-btn--red" title="Clear all widgets"
+                            (click)="svc.clearAll()">✕</button>
+
+                        <!-- Stronger divider between edit and view sections -->
+                        <div class="bar-sep bar-sep--strong"></div>
+
+                        <!-- Zoom -->
+                        <button class="corner-btn" title="Zoom out (Ctrl+scroll)" (click)="svc.zoomOut()">−</button>
+                        <button class="corner-btn corner-btn--pct" [class.corner-btn--active]="!svc.isDefaultZoom()"
+                            title="Reset zoom to 100%" (click)="svc.resetZoom()">{{ svc.zoomPercent() }}</button>
+                        <button class="corner-btn" title="Zoom in (Ctrl+scroll)" (click)="svc.zoomIn()">+</button>
+
+                        <div class="bar-sep bar-sep--strong"></div>
+
+                        <!-- Help -->
+                        <button class="corner-btn" title="Help — keyboard shortcuts & guide"
+                            (click)="svc.openHelp()">?</button>
+
+                        <div class="bar-sep"></div>
+                        
+                        <!-- History panel -->
+                        <button class="corner-btn" [class.is-active]="svc.showHistoryPanel()" title="Revision history"
+                            (click)="svc.toggleHistoryPanel()">⏱</button>
+
+                    </div>
+
+                </div><!-- /canvas-area-wrapper -->
+            </section>
+
+            <!-- ── CONTEXT MENU (Step 29) — outside scroll-area so fixed positioning works ── -->
+            @if (svc.contextMenu()) {
+            <app-context-menu />
+            }
+
+            @if (svc.showHistoryPanel()) {
+            <app-history-panel />
+            }
+
+            @if (svc.compactViewport() && svc.selectedWidget(); as selectedWidget) {
+            <div class="mobile-action-bar">
+                <div class="mobile-action-bar__meta">
+                    <span class="mobile-action-bar__label">{{ selectedWidget.title }}</span>
+                    <span class="mobile-action-bar__type">{{ selectedWidget.type }}</span>
+                </div>
+                <div class="mobile-action-bar__actions">
+                    <button class="mobile-action-btn" (click)="openSelectedWidgetEditor()">Edit</button>
+                    <button class="mobile-action-btn" (click)="duplicateSelectedWidget()">Copy</button>
+                    <button class="mobile-action-btn" (click)="toggleSelectedWidgetLock()">
+                        {{ selectedWidget.locked ? 'Unlock' : 'Lock' }}
+                    </button>
+                    <button class="mobile-action-btn mobile-action-btn--danger"
+                        (click)="deleteSelectedWidget()">Delete</button>
+                </div>
+            </div>
+            }
+
+        </div><!-- /main-area -->
     </div><!-- /workspace-layout -->
 </div>
