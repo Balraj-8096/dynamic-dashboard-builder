@@ -554,15 +554,15 @@
   font-weight: 600;
 
   &--ok {
-    background: color-mix(in srgb, var(--dev-badge-ok) 12%, transparent);
-    color: var(--dev-badge-ok);
-    border: 1px solid color-mix(in srgb, var(--dev-badge-ok) 30%, transparent);
+    background: color-mix(in srgb, var(--grn) 12%, transparent);
+    color: var(--grn);
+    border: 1px solid color-mix(in srgb, var(--grn) 30%, transparent);
   }
 
   &--warn {
-    background: color-mix(in srgb, var(--dev-badge-warn) 12%, transparent);
-    color: var(--dev-badge-warn);
-    border: 1px solid color-mix(in srgb, var(--dev-badge-warn) 30%, transparent);
+    background: color-mix(in srgb, var(--amb) 12%, transparent);
+    color: var(--amb);
+    border: 1px solid color-mix(in srgb, var(--amb) 30%, transparent);
   }
 
   &--err {
@@ -578,9 +578,9 @@
   }
 
   &--payload {
-    background: color-mix(in srgb, var(--dev-badge-payload) 12%, transparent);
-    color: var(--dev-badge-payload);
-    border: 1px solid color-mix(in srgb, var(--dev-badge-payload) 30%, transparent);
+    background: color-mix(in srgb, var(--pur) 12%, transparent);
+    color: var(--pur);
+    border: 1px solid color-mix(in srgb, var(--pur) 30%, transparent);
   }
 }
 
@@ -593,7 +593,7 @@
   white-space: pre;
   overflow-x: auto;
   overflow-y: auto;
-  background: var(--dev-json-bg);
+  background: var(--bg0);
   border-top: 1px solid color-mix(in srgb, var(--bdr) 50%, transparent);
 
   &::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -631,7 +631,7 @@
   font-size: 10px;
   font-family: var(--font-mono);
   color: var(--txt2);
-  background: var(--dev-json-bg);
+  background: var(--bg0);
   border-top: 1px solid color-mix(in srgb, var(--bdr) 50%, transparent);
   font-style: italic;
 }

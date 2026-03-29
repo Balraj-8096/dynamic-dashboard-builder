@@ -1,41 +1,55 @@
 // ═══════════════════════════════════════════════════════════════
 //  DASHCRAFT — Design Tokens
-//  Ported from React T{} object
-//  Every color in the app references these variables
+//  Every color/spacing/effect in the app references these vars.
+//
+//  Structure
+//  ─────────
+//  :root (static)       — never theme-dependent, defined once
+//  :root / [dark]       — dark theme defaults
+//  [data-theme="light"] — light overrides only
 // ═══════════════════════════════════════════════════════════════
 
-// Dark theme is the default (no attribute needed)
-// Light theme activates when <html data-theme="light">
 
-:root,
-[data-theme="dark"] {
+// ═══════════════════════════════════════════════════════════════
+//  STATIC — layout, radius, z-index, transitions, fonts, palettes
+//  These never change between themes.
+// ═══════════════════════════════════════════════════════════════
+:root {
 
-  // ── Backgrounds ─────────────────────────────────────────────
-  --bg0: #070b12; // darkest — canvas background
-  --bg1: #0d1219; // card / sidebar background
-  --bg2: #121a25; // widget header gradient top
-  --bg3: #1a2535; // input background, hover states
-  --bg4: #1f2d3d; // button hover
+  // ── Layout ───────────────────────────────────────────────────
+  --gap:       10px;   // grid gap between cells
+  --row-h:     80px;   // grid row height
+  --hdr-h:     40px;   // widget header height
+  --sidebar-w: 210px;  // sidebar width
+  --toolbar-h: 52px;   // top toolbar height
 
-  // ── Borders ─────────────────────────────────────────────────
-  --bdr: #1e2d42; // default border
-  --bdrH: #2a4060; // hovered border
-  --bdrA: #1d4ed8; // active / dragging border
+  // ── Border Radius ────────────────────────────────────────────
+  --radius-sm: 5px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
 
-  // ── Text ────────────────────────────────────────────────────
-  --txt0: #e8edf5; // primary text
-  --txt1: #8fa3be; // secondary text
-  --txt2: #526070; // muted / label text
+  // ── Transitions ──────────────────────────────────────────────
+  --transition-fast: all 0.12s ease;
+  --transition-base: all 0.15s ease;
+  --transition-slow: all 0.25s ease;
 
-  // ── Accent Colors ───────────────────────────────────────────
-  --acc: #3b82f6; // blue accent
-  --acc2: #60a5fa; // lighter blue
-  --grn: #22c55e; // green — success, trend up
-  --red: #ef4444; // red — danger, trend down
-  --amb: #f59e0b; // amber — warning, locked badge
-  --pur: #a78bfa; // purple — bring to front, templates
+  // ── Typography ───────────────────────────────────────────────
+  --font-sans: 'Onest', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 
-  // ── Chart Colors ────────────────────────────────────────────
+  // ── Z-index Scale ────────────────────────────────────────────
+  --z-widget:       1;
+  --z-widget-front: 100;
+  --z-selected:     150;
+  --z-active:       200;
+  --z-minimap:      300;
+  --z-toolbar:      400;
+  --z-modal:        1000;
+  --z-ctx-backdrop: 8000;
+  --z-ctx-menu:     8001;
+
+  // ── Chart Palette ────────────────────────────────────────────
   --chart-1: #3b82f6;
   --chart-2: #22c55e;
   --chart-3: #f59e0b;
@@ -45,233 +59,204 @@
   --chart-7: #f97316;
   --chart-8: #ec4899;
 
-  // ── Widget Type Colors (matches CATALOG) ────────────────────
-  --color-stat: #3b82f6;
+  // ── Widget Type Colors (matches CATALOG) ─────────────────────
+  --color-stat:      #3b82f6;
   --color-analytics: #22c55e;
-  --color-bar: #f59e0b;
-  --color-line: #06b6d4;
-  --color-pie: #a78bfa;
-  --color-table: #38bdf8;
-  --color-progress: #f97316;
-  --color-note: #94a3b8;
-  --color-section: #64748b;
+  --color-bar:       #f59e0b;
+  --color-line:      #06b6d4;
+  --color-pie:       #a78bfa;
+  --color-table:     #38bdf8;
+  --color-progress:  #f97316;
+  --color-note:      #94a3b8;
+  --color-section:   #64748b;
+}
 
-  // ── Spacing ─────────────────────────────────────────────────
-  --gap: 10px; // grid gap between cells
-  --row-h: 80px; // grid row height
-  --hdr-h: 40px; // widget header height
-  --sidebar-w: 210px; // sidebar width
-  --toolbar-h: 52px; // top toolbar height
 
-  // ── Border Radius ───────────────────────────────────────────
-  --radius-sm: 5px;
-  --radius-md: 8px;
-  --radius-lg: 10px;
-  --radius-xl: 14px;
+// ═══════════════════════════════════════════════════════════════
+//  DARK THEME (default — no attribute needed)
+// ═══════════════════════════════════════════════════════════════
+:root,
+[data-theme="dark"] {
 
-  // ── Table row tints ─────────────────────────────────────────
-  --table-row-hover-bg: rgba(255, 255, 255, 0.02);
+  // ── Backgrounds ──────────────────────────────────────────────
+  --bg0: #070b12; // darkest — canvas background
+  --bg1: #0d1219; // card / sidebar background
+  --bg2: #121a25; // widget header gradient top
+  --bg3: #1a2535; // input background, hover states
+  --bg4: #1f2d3d; // button hover
+
+  // ── Borders ──────────────────────────────────────────────────
+  --bdr:  #1e2d42; // default border
+  --bdrH: #2a4060; // hovered border
+  --bdrA: #1d4ed8; // active / dragging border
+
+  // ── Text ─────────────────────────────────────────────────────
+  --txt0: #e8edf5; // primary text
+  --txt1: #8fa3be; // secondary text
+  --txt2: #526070; // muted / label text
+
+  // ── Accent Colors ────────────────────────────────────────────
+  --acc:  #3b82f6; // blue accent
+  --acc2: #60a5fa; // lighter blue — logo secondary, large bold only
+  --grn:  #22c55e; // green — success, trend up, dev ok badge
+  --red:  #ef4444; // red — danger, trend down
+  --amb:  #f59e0b; // amber — warning, locked badge, dev warn badge
+  --pur:  #a78bfa; // purple — bring to front, templates, dev payload badge
+
+  // ── Shadows ──────────────────────────────────────────────────
+  --shadow-header:           0 1px 0 rgba(255, 255, 255, 0.03);
+  --shadow-card:             0 2px 12px rgba(0, 0, 0, 0.35);
+  --shadow-modal:            0 24px 64px rgba(0, 0, 0, 0.70);
+  --shadow-ctx:              0 16px 40px rgba(0, 0, 0, 0.70),
+                             0 0 0 1px #1e2d42;
+  --shadow-widget-active:    0 8px 32px rgba(0, 0, 0, 0.50),
+                             0 0 0 1px color-mix(in srgb, var(--acc) 20%, transparent);
+  --shadow-widget-interacting: 0 14px 36px rgba(0, 0, 0, 0.28),
+                             0 0 0 1px color-mix(in srgb, var(--acc) 22%, transparent);
+  --shadow-preview-card:     0 8px 24px rgba(0, 0, 0, 0.40);
+  --shadow-bottom-bar:       0 6px 28px rgba(0, 0, 0, 0.20);
+  --shadow-panel:            0 16px 40px rgba(0, 0, 0, 0.24); // toolbar menu + mobile bar
+  --shadow-minimap:          0 8px 24px rgba(0, 0, 0, 0.50);
+  --shadow-sidebar-drawer:   18px 0 40px rgba(0, 0, 0, 0.22);
+
+  // ── Dev JSON Syntax Colors ───────────────────────────────────
+  --dev-json-query-color:   #7dd3fc;
+  --dev-json-result-color:  #86efac;
+  --dev-json-payload-color: #c4b5fd;
+  --dev-json-sql-color:     #fbbf24;
+  --dev-json-error-color:   #f87171;
+  --dev-json-error-bg:      color-mix(in srgb, #f87171 5%, var(--bg0));
+
+  // ── Dev Badge Colors (err + sql differ from semantic accents) ─
+  --dev-badge-err: #f87171; // lighter red — legible on dark code bg
+  --dev-badge-sql: #fbbf24; // lighter amber — legible on dark code bg
+
+  // ── Table Row Tints ──────────────────────────────────────────
+  --table-row-hover-bg:  rgba(255, 255, 255, 0.020);
   --table-row-stripe-bg: rgba(255, 255, 255, 0.015);
 
-  // ── Empty state opacities ────────────────────────────────────
+  // ── Empty State ──────────────────────────────────────────────
   --empty-text-opacity-1: 0.40;
   --empty-text-opacity-2: 0.25;
+  --empty-icon-opacity:   0.06;
 
-  // ── Surface highlight ────────────────────────────────────────
-  --shadow-header: 0 1px 0 rgba(255, 255, 255, 0.03);
-
-  // ── Shadows ─────────────────────────────────────────────────
-  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.35);
-  --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.7);
-  --shadow-ctx: 0 16px 40px rgba(0, 0, 0, 0.7),
-    0 0 0 1px #1e2d42;
-
-  // ── Extended shadows (widget states + surface elevations) ───
-  --shadow-widget-active: 0 8px 32px rgba(0, 0, 0, 0.50),
-    0 0 0 1px color-mix(in srgb, var(--acc) 20%, transparent);
-  --shadow-widget-interacting: 0 14px 36px rgba(0, 0, 0, 0.28),
-    0 0 0 1px color-mix(in srgb, var(--acc) 22%, transparent);
-  --shadow-preview-card: 0 8px 24px rgba(0, 0, 0, 0.40);
-  --shadow-bottom-bar: 0 6px 28px rgba(0, 0, 0, 0.20);
-  --shadow-toolbar-menu: 0 18px 40px rgba(0, 0, 0, 0.24);
-  --shadow-mobile-bar: 0 16px 36px rgba(0, 0, 0, 0.24);
-  --shadow-minimap: 0 8px 24px rgba(0, 0, 0, 0.50);
-  --shadow-sidebar-drawer: 18px 0 40px rgba(0, 0, 0, 0.22);
-
-  // ── Dev JSON syntax highlight colors ────────────────────────
-  --dev-json-bg: var(--bg0);
-  --dev-json-query-color: #7dd3fc;
-  --dev-json-result-color: #86efac;
-  --dev-json-payload-color: #c4b5fd;
-  --dev-json-sql-color: #fbbf24;
-  --dev-json-error-color: #f87171;
-  --dev-json-error-bg: color-mix(in srgb, #f87171 5%, var(--bg0));
-
-  // ── Dev badge foreground colors ──────────────────────────────
-  --dev-badge-ok: #22c55e;
-  --dev-badge-warn: #f59e0b;
-  --dev-badge-err: #f87171;
-  --dev-badge-payload: #a78bfa;
-  --dev-badge-sql: #fbbf24;
-
-  // ── Canvas decoration ────────────────────────────────────────
+  // ── Canvas Decoration ────────────────────────────────────────
   --canvas-inset-highlight: inset 0 1px 0 color-mix(in srgb, white 4%, transparent);
-  --empty-icon-opacity: 0.06;
 
-  // ── Transitions ─────────────────────────────────────────────
-  --transition-fast: all 0.12s ease;
-  --transition-base: all 0.15s ease;
-  --transition-slow: all 0.25s ease;
-
-  // ── Typography ──────────────────────────────────────────────
-  --font-sans: 'Onest', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
-
-  // ── Z-index Scale ───────────────────────────────────────────
-  --z-widget: 1;
-  --z-widget-front: 100;
-  --z-selected: 150;
-  --z-active: 200;
-  --z-minimap: 300;
-  --z-toolbar: 400;
-  --z-modal: 1000;
-  --z-ctx-backdrop: 8000;
-  --z-ctx-menu: 8001;
-
-  // ── Widget State Colors ─────────────────────────────────────
-  --widget-border-default: var(--bdr);
-  --widget-border-hover: var(--bdrH);
-  --widget-border-selected: var(--acc);
-  --widget-border-active: var(--bdrA);
-  --widget-border-front: #7c3aed88;
-  --widget-border-animating: #22c55ecc;
-
-  // ── Status Badge Colors ─────────────────────────────────────
-  --status-paid-bg: #052e16;
-  --status-paid-fg: #22c55e;
-  --status-pending-bg: #2d1b01;
-  --status-pending-fg: #f59e0b;
-  --status-failed-bg: #2d0707;
-  --status-failed-fg: #ef4444;
-  --status-active-bg: #03224c;
-  --status-active-fg: #3b82f6;
+  // ── Status Badge Colors ──────────────────────────────────────
+  --status-paid-bg:     #052e16;
+  --status-paid-fg:     #22c55e;
+  --status-pending-bg:  #2d1b01;
+  --status-pending-fg:  #f59e0b;
+  --status-failed-bg:   #2d0707;
+  --status-failed-fg:   #ef4444;
+  --status-active-bg:   #03224c;
+  --status-active-fg:   #3b82f6;
   --status-inactive-bg: #1c1c1c;
   --status-inactive-fg: #64748b;
-  --status-shipped-bg: #052e16;
-  --status-shipped-fg: #10b981;
+  --status-shipped-bg:  #052e16;
+  --status-shipped-fg:  #10b981;
   --status-refunded-bg: #2a1a3e;
   --status-refunded-fg: #a78bfa;
-  --status-draft-bg: #1c1c1c;
-  --status-draft-fg: #64748b;
+  --status-draft-bg:    #1c1c1c;
+  --status-draft-fg:    #64748b;
 
-  // ── Color-mix base (used for hover tints) ───────────────────
+  // ── Color-mix Base (hover tints) ─────────────────────────────
   --mix-base: #000000;
 }
+
 
 // ═══════════════════════════════════════════════════════════════
 //  LIGHT THEME OVERRIDES
 // ═══════════════════════════════════════════════════════════════
 [data-theme="light"] {
 
-  // ── Backgrounds ─────────────────────────────────────────────
+  // ── Backgrounds ──────────────────────────────────────────────
   --bg0: #eef1f6; // canvas background
   --bg1: #ffffff; // card / sidebar background
   --bg2: #f4f6fa; // widget header
   --bg3: #e8edf6; // input background, hover states
   --bg4: #dce3ef; // button hover
 
-  // ── Accent Colors (higher contrast on light bg) ─────────────
-  // Dark theme uses mid-tone accents that pop on near-black bg.
-  // Light theme needs darker variants to meet contrast on white.
-  --acc: #2563eb; // 5.6:1 on white  (was #3b82f6 = 3.1:1)
-  --acc2: #3b82f6; // 3.1:1 — used for logo secondary, large bold only
-  --grn: #16a34a; // 4.5:1 on white  (was #22c55e = 2.0:1)
-  --red: #dc2626; // 5.9:1 on white  (was #ef4444 = 3.0:1)
-  --amb: #b45309; // 5.2:1 on white  (was #f59e0b = 2.8:1)
-  --pur: #7c3aed; // 5.5:1 on white  (was #a78bfa = 2.8:1)
+  // ── Accents (darkened for contrast on white) ─────────────────
+  // Dark uses mid-tone accents that pop on near-black bg.
+  // Light needs darker variants to meet WCAG contrast on white.
+  --acc:  #2563eb; // 5.6:1 on white  (was #3b82f6 = 3.1:1)
+  --acc2: #3b82f6; // 3.1:1 — large bold text only
+  --grn:  #16a34a; // 4.5:1 on white  (was #22c55e = 2.0:1)
+  --red:  #dc2626; // 5.9:1 on white  (was #ef4444 = 3.0:1)
+  --amb:  #b45309; // 5.2:1 on white  (was #f59e0b = 2.8:1)
+  --pur:  #7c3aed; // 5.5:1 on white  (was #a78bfa = 2.8:1)
 
-  // ── Borders ─────────────────────────────────────────────────
-  --bdr: #cdd5e0;
+  // ── Borders ──────────────────────────────────────────────────
+  --bdr:  #cdd5e0;
   --bdrH: #93b4d4;
   --bdrA: #2563eb; // matches --acc
 
-  // ── Text ────────────────────────────────────────────────────
+  // ── Text ─────────────────────────────────────────────────────
   --txt0: #0f172a;
   --txt1: #475569;
   --txt2: #94a3b8;
 
-  // ── Shadows ─────────────────────────────────────────────────
-  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.10);
-  --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.22);
-  --shadow-ctx: 0 16px 40px rgba(0, 0, 0, 0.14),
-    0 0 0 1px #cdd5e0;
-
-  // ── Extended shadows (lighter for light surfaces) ────────────
-  --shadow-widget-active: 0 4px 20px rgba(0, 0, 0, 0.10),
-    0 0 0 1px color-mix(in srgb, var(--acc) 20%, transparent);
+  // ── Shadows ──────────────────────────────────────────────────
+  --shadow-header:             none;
+  --shadow-card:               0 2px 12px rgba(0, 0, 0, 0.10);
+  --shadow-modal:              0 24px 64px rgba(0, 0, 0, 0.22);
+  --shadow-ctx:                0 16px 40px rgba(0, 0, 0, 0.14),
+                               0 0 0 1px #cdd5e0;
+  --shadow-widget-active:      0 4px 20px rgba(0, 0, 0, 0.10),
+                               0 0 0 1px color-mix(in srgb, var(--acc) 20%, transparent);
   --shadow-widget-interacting: 0 8px 24px rgba(0, 0, 0, 0.09),
-    0 0 0 1px color-mix(in srgb, var(--acc) 22%, transparent);
-  --shadow-preview-card: 0 4px 16px rgba(0, 0, 0, 0.08);
-  --shadow-bottom-bar: 0 4px 28px rgba(0, 0, 0, 0.02), 0 0 0 1px var(--bdr);
-  --shadow-toolbar-menu: 0 10px 28px rgba(0, 0, 0, 0.10), 0 0 0 1px var(--bdr);
-  --shadow-mobile-bar: 0 8px 24px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--bdr);
-  --shadow-minimap: 0 4px 16px rgba(0, 0, 0, 0.12), 0 0 0 1px var(--bdrH);
-  --shadow-sidebar-drawer: 8px 0 24px rgba(0, 0, 0, 0.10), 1px 0 0 var(--bdr);
+                               0 0 0 1px color-mix(in srgb, var(--acc) 22%, transparent);
+  --shadow-preview-card:       0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-bottom-bar:         0 4px 28px rgba(0, 0, 0, 0.02), 0 0 0 1px var(--bdr);
+  --shadow-panel:              0 10px 28px rgba(0, 0, 0, 0.10), 0 0 0 1px var(--bdr);
+  --shadow-minimap:            0 4px 16px rgba(0, 0, 0, 0.12), 0 0 0 1px var(--bdrH);
+  --shadow-sidebar-drawer:     8px 0 24px rgba(0, 0, 0, 0.10), 1px 0 0 var(--bdr);
 
-  // ── Dev JSON syntax colors (darkened for light background) ───
-  --dev-json-bg: #eef2f7;
-  --dev-json-query-color: #0369a1;
-  --dev-json-result-color: #15803d;
+  // ── Dev JSON Syntax Colors (darkened for light bg) ────────────
+  --dev-json-query-color:   #0369a1;
+  --dev-json-result-color:  #15803d;
   --dev-json-payload-color: #6d28d9;
-  --dev-json-sql-color: #92400e;
-  --dev-json-error-color: #dc2626;
-  --dev-json-error-bg: color-mix(in srgb, #dc2626 8%, #eef2f7);
+  --dev-json-sql-color:     #92400e;
+  --dev-json-error-color:   #dc2626;
+  --dev-json-error-bg:      color-mix(in srgb, #dc2626 8%, #eef1f6);
 
-  // ── Dev badge foreground colors (higher contrast on light bg) ─
-  --dev-badge-ok: #15803d;
-  --dev-badge-warn: #b45309;
-  --dev-badge-err: #dc2626;
-  --dev-badge-payload: #6d28d9;
+  // ── Dev Badge Colors ─────────────────────────────────────────
+  --dev-badge-err: #dc2626; // matches --red in light
   --dev-badge-sql: #92400e;
 
-  // ── Table row tints (dark overlay instead of white) ─────────
-  --table-row-hover-bg: rgba(0, 0, 0, 0.030);
+  // ── Table Row Tints ──────────────────────────────────────────
+  --table-row-hover-bg:  rgba(0, 0, 0, 0.030);
   --table-row-stripe-bg: rgba(0, 0, 0, 0.018);
 
-  // ── Empty state opacities (higher — dark text on light bg) ──
+  // ── Empty State ──────────────────────────────────────────────
   --empty-text-opacity-1: 0.60;
   --empty-text-opacity-2: 0.45;
+  --empty-icon-opacity:   0.10;
 
-  // ── Surface highlight ────────────────────────────────────────
-  --shadow-header: none;
-
-  // ── Canvas decoration ────────────────────────────────────────
+  // ── Canvas Decoration ────────────────────────────────────────
   --canvas-inset-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.85),
-    inset 0 0 0 1px color-mix(in srgb, var(--bdr) 40%, transparent);
-  --empty-icon-opacity: 0.10;
+                            inset 0 0 0 1px color-mix(in srgb, var(--bdr) 40%, transparent);
 
-  // ── Widget State Colors ──────────────────────────────────────
-  --widget-border-front: #7c3aed55;
-  --widget-border-animating: #22c55e99;
-
-  // ── Status Badge Colors ─────────────────────────────────────
-  --status-paid-bg: #dcfce7;
-  --status-paid-fg: #16a34a;
-  --status-pending-bg: #fef3c7;
-  --status-pending-fg: #d97706;
-  --status-failed-bg: #fee2e2;
-  --status-failed-fg: #dc2626;
-  --status-active-bg: #dbeafe;
-  --status-active-fg: #1d4ed8;
+  // ── Status Badge Colors ──────────────────────────────────────
+  --status-paid-bg:     #dcfce7;
+  --status-paid-fg:     #16a34a;
+  --status-pending-bg:  #fef3c7;
+  --status-pending-fg:  #d97706;
+  --status-failed-bg:   #fee2e2;
+  --status-failed-fg:   #dc2626;
+  --status-active-bg:   #dbeafe;
+  --status-active-fg:   #1d4ed8;
   --status-inactive-bg: #f1f5f9;
   --status-inactive-fg: #64748b;
-  --status-shipped-bg: #d1fae5;
-  --status-shipped-fg: #059669;
+  --status-shipped-bg:  #d1fae5;
+  --status-shipped-fg:  #059669;
   --status-refunded-bg: #ede9fe;
   --status-refunded-fg: #7c3aed;
-  --status-draft-bg: #f1f5f9;
-  --status-draft-fg: #64748b;
+  --status-draft-bg:    #f1f5f9;
+  --status-draft-fg:    #64748b;
 
-  // ── Color-mix base (used for hover tints) ───────────────────
+  // ── Color-mix Base ───────────────────────────────────────────
   --mix-base: #ffffff;
 }

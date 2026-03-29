@@ -393,7 +393,7 @@
   border-radius: 14px;
   border: 1px solid color-mix(in srgb, var(--acc) 20%, var(--bdr));
   background: color-mix(in srgb, var(--bg1) 94%, black 6%);
-  box-shadow: var(--shadow-mobile-bar);
+  box-shadow: var(--shadow-panel);
   backdrop-filter: blur(14px);
   z-index: 320;
 }
