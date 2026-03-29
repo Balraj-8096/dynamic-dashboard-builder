@@ -103,8 +103,8 @@
   font-size: 8px;
 }
 
-.trend--up   { color: var(--grn); background: rgba(34, 197, 94, 0.1);  }
-.trend--down { color: var(--red); background: rgba(239, 68, 68, 0.1);  }
+.trend--up   { color: var(--grn); background: color-mix(in srgb, var(--grn) 10%, transparent); }
+.trend--down { color: var(--red); background: color-mix(in srgb, var(--red) 10%, transparent); }
 
 // ── Description ───────────────────────────────────────────────
 .description {

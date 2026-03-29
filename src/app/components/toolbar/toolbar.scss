@@ -208,7 +208,7 @@
   border-radius: 12px;
   border: 1px solid var(--bdr);
   background: color-mix(in srgb, var(--bg1) 96%, black 4%);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.24);
+  box-shadow: var(--shadow-toolbar-menu);
   z-index: 500;
 }
 

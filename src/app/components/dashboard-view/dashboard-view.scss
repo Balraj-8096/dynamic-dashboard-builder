@@ -20,7 +20,7 @@
   background: var(--bg1);
   border-bottom: 1px solid var(--bdr);
   flex-shrink: 0;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03);
+  box-shadow: var(--shadow-header);
   gap: 12px;
 }
 
@@ -183,9 +183,9 @@
   pointer-events: none;
 }
 
-.empty-icon    { font-size: 64px; opacity: 0.06; font-family: var(--font-mono); }
-.empty-primary { font-size: 14px; color: var(--txt2); opacity: 0.4; }
-.empty-secondary { font-size: 12px; color: var(--txt2); opacity: 0.25; }
+.empty-icon    { font-size: 64px; opacity: var(--empty-icon-opacity); font-family: var(--font-mono); }
+.empty-primary { font-size: 14px; color: var(--txt2); opacity: var(--empty-text-opacity-1); }
+.empty-secondary { font-size: 12px; color: var(--txt2); opacity: var(--empty-text-opacity-2); }
 
 // ── Footer ────────────────────────────────────────────────────
 .view-footer {

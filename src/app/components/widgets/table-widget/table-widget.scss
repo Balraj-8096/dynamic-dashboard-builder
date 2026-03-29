@@ -36,11 +36,11 @@
     background: transparent !important;
 
     &:hover .mat-mdc-cell {
-      background: rgba(255, 255, 255, 0.02) !important;
+      background: var(--table-row-hover-bg) !important;
     }
 
     &.row--striped:nth-child(even) .mat-mdc-cell {
-      background: rgba(255, 255, 255, 0.015) !important;
+      background: var(--table-row-stripe-bg) !important;
     }
   }
 

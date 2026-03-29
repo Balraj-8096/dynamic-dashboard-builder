@@ -218,6 +218,10 @@
   }
 }
 
+[data-theme="light"] .mat-mdc-table .mat-mdc-row.striped:nth-child(even) .mat-mdc-cell {
+  background: rgba(0, 0, 0, 0.02) !important;
+}
+
 // ── Tooltip ──────────────────────────────────────────────────────
 .mat-mdc-tooltip {
   --mdc-plain-tooltip-container-color: var(--bg3) !important;
