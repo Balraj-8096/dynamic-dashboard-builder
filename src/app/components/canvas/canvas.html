@@ -1,8 +1,13 @@
 <div class="canvas-shell" [class.is-compact]="svc.compactViewport()">
+    <app-toolbar class="canvas-header" />
+
+    <div class="workspace-layout">
 
     <!-- ── SIDEBAR ── -->
     @if (!svc.compactViewport()) {
-    <app-sidebar />
+    <div class="workspace-sidebar">
+        <app-sidebar />
+    </div>
     } @else {
     <div class="compact-backdrop" [class.is-visible]="svc.sidebarOpen() || svc.toolbarMenuOpen()"
         (click)="closeCompactChrome()"></div>
@@ -15,7 +20,7 @@
     <div class="main-area">
 
         <!-- ── TOOLBAR ── -->
-        <app-toolbar />
+        <section class="workspace-stage">
 
         <!-- ── GLOBAL FILTER BAR ── -->
         <!-- <app-global-filter-bar /> -->
@@ -121,6 +126,7 @@
             </div>
 
         </div><!-- /canvas-area-wrapper -->
+        </section>
 
         <!-- ── CONTEXT MENU (Step 29) — outside scroll-area so fixed positioning works ── -->
         @if (svc.contextMenu()) {
@@ -150,4 +156,5 @@
         }
 
     </div><!-- /main-area -->
+    </div><!-- /workspace-layout -->
 </div>

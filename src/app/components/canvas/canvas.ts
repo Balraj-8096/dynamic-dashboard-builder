@@ -37,12 +37,11 @@ import { ImportModal } from '../modals/import-modal/import-modal';
 import { HelpModal } from '../modals/help-modal/help-modal';
 import { Minimap } from "../minimap/minimap";
 import { ContextMenu } from "../modals/context-menu/context-menu";
-import { GlobalFilterBarComponent } from "../shared/global-filter-bar/global-filter-bar";
 import { HistoryPanel } from "../history-panel/history-panel";
 
 @Component({
   selector: 'app-canvas',
-  imports: [CommonModule, WidgetCard, Sidebar, Toolbar, Minimap, ContextMenu, GlobalFilterBarComponent, HistoryPanel],
+  imports: [CommonModule, WidgetCard, Sidebar, Toolbar, Minimap, ContextMenu, HistoryPanel],
   templateUrl: './canvas.html',
   styleUrl: './canvas.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

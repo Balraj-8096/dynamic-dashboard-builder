@@ -1,4 +1,4 @@
-<aside class="sidebar">
+<aside class="sidebar" [class.sidebar--drawer]="svc.compactViewport()">
   @if (svc.compactViewport()) {
   <div class="sidebar-compact-topbar">
     <div class="sidebar-compact-copy">
