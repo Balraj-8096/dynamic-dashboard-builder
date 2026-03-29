@@ -581,6 +581,28 @@
   font-style: italic;
 }
 
+@media (max-width: 768px) {
+  .edit-modal {
+    max-height: 96dvh;
+  }
+
+  .modal-body {
+    flex-direction: column;
+  }
+
+  .panel-left {
+    border-right: none;
+    border-bottom: 1px solid var(--bdr);
+    max-height: min(60dvh, 500px);
+  }
+
+  .panel-right {
+    width: 100%;
+    min-width: 0;
+    max-height: min(50dvh, 420px);
+  }
+}
+
 // Field chips
 .chips-section {
   padding: 0 14px 14px;

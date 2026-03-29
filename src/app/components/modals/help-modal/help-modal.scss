@@ -333,6 +333,46 @@
   font-family: var(--font-mono);
 }
 
+@media (max-width: 640px) {
+  .help-modal {
+    width: 100%;
+    height: 94dvh;
+    max-height: 94dvh;
+    border-radius: 12px;
+  }
+
+  .modal-body {
+    flex-direction: column;
+  }
+
+  .help-nav {
+    width: 100%;
+    flex-direction: row;
+    border-right: none;
+    border-bottom: 1px solid var(--bdr);
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 6px;
+    gap: 4px;
+    flex-shrink: 0;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar { display: none; }
+  }
+
+  .nav-item {
+    flex: 0 0 auto;
+    padding: 6px 10px;
+    margin-bottom: 0;
+  }
+
+  .nav-indicator,
+  .quick-ref,
+  .nav-count {
+    display: none;
+  }
+}
+
 // ── Footer ────────────────────────────────────────────────────
 .modal-footer {
   display: flex;

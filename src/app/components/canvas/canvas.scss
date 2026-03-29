@@ -50,6 +50,126 @@
   overflow: hidden;
 }
 
+// ── Canvas area wrapper (positions scroll + floating HUDs) ─────
+.canvas-area-wrapper {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+// ── Unified bottom bar — centred, all canvas controls ──────────
+.canvas-bottom-bar {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 5px;
+  border-radius: 16px;
+  border: 1px solid var(--bdr);
+  background: color-mix(in srgb, var(--bg1) 96%, transparent);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+  white-space: nowrap;
+
+  > * { pointer-events: auto; }
+}
+
+.corner-btn {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--txt1);
+  cursor: pointer;
+  font-size: 17px;
+  border-radius: 9px;
+  flex-shrink: 0;
+  transition: background var(--transition-fast), color var(--transition-fast);
+
+  &:not(:disabled):hover {
+    background: var(--bg3);
+    color: var(--txt0);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  &--pct {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  &--active {
+    background: color-mix(in srgb, var(--acc) 16%, transparent);
+    color: var(--acc);
+
+    &:hover {
+      background: color-mix(in srgb, var(--acc) 24%, transparent);
+    }
+  }
+
+  &--primary {
+    width: auto;
+    padding: 0 14px;
+    background: linear-gradient(150deg, #1d4ed8, var(--acc));
+    color: #fff;
+    font-size: 12px;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    box-shadow: 0 2px 10px color-mix(in srgb, var(--acc) 35%, transparent);
+
+    &:hover { opacity: 0.88; }
+  }
+
+  &--green {
+    color: var(--grn);
+    &:not(:disabled):hover {
+      background: color-mix(in srgb, var(--grn) 14%, var(--mix-base));
+      color: var(--grn);
+    }
+  }
+
+  &--red {
+    color: var(--red);
+    &:not(:disabled):hover {
+      background: color-mix(in srgb, var(--red) 14%, var(--mix-base));
+      color: var(--red);
+    }
+  }
+}
+
+// ── Bar vertical group separators ──────────────────────────────
+.bar-sep {
+  width: 1px;
+  height: 20px;
+  background: var(--bdr);
+  margin: 0 4px;
+  flex-shrink: 0;
+
+  &--strong {
+    height: 22px;
+    background: var(--bdrH);
+    margin: 0 6px;
+  }
+}
+
+
 // ── Scroll area ────────────────────────────────────────────────
 .scroll-area {
   flex: 1;
@@ -299,6 +419,24 @@
     overscroll-behavior-y: auto;
   }
 
+  // Lift bottom bar above the mobile action bar (~64px tall)
+  .canvas-bottom-bar {
+    bottom: 76px;
+    // keep centred + auto width; clamp so it never overflows the viewport
+    max-width: calc(100% - 24px);
+    overflow-x: auto;
+    scrollbar-width: none;
+    // restore pointer-events so touch-scroll works on the bar itself
+    pointer-events: auto;
+
+    &::-webkit-scrollbar { display: none; }
+
+    // lift above stacked mobile-action-bar when a widget is selected
+    &.is-lifted {
+      bottom: 134px;
+    }
+  }
+
   .compact-sidebar-shell .sidebar {
     width: 100%;
     height: 100%;
@@ -345,5 +483,38 @@
     left: 10px;
     right: 10px;
     bottom: 10px;
+  }
+}
+
+@media (max-width: 640px) {
+  // Compact bar + smaller buttons so all actions fit on narrow phones
+  .canvas-bottom-bar {
+    padding: 4px;
+    gap: 1px;
+    border-radius: 14px;
+  }
+
+  .corner-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 15px;
+    border-radius: 7px;
+
+    &--primary {
+      padding: 0 10px;
+      font-size: 11px;
+    }
+
+    &--pct {
+      font-size: 10px;
+    }
+  }
+
+  .bar-sep {
+    margin: 0 2px;
+
+    &--strong {
+      margin: 0 3px;
+    }
   }
 }

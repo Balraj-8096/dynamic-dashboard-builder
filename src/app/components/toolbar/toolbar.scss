@@ -135,103 +135,12 @@
     color: var(--txt0);
   }
 
-  &--green {
-    color: var(--grn);
-    &:hover {
-      background: color-mix(in srgb, var(--grn) 12%, var(--mix-base));
-      color: var(--grn);
-    }
-  }
-
-  &--red {
-    color: var(--red);
-    border-color: color-mix(in srgb, var(--red) 18%, transparent);
-    &:hover {
-      background: color-mix(in srgb, var(--red) 14%, var(--mix-base));
-      color: var(--red);
-    }
-  }
-
   &--utility {
     border-color: transparent;
     background: transparent;
   }
 }
 
-// ── Add Widget button ─────────────────────────────────────────
-.btn-add {
-  padding: 6px 16px;
-  border-radius: var(--radius-sm);
-  border: none;
-  background: linear-gradient(135deg, #1d4ed8, var(--acc));
-  color: #fff;
-  cursor: pointer;
-  font-size: 12px;
-  font-family: var(--font-mono);
-  font-weight: 600;
-  box-shadow: 0 4px 12px color-mix(in srgb, var(--acc) 27%, transparent);
-  transition: opacity var(--transition-fast);
-  white-space: nowrap;
-
-  &:hover { opacity: 0.88; }
-}
-
-// ── Zoom group ────────────────────────────────────────────────
-.zoom-group {
-  display: flex;
-  align-items: center;
-  background: var(--bg3);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--bdr);
-  overflow: hidden;
-}
-
-.zoom-btn {
-  width: 26px;
-  height: 28px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  color: var(--txt1);
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition-fast);
-
-  &:first-child { border-right: 1px solid var(--bdr); }
-  &:last-child  { border-left:  1px solid var(--bdr); }
-
-  &:hover {
-    background: var(--bg4);
-    color: var(--txt0);
-  }
-}
-
-.zoom-pct {
-  height: 28px;
-  padding: 0 8px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  color: var(--txt1);
-  font-size: 11px;
-  font-family: var(--font-mono);
-  transition: all var(--transition-fast);
-  white-space: nowrap;
-  min-width: 42px;
-  text-align: center;
-
-  &:hover {
-    background: color-mix(in srgb, var(--acc) 16%, transparent);
-    color: var(--acc2);
-  }
-
-  &.is-non-default {
-    background: color-mix(in srgb, var(--acc) 9%, transparent);
-    color: var(--acc);
-  }
-}
 
 // ── Theme toggle button ───────────────────────────────────────
 .btn-theme {
@@ -389,21 +298,12 @@
   }
 
   .btn-text,
-  .btn-add,
   .btn-view {
     min-height: 32px;
   }
 
   .toolbar.is-compact {
     gap: 6px;
-  }
-
-  .toolbar.is-compact .cluster--center {
-    gap: 4px;
-  }
-
-  .toolbar.is-compact .btn-add {
-    padding-inline: 12px;
   }
 }
 
@@ -416,10 +316,6 @@
     display: none;
   }
 
-  .zoom-group {
-    order: 2;
-  }
-
   .cluster--right {
     gap: 4px;
   }
@@ -429,22 +325,12 @@
   }
 
   .btn-text,
-  .btn-add,
   .btn-view {
     padding-inline: 10px;
   }
 
   .toolbar.is-compact .title-span {
     max-width: 96px;
-  }
-
-  .toolbar.is-compact .btn-add {
-    font-size: 11px;
-    padding-inline: 10px;
-  }
-
-  .toolbar.is-compact .zoom-group {
-    display: none;
   }
 
   .toolbar-menu {
