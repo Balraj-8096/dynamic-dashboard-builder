@@ -71,9 +71,11 @@ export class TableEditorModal implements OnInit {
   statusColumn = false;
 
   // ── Columns ───────────────────────────────────────────────────────────────
-  editorCols:     EditorColumn[] = [];
-  editingColIdx   = -1;
-  showFieldPicker = false;
+  editorCols:   EditorColumn[] = [];
+  editingColIdx = -1;
+
+  // ── Add-column dropdown ───────────────────────────────────────────────────
+  addColField = '';   // stores "entity.field" key
 
   // ── Sort ──────────────────────────────────────────────────────────────────
   sortEntity = '';
@@ -265,12 +267,14 @@ export class TableEditorModal implements OnInit {
     this.filterGroups = [];
     this.previewRows  = [];
     this.rowCount     = 0;
+    this.addColField = '';
     this.pushLocalHistory();
     this.cdr.markForCheck();
   }
 
   onRootEntityChange(entity: string): void {
-    this.rootEntity = entity;
+    this.rootEntity  = entity;
+    this.addColField = '';
     const reachable = new Set(
       this.qsvc.getReachableEntities(this.product, [entity]).map(e => e.name)
     );
@@ -344,8 +348,41 @@ export class TableEditorModal implements OnInit {
     this.refreshPreview();
   }
 
+  /** Add all fields from every reachable entity in one batch. */
   addAllColumns(): void {
-    this.addAllColumnsFromEntity(this.rootEntity);
+    const existingKeys = new Set(this.editorCols.map(c => c.key));
+    const newCols: EditorColumn[] = [];
+    for (const e of this.reachableEntities) {
+      for (const f of this.fieldsFor(e.name)) {
+        const key = `${e.name}.${f.name}`;
+        if (!existingKeys.has(key)) {
+          newCols.push({ key, label: f.name, entity: e.name, field: f.name,
+                         visible: true, type: f.type, width: 'auto' });
+          existingKeys.add(key);
+        }
+      }
+    }
+    if (!newCols.length) return;
+    this.editorCols = [...this.editorCols, ...newCols];
+    this.pushLocalHistory();
+    this.refreshPreview();
+  }
+
+  /** Returns true if a column with this "entity.field" key is already added. */
+  isKeySelected(key: string): boolean {
+    return this.editorCols.some(c => c.key === key);
+  }
+
+  addColumnFromDropdown(): void {
+    if (!this.addColField) return;
+    const dot    = this.addColField.indexOf('.');
+    if (dot < 0) return;
+    const entity = this.addColField.substring(0, dot);
+    const field  = this.addColField.substring(dot + 1);
+    if (this.isColumnSelected(entity, field)) return;
+    this.toggleColumn(entity, field);
+    this.addColField = '';
+    this.cdr.markForCheck();
   }
 
   removeColumn(i: number): void {
@@ -439,9 +476,12 @@ export class TableEditorModal implements OnInit {
     this.cdr.markForCheck();
   }
 
-  onDrvSrcEntityChange(i: number, entity: string): void {
+  onDrvSrcKeyChange(i: number, key: string): void {
+    const dot    = key.indexOf('.');
+    const entity = dot >= 0 ? key.substring(0, dot) : key;
+    const field  = dot >= 0 ? key.substring(dot + 1) : '';
     const updated = [...this.drvSources];
-    updated[i] = { entity, field: this.fieldsFor(entity)[0]?.name ?? '' };
+    updated[i] = { entity, field };
     this.drvSources = updated;
     this.cdr.markForCheck();
   }
@@ -670,6 +710,20 @@ export class TableEditorModal implements OnInit {
     const colSet = new Map<string, { entity: string; field: string }>();
     for (const c of normalCols) {
       colSet.set(c.key, { entity: c.entity, field: c.field });
+    }
+
+    // When only derived columns are present, auto-include their source fields so
+    // the query engine has the data it needs to compute derived values.
+    // The display layer uses cfg.columns (derived key only), so sources stay hidden.
+    if (colSet.size === 0) {
+      for (const dc of derivedCols) {
+        if (dc.derivedDef) {
+          for (const src of dc.derivedDef.sources) {
+            const key = `${src.entity}.${src.field}`;
+            colSet.set(key, { entity: src.entity, field: src.field });
+          }
+        }
+      }
     }
 
     // Auto-compute the join path from rootEntity + all referenced entities

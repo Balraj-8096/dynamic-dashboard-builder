@@ -147,6 +147,14 @@
   }
 }
 
+// ── Add-column inline bar (replaces chip-panel) ───────────────
+.te-add-col-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
 // ── Shared select ─────────────────────────────────────────────
 .te-sel {
   background: var(--bg2);
@@ -236,112 +244,6 @@
 }
 
 .te-page-sel { width: 58px; font-size: 11px; }
-
-// ── 4. Field picker panel ─────────────────────────────────────
-.te-field-picker-panel {
-  display: flex;
-  flex-direction: column;
-  border-bottom: 1px solid var(--bdr);
-  background: color-mix(in srgb, var(--bg1) 70%, var(--bg0));
-  flex-shrink: 0;
-  max-height: 220px;
-  overflow-y: auto;
-  &::-webkit-scrollbar { width: 4px; }
-  &::-webkit-scrollbar-thumb { background: var(--bdr); border-radius: 4px; }
-}
-
-.te-fpick-group {
-  &:not(:last-child) { border-bottom: 1px solid color-mix(in srgb, var(--bdr) 50%, transparent); }
-
-  &__header {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    padding: 6px 16px 5px;
-    background: color-mix(in srgb, var(--bg2) 55%, transparent);
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    border-bottom: 1px solid color-mix(in srgb, var(--bdr) 45%, transparent);
-  }
-
-  &__name {
-    font-size: 9px;
-    font-family: var(--font-mono);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.09em;
-    color: var(--txt1);
-  }
-
-  &__badge {
-    font-size: 9px;
-    font-family: var(--font-mono);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--txt2);
-    background: color-mix(in srgb, var(--bg3) 70%, transparent);
-    border: 1px solid var(--bdr);
-    border-radius: 999px;
-    padding: 1px 6px;
-  }
-
-  &__fields {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    padding: 8px 16px;
-  }
-}
-
-.te-fpick-add-all {
-  margin-left: auto;
-  font-size: 10px;
-  padding: 2px 8px;
-  color: var(--acc);
-  border-color: color-mix(in srgb, var(--acc) 30%, var(--bdr));
-}
-
-.te-fpick-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 8px;
-  background: var(--bg3);
-  border: 1px solid var(--bdr);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-
-  &:hover {
-    background: var(--bg4);
-    border-color: var(--bdrH);
-  }
-
-  &.is-selected {
-    background: color-mix(in srgb, var(--acc) 14%, var(--bg3));
-    border-color: color-mix(in srgb, var(--acc) 55%, var(--bdr));
-  }
-
-  &__name {
-    font-size: 11px;
-    font-family: var(--font-mono);
-    color: var(--txt0);
-    line-height: 1;
-  }
-
-  &__type {
-    font-size: 8px;
-    font-family: var(--font-mono);
-    color: var(--txt2);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    line-height: 1;
-  }
-
-  &.is-selected &__name { color: var(--acc); font-weight: 600; }
-  &.is-selected &__type { color: color-mix(in srgb, var(--acc) 70%, var(--txt2)); }
-}
 
 // ── 4. Derived column creator panel ──────────────────────────
 .te-derived-panel {

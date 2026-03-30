@@ -103,9 +103,16 @@ export class FilterBuilder {
     ));
   }
 
-  onEntityChange(gi: number, ci: number, entity: string): void {
-    const firstField = this.filterableFields(entity)[0]?.name ?? '';
-    this.updateCondition(gi, ci, { entity, field: firstField, value: '', values: undefined, dateRange: undefined });
+  onFieldKeyChange(gi: number, ci: number, key: string): void {
+    const dot      = key.indexOf('.');
+    const entity   = dot >= 0 ? key.substring(0, dot) : key;
+    const field    = dot >= 0 ? key.substring(dot + 1) : '';
+    const prev     = this.filterGroups[gi]?.conditions[ci];
+    const reset    = prev?.entity !== entity;
+    this.updateCondition(gi, ci, {
+      entity, field,
+      ...(reset ? { operator: FilterOperator.Eq, value: '', values: undefined, dateRange: undefined } : {}),
+    });
   }
 
   onOperatorChange(gi: number, ci: number, op: FilterOperator): void {

@@ -72,11 +72,36 @@
 
     <div class="te-toolbar__left">
       @if (rootEntity) {
-        <button class="te-icon-btn" [class.is-on]="showFieldPicker"
-          (click)="showFieldPicker = !showFieldPicker"
-          title="Browse and add fields">
-          ⊕ Fields
-        </button>
+        <!-- Dropdown-based column selector -->
+        <div class="te-add-col-row">
+          <select class="te-sel te-sel--field"
+            [(ngModel)]="addColField">
+            <option value="">— select field —</option>
+            @for (e of reachableEntities; track e.name) {
+              <optgroup [label]="e.name + (e.name !== rootEntity ? ' (joined)' : '')">
+                @for (f of fieldsFor(e.name); track f.name) {
+                  <option [value]="e.name + '.' + f.name"
+                    [disabled]="isColumnSelected(e.name, f.name)">
+                    {{ f.name }}{{ isColumnSelected(e.name, f.name) ? ' ✓' : '' }}
+                  </option>
+                }
+              </optgroup>
+            }
+          </select>
+
+          <button class="te-btn te-btn--add-col"
+            [disabled]="!addColField || isKeySelected(addColField)"
+            (click)="addColumnFromDropdown()"
+            title="Add selected field as a column">
+            + Add
+          </button>
+
+          <button class="te-btn te-btn--ghost"
+            (click)="addAllColumns()"
+            title="Add all fields from all reachable entities">
+            All
+          </button>
+        </div>
       }
     </div>
 
@@ -114,38 +139,6 @@
     </div>
 
   </div>
-
-  <!-- ── 4. FIELD PICKER PANEL (collapsible) ───────────────────── -->
-  @if (showFieldPicker && rootEntity) {
-    <div class="te-field-picker-panel">
-      @for (entity of reachableEntities; track entity.name) {
-        <div class="te-fpick-group">
-          <div class="te-fpick-group__header">
-            <span class="te-fpick-group__name">{{ entity.name }}</span>
-            @if (entity.name !== rootEntity) {
-              <span class="te-fpick-group__badge">joined</span>
-            }
-            <button class="te-btn te-btn--ghost te-fpick-add-all"
-              (click)="addAllColumnsFromEntity(entity.name)"
-              title="Add all {{ entity.name }} fields">
-              All
-            </button>
-          </div>
-          <div class="te-fpick-group__fields">
-            @for (field of fieldsFor(entity.name); track field.name) {
-              <button class="te-fpick-chip"
-                [class.is-selected]="isColumnSelected(entity.name, field.name)"
-                (click)="toggleColumn(entity.name, field.name)"
-                [title]="entity.name + '.' + field.name + ' (' + field.type + ')'">
-                <span class="te-fpick-chip__name">{{ field.name }}</span>
-                <span class="te-fpick-chip__type">{{ field.type }}</span>
-              </button>
-            }
-          </div>
-        </div>
-      }
-    </div>
-  }
 
   <!-- ── 5. DERIVED COLUMN CREATOR (collapsible) ──────────────── -->
   @if (showDerivedPanel) {
@@ -189,7 +182,7 @@
         </div>
       </div>
 
-      <!-- Source fields — entity options come from all reachable entities -->
+      <!-- Source fields — single combined entity.field dropdown with optgroups -->
       <div class="te-drv-field">
         <label class="te-drv-label">Source fields</label>
         <div class="te-drv-sources">
@@ -198,17 +191,15 @@
               <span class="te-drv-op">{{ getDrvOpLabel() }}</span>
             }
             <div class="te-drv-src-row">
-              <select class="te-sel te-sel--sm"
-                [ngModel]="src.entity"
-                (ngModelChange)="onDrvSrcEntityChange(si, $event)">
-                @for (e of reachableEntities; track e.name) {
-                  <option [value]="e.name">{{ e.name }}</option>
-                }
-              </select>
               <select class="te-sel te-sel--sm te-sel--field"
-                [(ngModel)]="drvSources[si].field">
-                @for (f of fieldsFor(src.entity); track f.name) {
-                  <option [value]="f.name">{{ f.name }}</option>
+                [ngModel]="src.entity + '.' + src.field"
+                (ngModelChange)="onDrvSrcKeyChange(si, $event)">
+                @for (e of reachableEntities; track e.name) {
+                  <optgroup [label]="e.name + (e.name !== rootEntity ? ' (joined)' : '')">
+                    @for (f of fieldsFor(e.name); track f.name) {
+                      <option [value]="e.name + '.' + f.name">{{ f.name }}</option>
+                    }
+                  </optgroup>
                 }
               </select>
               @if (drvSources.length > 2) {
@@ -372,7 +363,7 @@
           <p class="te-empty-state__hint">Select a product and entity in the header above</p>
         } @else {
           <p class="te-empty-state__msg">No columns added yet</p>
-          <p class="te-empty-state__hint">Click <strong>⊕ Fields</strong> in the toolbar to browse and add fields</p>
+          <p class="te-empty-state__hint">Use the <strong>entity → field</strong> dropdowns in the toolbar to add columns</p>
           <button class="te-btn te-btn--add-col" (click)="addAllColumns()">
             + Add all fields from {{ rootEntity }}
           </button>

@@ -51,25 +51,19 @@
           <span class="filter-condition-card__title">Condition {{ ci + 1 }}</span>
           <span class="filter-condition-card__summary">{{ conditionValueSummary(c) }}</span>
         </div>
-        <!-- Entity / Field / Operator row -->
-        <div class="three-col filter-grid" style="margin-bottom:6px">
-          <div class="field-row">
-            <label class="field-label">Entity</label>
-            <select class="sel sel--sm"
-              [ngModel]="c.entity"
-              (ngModelChange)="onEntityChange(gi, ci, $event)">
-              @for (e of entities; track e.name) {
-                <option [value]="e.name">{{ e.name }}</option>
-              }
-            </select>
-          </div>
+        <!-- Field / Operator row — single combined entity.field dropdown -->
+        <div class="two-col filter-grid" style="margin-bottom:6px">
           <div class="field-row">
             <label class="field-label">Field</label>
             <select class="sel sel--sm"
-              [ngModel]="c.field"
-              (ngModelChange)="updateCondition(gi, ci, { field: $event })">
-              @for (fd of filterableFields(c.entity); track fd.name) {
-                <option [value]="fd.name">{{ fd.name }}</option>
+              [ngModel]="c.entity + '.' + c.field"
+              (ngModelChange)="onFieldKeyChange(gi, ci, $event)">
+              @for (e of entities; track e.name) {
+                <optgroup [label]="e.name">
+                  @for (fd of filterableFields(e.name); track fd.name) {
+                    <option [value]="e.name + '.' + fd.name">{{ fd.name }}</option>
+                  }
+                </optgroup>
               }
             </select>
           </div>

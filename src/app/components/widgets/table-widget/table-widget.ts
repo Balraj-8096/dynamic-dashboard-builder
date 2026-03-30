@@ -77,9 +77,20 @@ export class TableWidget implements OnChanges {
   private refresh(): void {
     if (this.cfg?.queryConfig) {
       try {
-        const effectiveQcfg = this.localDateFilter
+        let qcfg = this.localDateFilter
           ? { ...this.cfg.queryConfig, filters: [...(this.cfg.queryConfig.filters ?? []), this.localDateFilter] }
           : this.cfg.queryConfig;
+
+        // When only derived columns were added, queryConfig.columns may be empty.
+        // Auto-fill it with the source fields so the query engine can execute.
+        if (!qcfg.columns?.length && qcfg.derivedColumns?.length) {
+          const srcCols = qcfg.derivedColumns.flatMap(dc =>
+            dc.sources.map(s => ({ entity: s.entity, field: s.field }))
+          );
+          qcfg = { ...qcfg, columns: srcCols };
+        }
+
+        const effectiveQcfg = qcfg;
         const mapped = mapTableResult(this.qsvc.executeTableQuery(effectiveQcfg));
         // Prefer cfg.columns (user-configured visible columns) so that source fields
         // fetched for derived/combined columns don't appear as extra table columns.
