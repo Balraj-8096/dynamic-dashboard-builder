@@ -684,7 +684,6 @@ export class TableEditorModal implements OnInit {
         striped:       this.striped,
         compact:       this.compact,
         statusColumn:  this.statusColumn,
-        selectedFields: [],
         queryConfig:   qcfg ?? undefined,
       } as TableConfig,
     };
@@ -753,7 +752,6 @@ export class TableEditorModal implements OnInit {
         striped:       this.striped,
         compact:       this.compact,
         statusColumn:  this.statusColumn,
-        selectedFields: [],
         queryConfig:   qcfg ?? undefined,
       } as TableConfig,
     };

@@ -4,44 +4,7 @@
 
 @if (cfg) {
 
-  <!-- ── Multi-field grid mode ─────────────────────────────── -->
-  @if (isMultiField) {
-    <div
-      class="multi-grid"
-      [style.grid-template-columns]="'repeat(' + multiCols + ', 1fr)'">
-
-      @for (field of selectedFields; track field!.id) {
-        <div class="mini-tile">
-
-          <!-- Mini value -->
-          <div
-            class="mini-tile__value"
-            [style.color]="field!.accent">
-            {{ field!.value }}
-          </div>
-
-          <!-- Mini label -->
-          <div class="mini-tile__label">
-            {{ field!.label }}
-          </div>
-
-          <!-- Mini trend -->
-          <div
-            class="mini-tile__trend"
-            [class.trend--up]="field!.trendUp"
-            [class.trend--down]="!field!.trendUp">
-            {{ field!.trend }}
-          </div>
-
-        </div>
-      }
-
-    </div>
-  }
-
-  <!-- ── Single field mode ─────────────────────────────────── -->
-  @if (!isMultiField) {
-    <div class="single-layout">
+  <div class="single-layout">
 
       <!-- Top section: value + trend -->
       <div class="single-layout__top">
@@ -131,6 +94,5 @@
       }
 
     </div>
-  }
 
 }

@@ -46,7 +46,7 @@ export function buildSalesDemo(): Widget[] {
         value: '–', subValue: 'COUNT query', trend: '', trendUp: true,
         accent: '#3b82f6', prefix: '', suffix: '',
         description: 'Live COUNT of all appointment rows',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient'],
@@ -62,7 +62,7 @@ export function buildSalesDemo(): Widget[] {
         value: '–', subValue: 'status = completed', trend: '', trendUp: true,
         accent: '#10b981', prefix: '', suffix: '',
         description: 'Appointments with status = completed',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient'],
@@ -79,7 +79,7 @@ export function buildSalesDemo(): Widget[] {
         value: '–', subValue: 'SUM(price)', trend: '', trendUp: true,
         accent: '#a78bfa', prefix: '£', suffix: '',
         description: 'SUM of all consultation fees',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient'],
@@ -95,7 +95,7 @@ export function buildSalesDemo(): Widget[] {
         value: '–', subValue: 'patient.status = active', trend: '', trendUp: true,
         accent: '#06b6d4', prefix: '', suffix: '',
         description: 'COUNT of patients with status = active',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx',
           entities: ['patient'],
@@ -114,7 +114,6 @@ export function buildSalesDemo(): Widget[] {
       config: {
         value: '–', changeValue: '', changeLabel: 'vs previous period',
         trendUp: true, accent: '#3b82f6', data: [], period: '',
-        selectedFields: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient'],
@@ -130,7 +129,7 @@ export function buildSalesDemo(): Widget[] {
       title: 'Appointments by Month',
       config: {
         accent: '#3b82f6', stacked: false, horizontal: false,
-        showGrid: true, showLegend: false, series: [], selectedFields: [],
+        showGrid: true, showLegend: false, series: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient'],
@@ -145,7 +144,7 @@ export function buildSalesDemo(): Widget[] {
       w: 3, h: 3,
       title: 'By Payor Type',
       config: {
-        innerRadius: 50, showLabels: false, showLegend: true, data: [], selectedFields: [],
+        innerRadius: 50, showLabels: false, showLegend: true, data: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient'],
@@ -162,7 +161,7 @@ export function buildSalesDemo(): Widget[] {
       title: 'Monthly Revenue',
       config: {
         areaFill: true, smooth: true, showGrid: true, showDots: false, showLegend: false,
-        series: [], selectedFields: [],
+        series: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient'],
@@ -176,7 +175,7 @@ export function buildSalesDemo(): Widget[] {
       w: 4, h: 3,
       title: 'Appointment Status',
       config: {
-        showValues: true, animated: true, selectedFields: [],
+        showValues: true, animated: true,
         items: [
           { label: 'Completed', value: 0, max: 50, color: '#10b981' },
           { label: 'Confirmed', value: 0, max: 50, color: '#22c55e' },
@@ -236,7 +235,7 @@ All widgets on this canvas are fully editable.`,
       title: 'Recent Appointments',
       config: {
         striped: true, compact: false, statusColumn: true,
-        columns: [], rows: [], selectedFields: [],
+        columns: [], rows: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient', 'patient', 'contact'],

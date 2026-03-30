@@ -110,7 +110,6 @@ export interface StatConfig {
   description:    string;
   showSparkline:  boolean;
   sparkData:      number[];
-  selectedFields: string[];
   // ── Query integration ──
   queryConfig?:   StatQueryConfig;
   queryWarnings?: QueryWarning[];
@@ -130,12 +129,6 @@ export interface AnalyticsConfig {
   accent:         string;
   data:           number[];
   period:         string;
-  /**
-   * B6 fix: tracks which DATA_SCHEMA.kpi field is selected.
-   * Required so Edit Modal fields tab can pre-check the right radio.
-   * Single-element array (analytics is single-select).
-   */
-  selectedFields: string[];
   // ── Query integration ──
   queryConfig?:   StatQueryConfig;
   queryWarnings?: QueryWarning[];
@@ -202,11 +195,6 @@ export interface BarConfig {
   showGrid:       boolean;
   showLegend:     boolean;
   series:         ChartSeries[];
-  /**
-   * B6 fix: tracks which DATA_SCHEMA.series IDs are selected.
-   * Required so Edit Modal fields tab can pre-check the right boxes.
-   */
-  selectedFields: string[];
   // ── Query integration ──
   queryConfig?:   ChartQueryConfig;
   queryWarnings?: QueryWarning[];
@@ -228,11 +216,6 @@ export interface LineConfig {
   showDots:       boolean;
   showLegend:     boolean;
   series:         ChartSeries[];
-  /**
-   * B6 fix: tracks which DATA_SCHEMA.series IDs are selected.
-   * Required so Edit Modal fields tab can pre-check the right boxes.
-   */
-  selectedFields: string[];
   // ── Query integration ──
   queryConfig?:   ChartQueryConfig;
   queryWarnings?: QueryWarning[];
@@ -260,11 +243,6 @@ export interface PieConfig {
   innerRadius:    number;
   showLabels:     boolean;
   showLegend:     boolean;
-  /**
-   * B6 fix: tracks which DATA_SCHEMA.segments IDs are selected.
-   * Required so Edit Modal fields tab can pre-check the right boxes.
-   */
-  selectedFields: string[];
   // ── Query integration ──
   queryConfig?:   PieQueryConfig;
   queryWarnings?: QueryWarning[];
@@ -301,11 +279,6 @@ export interface TableConfig {
   striped:        boolean;
   compact:        boolean;
   statusColumn:   boolean;
-  /**
-   * B6 fix: tracks which DATA_SCHEMA.columns IDs are selected.
-   * Required so Edit Modal fields tab can pre-check the right boxes.
-   */
-  selectedFields: string[];
   // ── Query integration ──
   queryConfig?:   TableQueryConfig;
   queryWarnings?: QueryWarning[];
@@ -342,11 +315,6 @@ export interface ProgressConfig {
   items:           ProgressItem[];
   showValues:      boolean;
   animated:        boolean;
-  /**
-   * B6 fix: tracks which DATA_SCHEMA.items IDs are selected.
-   * Required so Edit Modal fields tab can pre-check the right boxes.
-   */
-  selectedFields:  string[];
   // ── Query integration ──
   progressQueries?: StatQueryConfig[];  // one per item
   queryWarnings?:   QueryWarning[];
@@ -438,88 +406,6 @@ export interface CatalogItem {
 }
 
 
-// ───────────────────────────────────────────────────────────────
-//  DATA SCHEMA
-// ───────────────────────────────────────────────────────────────
-
-/**
- * KPI field in DATA_SCHEMA.kpi
- * Used by stat and analytics widgets
- */
-export interface KpiField {
-  id:       string;
-  label:    string;
-  value:    string;
-  trend:    string;
-  trendUp:  boolean;
-  accent:   string;
-  spark:    number[];
-  category: string;
-}
-
-/**
- * Time-series field in DATA_SCHEMA.series
- * Used by bar and line chart widgets
- */
-export interface SeriesField {
-  id:    string;
-  label: string;
-  color: string;
-  data:  DataPoint[];
-}
-
-/**
- * Segment field in DATA_SCHEMA.segments
- * Used by pie / donut chart widgets
- */
-export interface SegmentField {
-  id:    string;
-  name:  string;
-  value: number;
-  color: string;
-}
-
-/**
- * Column field in DATA_SCHEMA.columns
- * Used by table widget
- */
-export interface ColumnField {
-  id:    string;
-  key:   string;
-  label: string;
-}
-
-/**
- * Progress item field in DATA_SCHEMA.items
- * Used by progress bars widget
- */
-export interface ItemField {
-  id:    string;
-  label: string;
-  value: number;
-  max:   number;
-  color: string;
-}
-
-/**
- * Full DATA_SCHEMA structure
- */
-export interface DataSchema {
-  kpi:      KpiField[];
-  series:   SeriesField[];
-  segments: SegmentField[];
-  columns:  ColumnField[];
-  items:    ItemField[];
-}
-
-/**
- * Field pool mapping entry for FIELD_POOL_MAP
- */
-export interface FieldPoolEntry {
-  pool:  keyof DataSchema;
-  multi: boolean;
-  hint:  string;
-}
 
 
 // ───────────────────────────────────────────────────────────────

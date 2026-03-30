@@ -55,7 +55,7 @@ function buildEpx(): Widget[] {
         value: '–', subValue: 'all time', trend: '', trendUp: true,
         accent: '#3b82f6', prefix: '', suffix: '',
         description: 'Total appointments in the system',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient'],
@@ -71,7 +71,7 @@ function buildEpx(): Widget[] {
         value: '–', subValue: 'appointments', trend: '', trendUp: true,
         accent: '#10b981', prefix: '', suffix: '',
         description: 'Appointments with status = completed',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient'],
@@ -88,7 +88,7 @@ function buildEpx(): Widget[] {
         value: '–', subValue: 'DNA appointments', trend: '', trendUp: false,
         accent: '#ef4444', prefix: '', suffix: '',
         description: 'Appointments with status = no_show',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient'],
@@ -110,7 +110,7 @@ function buildEpx(): Widget[] {
         value: '–', subValue: 'consultation fees', trend: '', trendUp: true,
         accent: '#a78bfa', prefix: '£', suffix: '',
         description: 'SUM of all appointment prices',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient'],
@@ -132,7 +132,7 @@ function buildEpx(): Widget[] {
       title: 'Appointments by Month',
       config: {
         accent: '#3b82f6', stacked: false, horizontal: false,
-        showGrid: true, showLegend: false, series: [], selectedFields: [],
+        showGrid: true, showLegend: false, series: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient'],
@@ -152,7 +152,7 @@ function buildEpx(): Widget[] {
       w: 5, h: 3,
       title: 'By Payor Type',
       config: {
-        innerRadius: 50, showLabels: false, showLegend: true, data: [], selectedFields: [],
+        innerRadius: 50, showLabels: false, showLegend: true, data: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient'],
@@ -171,7 +171,6 @@ function buildEpx(): Widget[] {
       config: {
         value: '–', changeValue: '', changeLabel: 'vs previous period',
         trendUp: true, accent: '#3b82f6', data: [], period: '',
-        selectedFields: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient'],
@@ -192,7 +191,7 @@ function buildEpx(): Widget[] {
       w: 4, h: 3,
       title: 'Status Breakdown',
       config: {
-        showValues: true, animated: true, selectedFields: [],
+        showValues: true, animated: true,
         items: [
           { label: 'Completed', value: 0, max: 50, color: '#10b981' },
           { label: 'Confirmed', value: 0, max: 50, color: '#22c55e' },
@@ -259,7 +258,7 @@ Track appointment activity, revenue, and patient attendance across all sites.
         value: '–', subValue: 'registered patients', trend: '', trendUp: true,
         accent: '#06b6d4', prefix: '', suffix: '',
         description: 'Patients with status = active',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx',
           entities: ['patient'],
@@ -276,7 +275,7 @@ Track appointment activity, revenue, and patient attendance across all sites.
         value: '–', subValue: 'video consultations', trend: '', trendUp: true,
         accent: '#22c55e', prefix: '', suffix: '',
         description: 'Appointments via video (is_remote = true)',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient'],
@@ -293,7 +292,7 @@ Track appointment activity, revenue, and patient attendance across all sites.
         value: '–', subValue: 'per appointment', trend: '', trendUp: true,
         accent: '#f59e0b', prefix: '£', suffix: '',
         description: 'AVG(price) across all appointment rows',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient'],
@@ -309,7 +308,7 @@ Track appointment activity, revenue, and patient attendance across all sites.
         value: '–', subValue: 'billed to payor', trend: '', trendUp: true,
         accent: '#a78bfa', prefix: '', suffix: '',
         description: 'Appointments where invoiced = true',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient'],
@@ -327,7 +326,7 @@ Track appointment activity, revenue, and patient attendance across all sites.
       title: 'Monthly Appointment Trend',
       config: {
         areaFill: true, smooth: true, showGrid: true, showDots: false, showLegend: false,
-        series: [], selectedFields: [],
+        series: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient'],
@@ -348,7 +347,7 @@ Track appointment activity, revenue, and patient attendance across all sites.
       title: 'Revenue by Appointment Type',
       config: {
         accent: '#3b82f6', stacked: false, horizontal: true,
-        showGrid: true, showLegend: false, series: [], selectedFields: [],
+        showGrid: true, showLegend: false, series: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient'],
@@ -368,7 +367,7 @@ Track appointment activity, revenue, and patient attendance across all sites.
       title: 'Recent Appointments',
       config: {
         striped: true, compact: false, statusColumn: true,
-        columns: [], rows: [], selectedFields: [],
+        columns: [], rows: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient', 'patient', 'contact'],
@@ -417,7 +416,7 @@ Track appointment activity, revenue, and patient attendance across all sites.
       title: 'Patient Contact List',
       config: {
         striped: true, compact: true, statusColumn: false,
-        columns: [], rows: [], selectedFields: [],
+        columns: [], rows: [],
         queryConfig: {
           product: 'epx',
           entities: ['patient', 'contact', 'contact_address', 'address'],
@@ -478,7 +477,7 @@ function buildAccounting(): Widget[] {
         value: '–', subValue: 'all invoices', trend: '', trendUp: true,
         accent: '#3b82f6', prefix: '', suffix: '',
         description: 'Total invoice count',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'accounting',
           entities: ['invoice'],
@@ -494,7 +493,7 @@ function buildAccounting(): Widget[] {
         value: '–', subValue: 'invoiced amount', trend: '', trendUp: true,
         accent: '#10b981', prefix: '£', suffix: '',
         description: 'SUM of total_amount (excl. void invoices)',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'accounting',
           entities: ['invoice'],
@@ -516,7 +515,7 @@ function buildAccounting(): Widget[] {
         value: '–', subValue: 'need attention', trend: '', trendUp: false,
         accent: '#ef4444', prefix: '', suffix: '',
         description: 'Invoices with status = overdue',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'accounting',
           entities: ['invoice'],
@@ -539,7 +538,7 @@ function buildAccounting(): Widget[] {
         value: '–', subValue: 'cleared payments', trend: '', trendUp: true,
         accent: '#22c55e', prefix: '£', suffix: '',
         description: 'SUM of cleared payment amounts',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'accounting',
           entities: ['invoice', 'payment_allocation', 'payment'],
@@ -557,7 +556,7 @@ function buildAccounting(): Widget[] {
       title: 'Revenue by Month',
       config: {
         accent: '#10b981', stacked: false, horizontal: false,
-        showGrid: true, showLegend: false, series: [], selectedFields: [],
+        showGrid: true, showLegend: false, series: [],
         queryConfig: {
           product: 'accounting',
           entities: ['invoice'],
@@ -577,7 +576,7 @@ function buildAccounting(): Widget[] {
       w: 5, h: 3,
       title: 'Invoices by Status',
       config: {
-        innerRadius: 50, showLabels: false, showLegend: true, data: [], selectedFields: [],
+        innerRadius: 50, showLabels: false, showLegend: true, data: [],
         queryConfig: {
           product: 'accounting',
           entities: ['invoice'],
@@ -596,7 +595,6 @@ function buildAccounting(): Widget[] {
       config: {
         value: '–', changeValue: '', changeLabel: 'vs previous period',
         trendUp: true, accent: '#10b981', data: [], period: '',
-        selectedFields: [],
         queryConfig: {
           product: 'accounting',
           entities: ['invoice'],
@@ -617,7 +615,7 @@ function buildAccounting(): Widget[] {
       w: 4, h: 3,
       title: 'Invoice Status',
       config: {
-        showValues: true, animated: true, selectedFields: [],
+        showValues: true, animated: true,
         items: [
           { label: 'Paid',    value: 0, max: 50, color: '#22c55e' },
           { label: 'Sent',    value: 0, max: 50, color: '#3b82f6' },
@@ -684,7 +682,7 @@ Monitor invoice lifecycle, revenue collection, and claim status.
         value: '–', subValue: 'fully settled', trend: '', trendUp: true,
         accent: '#22c55e', prefix: '', suffix: '',
         description: 'Invoices with status = paid',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'accounting',
           entities: ['invoice'],
@@ -701,7 +699,7 @@ Monitor invoice lifecycle, revenue collection, and claim status.
         value: '–', subValue: 'awaiting payment', trend: '', trendUp: false,
         accent: '#f59e0b', prefix: '', suffix: '',
         description: 'Invoices with status = sent (not yet paid)',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'accounting',
           entities: ['invoice'],
@@ -718,7 +716,7 @@ Monitor invoice lifecycle, revenue collection, and claim status.
         value: '–', subValue: 'by insurers', trend: '', trendUp: true,
         accent: '#3b82f6', prefix: '', suffix: '',
         description: 'Claims with status = accepted',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'accounting',
           entities: ['invoice', 'claim'],
@@ -735,7 +733,7 @@ Monitor invoice lifecycle, revenue collection, and claim status.
         value: '–', subValue: 'accepted claims', trend: '', trendUp: true,
         accent: '#10b981', prefix: '£', suffix: '',
         description: 'SUM of approved_amount from accepted claims',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'accounting',
           entities: ['invoice', 'claim'],
@@ -758,7 +756,7 @@ Monitor invoice lifecycle, revenue collection, and claim status.
       title: 'Monthly Revenue Trend',
       config: {
         areaFill: true, smooth: true, showGrid: true, showDots: false, showLegend: false,
-        series: [], selectedFields: [],
+        series: [],
         queryConfig: {
           product: 'accounting',
           entities: ['invoice'],
@@ -779,7 +777,7 @@ Monitor invoice lifecycle, revenue collection, and claim status.
       title: 'Revenue by Invoice Type',
       config: {
         accent: '#10b981', stacked: false, horizontal: true,
-        showGrid: true, showLegend: false, series: [], selectedFields: [],
+        showGrid: true, showLegend: false, series: [],
         queryConfig: {
           product: 'accounting',
           entities: ['invoice'],
@@ -799,7 +797,7 @@ Monitor invoice lifecycle, revenue collection, and claim status.
       title: 'Recent Invoices',
       config: {
         striped: true, compact: false, statusColumn: true,
-        columns: [], rows: [], selectedFields: [],
+        columns: [], rows: [],
         queryConfig: {
           product: 'accounting',
           entities: ['invoice'],
@@ -853,7 +851,7 @@ Monitor invoice lifecycle, revenue collection, and claim status.
       title: 'Recent Payments',
       config: {
         striped: true, compact: false, statusColumn: true,
-        columns: [], rows: [], selectedFields: [],
+        columns: [], rows: [],
         queryConfig: {
           product: 'accounting',
           entities: ['invoice', 'payment_allocation', 'payment'],
@@ -875,7 +873,7 @@ Monitor invoice lifecycle, revenue collection, and claim status.
       title: 'Claims Overview',
       config: {
         striped: true, compact: false, statusColumn: true,
-        columns: [], rows: [], selectedFields: [],
+        columns: [], rows: [],
         queryConfig: {
           product: 'accounting',
           entities: ['invoice', 'claim', 'payer'],
@@ -935,7 +933,7 @@ function buildPrescriptions(): Widget[] {
         value: '–', subValue: 'all time', trend: '', trendUp: true,
         accent: '#a78bfa', prefix: '', suffix: '',
         description: 'Total prescriptions issued',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'prescriptions',
           entities: ['prescription'],
@@ -951,7 +949,7 @@ function buildPrescriptions(): Widget[] {
         value: '–', subValue: 'currently active', trend: '', trendUp: true,
         accent: '#3b82f6', prefix: '', suffix: '',
         description: 'Prescriptions with status = active',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'prescriptions',
           entities: ['prescription'],
@@ -968,7 +966,7 @@ function buildPrescriptions(): Widget[] {
         value: '–', subValue: 'prescriptions', trend: '', trendUp: false,
         accent: '#f97316', prefix: '', suffix: '',
         description: 'Prescriptions for controlled medications',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'prescriptions',
           entities: ['prescription', 'prescription_item', 'medication'],
@@ -991,7 +989,7 @@ function buildPrescriptions(): Widget[] {
         value: '–', subValue: 'repeat scripts', trend: '', trendUp: true,
         accent: '#22c55e', prefix: '', suffix: '',
         description: 'Prescriptions where is_repeat = true',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'prescriptions',
           entities: ['prescription'],
@@ -1009,7 +1007,7 @@ function buildPrescriptions(): Widget[] {
       title: 'Prescriptions by Month',
       config: {
         accent: '#a78bfa', stacked: false, horizontal: false,
-        showGrid: true, showLegend: false, series: [], selectedFields: [],
+        showGrid: true, showLegend: false, series: [],
         // Reference Lines: monthly volume targets
         referenceLines: [
           { label: 'Monthly Target', value: 8,  color: '#22c55e', dash: true  },
@@ -1029,7 +1027,7 @@ function buildPrescriptions(): Widget[] {
       w: 5, h: 3,
       title: 'By Drug Class',
       config: {
-        innerRadius: 50, showLabels: false, showLegend: true, data: [], selectedFields: [],
+        innerRadius: 50, showLabels: false, showLegend: true, data: [],
         queryConfig: {
           product: 'prescriptions',
           entities: ['prescription', 'prescription_item', 'medication'],
@@ -1049,7 +1047,6 @@ function buildPrescriptions(): Widget[] {
       config: {
         value: '–', changeValue: '', changeLabel: 'vs previous period',
         trendUp: true, accent: '#a78bfa', data: [], period: '',
-        selectedFields: [],
         // Color Thresholds: accent shifts with prescription volume
         colorThresholds: [
           { threshold: 20, color: '#10b981' },
@@ -1070,7 +1067,7 @@ function buildPrescriptions(): Widget[] {
       w: 4, h: 3,
       title: 'Prescription Status',
       config: {
-        showValues: true, animated: true, selectedFields: [],
+        showValues: true, animated: true,
         items: [
           { label: 'Active',    value: 0, max: 50, color: '#3b82f6' },
           { label: 'Dispensed', value: 0, max: 50, color: '#10b981' },
@@ -1137,7 +1134,7 @@ Monitor prescription activity, controlled substances, and dispensing rates.
         value: '–', subValue: 'items dispensed', trend: '', trendUp: true,
         accent: '#06b6d4', prefix: '', suffix: '',
         description: 'Total number of dispense records',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'prescriptions',
           entities: ['prescription', 'dispense'],
@@ -1153,7 +1150,7 @@ Monitor prescription activity, controlled substances, and dispensing rates.
         value: '–', subValue: 'past expiry', trend: '', trendUp: false,
         accent: '#ef4444', prefix: '', suffix: '',
         description: 'Prescriptions with status = expired',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'prescriptions',
           entities: ['prescription'],
@@ -1176,7 +1173,7 @@ Monitor prescription activity, controlled substances, and dispensing rates.
         value: '–', subValue: 'urgent scripts', trend: '', trendUp: false,
         accent: '#ef4444', prefix: '', suffix: '',
         description: 'Prescriptions with priority = emergency',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'prescriptions',
           entities: ['prescription'],
@@ -1199,7 +1196,7 @@ Monitor prescription activity, controlled substances, and dispensing rates.
         value: '–', subValue: 'licensed clinicians', trend: '', trendUp: true,
         accent: '#a78bfa', prefix: '', suffix: '',
         description: 'Prescribers with is_active = true',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'prescriptions',
           entities: ['prescriber'],
@@ -1217,7 +1214,7 @@ Monitor prescription activity, controlled substances, and dispensing rates.
       title: 'Dispenses by Month',
       config: {
         areaFill: true, smooth: true, showGrid: true, showDots: false, showLegend: false,
-        series: [], selectedFields: [],
+        series: [],
         // Reference Lines: dispensing performance bands
         referenceLines: [
           { label: 'Target',   value: 10, color: '#22c55e', dash: true  },
@@ -1237,7 +1234,7 @@ Monitor prescription activity, controlled substances, and dispensing rates.
       title: 'Prescriptions by Prescriber Type',
       config: {
         accent: '#a78bfa', stacked: false, horizontal: true,
-        showGrid: true, showLegend: false, series: [], selectedFields: [],
+        showGrid: true, showLegend: false, series: [],
         queryConfig: {
           product: 'prescriptions',
           entities: ['prescription', 'prescriber'],
@@ -1257,7 +1254,7 @@ Monitor prescription activity, controlled substances, and dispensing rates.
       title: 'Recent Prescriptions',
       config: {
         striped: true, compact: false, statusColumn: true,
-        columns: [], rows: [], selectedFields: [],
+        columns: [], rows: [],
         queryConfig: {
           product: 'prescriptions',
           entities: ['prescription', 'prescription_item', 'medication', 'prescriber'],
@@ -1315,7 +1312,7 @@ Monitor prescription activity, controlled substances, and dispensing rates.
       title: 'Recent Dispenses',
       config: {
         striped: true, compact: false, statusColumn: true,
-        columns: [], rows: [], selectedFields: [],
+        columns: [], rows: [],
         queryConfig: {
           product: 'prescriptions',
           entities: ['prescription', 'dispense'],
@@ -1337,7 +1334,7 @@ Monitor prescription activity, controlled substances, and dispensing rates.
       title: 'Prescriber Directory',
       config: {
         striped: true, compact: true, statusColumn: false,
-        columns: [], rows: [], selectedFields: [],
+        columns: [], rows: [],
         queryConfig: {
           product: 'prescriptions',
           entities: ['prescriber'],
@@ -1374,7 +1371,7 @@ function buildWidgetGallery(): Widget[] {
         value: '–', subValue: 'COUNT appointments',
         trend: '', trendUp: true, accent: '#6366f1', prefix: '', suffix: '',
         description: 'Stat card with live COUNT query',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient'],
@@ -1391,7 +1388,6 @@ function buildWidgetGallery(): Widget[] {
       config: {
         value: '–', changeValue: '', changeLabel: 'vs previous period',
         trendUp: true, accent: '#8b5cf6', data: [], period: '',
-        selectedFields: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient'],
@@ -1407,7 +1403,7 @@ function buildWidgetGallery(): Widget[] {
       ...FACTORIES[WidgetType.Progress](6, 1),
       title: '③ Progress Bars',
       config: {
-        showValues: true, animated: true, selectedFields: [],
+        showValues: true, animated: true,
         items: [
           { label: 'Completed', value: 0, max: 50, color: '#10b981' },
           { label: 'No Shows',  value: 0, max: 50, color: '#ef4444' },
@@ -1453,7 +1449,7 @@ Supports **bold**, *italic*, and \`code\`.`,
       title: '⑤ Bar Chart',
       config: {
         accent: '#6366f1', stacked: false, horizontal: false,
-        showGrid: true, showLegend: false, series: [], selectedFields: [],
+        showGrid: true, showLegend: false, series: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient'],
@@ -1468,7 +1464,7 @@ Supports **bold**, *italic*, and \`code\`.`,
       w: 4, h: 3,
       title: '⑥ Pie / Donut Chart',
       config: {
-        innerRadius: 50, showLabels: false, showLegend: true, data: [], selectedFields: [],
+        innerRadius: 50, showLabels: false, showLegend: true, data: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient'],
@@ -1483,7 +1479,7 @@ Supports **bold**, *italic*, and \`code\`.`,
       title: '⑦ Line / Area Chart',
       config: {
         areaFill: true, smooth: true, showGrid: true, showDots: false, showLegend: false,
-        series: [], selectedFields: [],
+        series: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient'],
@@ -1503,7 +1499,7 @@ Supports **bold**, *italic*, and \`code\`.`,
       title: '⑧ Data Table',
       config: {
         striped: true, compact: false, statusColumn: true,
-        columns: [], rows: [], selectedFields: [],
+        columns: [], rows: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient', 'patient', 'contact'],
@@ -1551,7 +1547,7 @@ function buildAggregations(): Widget[] {
         value: '–', subValue: 'COUNT(appointment_id)', trend: '', trendUp: true,
         accent: '#6366f1', prefix: '', suffix: '',
         description: 'COUNT: counts every row in the join result',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx', entities: ['appointment', 'appointment_patient'],
           agg: { entity: 'appointment_patient', field: 'appointment_id', function: AggregationFunction.Count },
@@ -1567,7 +1563,7 @@ function buildAggregations(): Widget[] {
         value: '–', subValue: 'COUNT_DISTINCT(patient_id)', trend: '', trendUp: true,
         accent: '#8b5cf6', prefix: '', suffix: '',
         description: 'COUNT_DISTINCT: deduplicates patient_id — fewer than total rows',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx', entities: ['appointment', 'appointment_patient'],
           agg: { entity: 'appointment_patient', field: 'patient_id', function: AggregationFunction.CountDistinct },
@@ -1583,7 +1579,7 @@ function buildAggregations(): Widget[] {
         value: '–', subValue: 'SUM(price)', trend: '', trendUp: true,
         accent: '#10b981', prefix: '£', suffix: '',
         description: 'SUM: adds all price values across joined rows',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx', entities: ['appointment', 'appointment_patient'],
           agg: { entity: 'appointment_patient', field: 'price', function: AggregationFunction.Sum },
@@ -1599,7 +1595,7 @@ function buildAggregations(): Widget[] {
         value: '–', subValue: 'AVG(price)', trend: '', trendUp: true,
         accent: '#f59e0b', prefix: '£', suffix: '',
         description: 'AVG: arithmetic mean — includes £0 for dna/cancelled rows',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx', entities: ['appointment', 'appointment_patient'],
           agg: { entity: 'appointment_patient', field: 'price', function: AggregationFunction.Avg },
@@ -1616,7 +1612,7 @@ function buildAggregations(): Widget[] {
         value: '–', subValue: 'MIN(price)', trend: '', trendUp: true,
         accent: '#06b6d4', prefix: '£', suffix: '',
         description: 'MIN: smallest price value (£0.00 for dna/cancelled)',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx', entities: ['appointment', 'appointment_patient'],
           agg: { entity: 'appointment_patient', field: 'price', function: AggregationFunction.Min },
@@ -1631,7 +1627,7 @@ function buildAggregations(): Widget[] {
         value: '–', subValue: 'MAX(price)', trend: '', trendUp: true,
         accent: '#ef4444', prefix: '£', suffix: '',
         description: 'MAX: largest price value in the dataset',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx', entities: ['appointment', 'appointment_patient'],
           agg: { entity: 'appointment_patient', field: 'price', function: AggregationFunction.Max },
@@ -1646,7 +1642,7 @@ function buildAggregations(): Widget[] {
         value: '–', subValue: 'AVG(rating)', trend: '', trendUp: true,
         accent: '#f97316', prefix: '', suffix: ' / 5',
         description: 'AVG on nullable field: NULL ratings are excluded automatically',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx', entities: ['appointment', 'appointment_patient'],
           agg: { entity: 'appointment_patient', field: 'rating', function: AggregationFunction.Avg },
@@ -1661,7 +1657,7 @@ function buildAggregations(): Widget[] {
         value: '–', subValue: 'MIN(duration_minutes)', trend: '', trendUp: true,
         accent: '#22c55e', prefix: '', suffix: ' min',
         description: 'MIN on appointment.duration_minutes — shortest slot',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx', entities: ['appointment'],
           agg: { entity: 'appointment', field: 'duration_minutes', function: AggregationFunction.Min },
@@ -1677,7 +1673,7 @@ function buildAggregations(): Widget[] {
       title: 'COUNT by Month — Bar Chart',
       config: {
         accent: '#6366f1', stacked: false, horizontal: false,
-        showGrid: true, showLegend: false, series: [], selectedFields: [],
+        showGrid: true, showLegend: false, series: [],
         queryConfig: {
           product: 'epx', entities: ['appointment', 'appointment_patient'],
           dateAxis: { entity: 'appointment', field: 'start_date', interval: DateInterval.Month },
@@ -1690,7 +1686,7 @@ function buildAggregations(): Widget[] {
       w: 5, h: 3,
       title: 'SUM Revenue by Payor — Pie',
       config: {
-        innerRadius: 50, showLabels: false, showLegend: true, data: [], selectedFields: [],
+        innerRadius: 50, showLabels: false, showLegend: true, data: [],
         queryConfig: {
           product: 'epx', entities: ['appointment', 'appointment_patient'],
           groupBy: { entity: 'appointment_patient', field: 'payor_type' },
@@ -1709,7 +1705,7 @@ function buildAggregations(): Widget[] {
         value: '–', subValue: 'COUNT(invoice.id)', trend: '', trendUp: true,
         accent: '#10b981', prefix: '', suffix: '',
         description: 'COUNT: total invoice rows',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'accounting', entities: ['invoice'],
           agg: { entity: 'invoice', field: 'id', function: AggregationFunction.Count },
@@ -1724,7 +1720,7 @@ function buildAggregations(): Widget[] {
         value: '–', subValue: 'SUM(total_amount)', trend: '', trendUp: true,
         accent: '#22c55e', prefix: '£', suffix: '',
         description: 'SUM(total_amount) on all non-void invoices',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'accounting', entities: ['invoice'],
           agg: { entity: 'invoice', field: 'total_amount', function: AggregationFunction.Sum },
@@ -1740,7 +1736,7 @@ function buildAggregations(): Widget[] {
         value: '–', subValue: 'AVG(total_amount)', trend: '', trendUp: true,
         accent: '#f59e0b', prefix: '£', suffix: '',
         description: 'AVG(total_amount) across all invoices',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'accounting', entities: ['invoice'],
           agg: { entity: 'invoice', field: 'total_amount', function: AggregationFunction.Avg },
@@ -1755,7 +1751,7 @@ function buildAggregations(): Widget[] {
         value: '–', subValue: 'SUM(write_off_amount)', trend: '', trendUp: false,
         accent: '#ef4444', prefix: '£', suffix: '',
         description: 'SUM on nullable write_off_amount — NULL rows contribute zero',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'accounting', entities: ['invoice'],
           agg: { entity: 'invoice', field: 'write_off_amount', function: AggregationFunction.Sum },
@@ -1774,7 +1770,7 @@ function buildAggregations(): Widget[] {
         value: '–', subValue: 'COUNT(prescription.id)', trend: '', trendUp: true,
         accent: '#a78bfa', prefix: '', suffix: '',
         description: 'COUNT: total prescription rows',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'prescriptions', entities: ['prescription'],
           agg: { entity: 'prescription', field: 'id', function: AggregationFunction.Count },
@@ -1789,7 +1785,7 @@ function buildAggregations(): Widget[] {
         value: '–', subValue: 'COUNT_DISTINCT(prescriber_id)', trend: '', trendUp: true,
         accent: '#8b5cf6', prefix: '', suffix: '',
         description: 'COUNT_DISTINCT: unique prescribers with at least one prescription',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'prescriptions', entities: ['prescription'],
           agg: { entity: 'prescription', field: 'prescriber_id', function: AggregationFunction.CountDistinct },
@@ -1804,7 +1800,7 @@ function buildAggregations(): Widget[] {
         value: '–', subValue: 'SUM(dispensed_quantity)', trend: '', trendUp: true,
         accent: '#06b6d4', prefix: '', suffix: ' units',
         description: 'SUM(dispensed_quantity) across all dispense records',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'prescriptions', entities: ['prescription', 'dispense'],
           agg: { entity: 'dispense', field: 'dispensed_quantity', function: AggregationFunction.Sum },
@@ -1819,7 +1815,7 @@ function buildAggregations(): Widget[] {
         value: '–', subValue: 'AVG(repeat_count)', trend: '', trendUp: false,
         accent: '#f97316', prefix: '', suffix: ' repeats',
         description: 'AVG(repeat_count) includes is_repeat=false rows (value=0) — dilutes the average',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'prescriptions', entities: ['prescription'],
           agg: { entity: 'prescription', field: 'repeat_count', function: AggregationFunction.Avg },
@@ -1849,7 +1845,7 @@ function buildFilterOps(): Widget[] {
         value: '–', subValue: 'status = "completed"', trend: '', trendUp: true,
         accent: '#10b981', prefix: '', suffix: '',
         description: 'EQ: appointment.status equals "completed"',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx', entities: ['appointment', 'appointment_patient'],
           agg: { entity: 'appointment_patient', field: 'appointment_id', function: AggregationFunction.Count },
@@ -1866,7 +1862,7 @@ function buildFilterOps(): Widget[] {
         value: '–', subValue: 'status ≠ "cancelled"', trend: '', trendUp: true,
         accent: '#3b82f6', prefix: '', suffix: '',
         description: 'NEQ: appointment.status not equal to "cancelled"',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx', entities: ['appointment', 'appointment_patient'],
           agg: { entity: 'appointment_patient', field: 'appointment_id', function: AggregationFunction.Count },
@@ -1883,7 +1879,7 @@ function buildFilterOps(): Widget[] {
         value: '–', subValue: 'price > 75', trend: '', trendUp: true,
         accent: '#f59e0b', prefix: '', suffix: '',
         description: 'GT: appointment_patient.price greater than 75',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx', entities: ['appointment', 'appointment_patient'],
           agg: { entity: 'appointment_patient', field: 'appointment_id', function: AggregationFunction.Count },
@@ -1900,7 +1896,7 @@ function buildFilterOps(): Widget[] {
         value: '–', subValue: 'duration_minutes < 45', trend: '', trendUp: true,
         accent: '#a78bfa', prefix: '', suffix: '',
         description: 'LT: appointment.duration_minutes less than 45',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx', entities: ['appointment'],
           agg: { entity: 'appointment', field: 'id', function: AggregationFunction.Count },
@@ -1918,7 +1914,7 @@ function buildFilterOps(): Widget[] {
         value: '–', subValue: 'price ≥ 100', trend: '', trendUp: true,
         accent: '#22c55e', prefix: '', suffix: '',
         description: 'GTE: price greater than or equal to 100',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx', entities: ['appointment', 'appointment_patient'],
           agg: { entity: 'appointment_patient', field: 'appointment_id', function: AggregationFunction.Count },
@@ -1934,7 +1930,7 @@ function buildFilterOps(): Widget[] {
         value: '–', subValue: 'rating ≤ 2', trend: '', trendUp: false,
         accent: '#ef4444', prefix: '', suffix: '',
         description: 'LTE: rating less than or equal to 2 (low satisfaction)',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx', entities: ['appointment', 'appointment_patient'],
           agg: { entity: 'appointment_patient', field: 'appointment_id', function: AggregationFunction.Count },
@@ -1950,7 +1946,7 @@ function buildFilterOps(): Widget[] {
         value: '–', subValue: 'rating IS NULL', trend: '', trendUp: false,
         accent: '#6b7280', prefix: '', suffix: '',
         description: 'IS_NULL: appointments where rating has not been submitted',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx', entities: ['appointment', 'appointment_patient'],
           agg: { entity: 'appointment_patient', field: 'appointment_id', function: AggregationFunction.Count },
@@ -1966,7 +1962,7 @@ function buildFilterOps(): Widget[] {
         value: '–', subValue: 'rating IS NOT NULL', trend: '', trendUp: true,
         accent: '#10b981', prefix: '', suffix: '',
         description: 'IS_NOT_NULL: appointments where rating has been submitted',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx', entities: ['appointment', 'appointment_patient'],
           agg: { entity: 'appointment_patient', field: 'appointment_id', function: AggregationFunction.Count },
@@ -1986,7 +1982,7 @@ function buildFilterOps(): Widget[] {
         value: '–', subValue: 'appointment_type IN [...]', trend: '', trendUp: true,
         accent: '#3b82f6', prefix: '', suffix: '',
         description: 'IN: appointment_type in ["consultation", "procedure"]',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx', entities: ['appointment', 'appointment_patient'],
           agg: { entity: 'appointment_patient', field: 'appointment_id', function: AggregationFunction.Count },
@@ -2003,7 +1999,7 @@ function buildFilterOps(): Widget[] {
         value: '–', subValue: 'type NOT IN [...]', trend: '', trendUp: true,
         accent: '#8b5cf6', prefix: '', suffix: '',
         description: 'NOT_IN: appointment_type not in ["follow_up", "screening"]',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx', entities: ['appointment', 'appointment_patient'],
           agg: { entity: 'appointment_patient', field: 'appointment_id', function: AggregationFunction.Count },
@@ -2020,7 +2016,7 @@ function buildFilterOps(): Widget[] {
         value: '–', subValue: 'identifier CONTAINS "APT"', trend: '', trendUp: true,
         accent: '#06b6d4', prefix: '', suffix: '',
         description: 'CONTAINS: appointment.identifier contains the substring "APT"',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx', entities: ['appointment', 'appointment_patient'],
           agg: { entity: 'appointment_patient', field: 'appointment_id', function: AggregationFunction.Count },
@@ -2036,7 +2032,6 @@ function buildFilterOps(): Widget[] {
       config: {
         value: '–', changeValue: '', changeLabel: 'vs previous period',
         trendUp: true, accent: '#ec4899', data: [], period: '',
-        selectedFields: [],
         queryConfig: {
           product: 'epx', entities: ['appointment', 'appointment_patient'],
           agg: { entity: 'appointment_patient', field: 'appointment_id', function: AggregationFunction.Count },
@@ -2054,7 +2049,7 @@ function buildFilterOps(): Widget[] {
       title: 'IS_NOT_NULL Rating — Appointments with Feedback',
       config: {
         striped: true, compact: false, statusColumn: true,
-        columns: [], rows: [], selectedFields: [],
+        columns: [], rows: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient'],
@@ -2102,7 +2097,7 @@ function buildFilterGroups(): Widget[] {
         value: '–', subValue: 'AND group', trend: '', trendUp: true,
         accent: '#3b82f6', prefix: '', suffix: '',
         description: 'Single AND group: status=completed AND invoiced=true',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx', entities: ['appointment', 'appointment_patient'],
           agg: { entity: 'appointment_patient', field: 'appointment_id', function: AggregationFunction.Count },
@@ -2127,7 +2122,7 @@ function buildFilterGroups(): Widget[] {
         value: '–', subValue: 'OR group', trend: '', trendUp: true,
         accent: '#22c55e', prefix: '', suffix: '',
         description: 'Single OR group: status=completed OR status=confirmed',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx', entities: ['appointment', 'appointment_patient'],
           agg: { entity: 'appointment_patient', field: 'appointment_id', function: AggregationFunction.Count },
@@ -2152,7 +2147,7 @@ function buildFilterGroups(): Widget[] {
         value: '–', subValue: 'two filter groups', trend: '', trendUp: true,
         accent: '#f59e0b', prefix: '', suffix: '',
         description: 'Two groups: (completed OR confirmed) AND invoiced=true',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx', entities: ['appointment', 'appointment_patient'],
           agg: { entity: 'appointment_patient', field: 'appointment_id', function: AggregationFunction.Count },
@@ -2183,7 +2178,7 @@ function buildFilterGroups(): Widget[] {
         value: '–', subValue: 'payor_type OR group', trend: '', trendUp: true,
         accent: '#06b6d4', prefix: '', suffix: '',
         description: 'OR group: payor_type=insurance OR payor_type=nhs',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'epx', entities: ['appointment', 'appointment_patient'],
           agg: { entity: 'appointment_patient', field: 'appointment_id', function: AggregationFunction.Count },
@@ -2208,7 +2203,7 @@ function buildFilterGroups(): Widget[] {
       title: 'Completed + Invoiced Appointments — AND Group',
       config: {
         striped: true, compact: false, statusColumn: true,
-        columns: [], rows: [], selectedFields: [],
+        columns: [], rows: [],
         queryConfig: {
           product: 'epx',
           entities: ['appointment', 'appointment_patient'],
@@ -2244,7 +2239,7 @@ function buildFilterGroups(): Widget[] {
         value: '–', subValue: 'OR group', trend: '', trendUp: false,
         accent: '#ef4444', prefix: '', suffix: '',
         description: 'OR group: status=sent OR status=overdue',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'accounting', entities: ['invoice'],
           agg: { entity: 'invoice', field: 'id', function: AggregationFunction.Count },
@@ -2268,7 +2263,7 @@ function buildFilterGroups(): Widget[] {
         value: '–', subValue: 'AND group', trend: '', trendUp: false,
         accent: '#f97316', prefix: '', suffix: '',
         description: 'AND group: status=overdue AND is_void=false',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'accounting', entities: ['invoice'],
           agg: { entity: 'invoice', field: 'id', function: AggregationFunction.Count },
@@ -2292,7 +2287,7 @@ function buildFilterGroups(): Widget[] {
         value: '–', subValue: 'OR group on claims', trend: '', trendUp: true,
         accent: '#22c55e', prefix: '', suffix: '',
         description: 'OR group: claim.status=accepted OR claim.status=paid',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'accounting', entities: ['invoice', 'claim'],
           agg: { entity: 'claim', field: 'id', function: AggregationFunction.Count },
@@ -2316,7 +2311,7 @@ function buildFilterGroups(): Widget[] {
         value: '–', subValue: 'two-group combo', trend: '', trendUp: true,
         accent: '#10b981', prefix: '£', suffix: '',
         description: '(sent OR overdue) AND is_void=false — sum of receivable invoices',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'accounting', entities: ['invoice'],
           agg: { entity: 'invoice', field: 'total_amount', function: AggregationFunction.Sum },
@@ -2350,7 +2345,7 @@ function buildFilterGroups(): Widget[] {
         value: '–', subValue: 'priority OR group', trend: '', trendUp: false,
         accent: '#ef4444', prefix: '', suffix: '',
         description: 'OR group: priority=emergency OR priority=urgent',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'prescriptions', entities: ['prescription'],
           agg: { entity: 'prescription', field: 'id', function: AggregationFunction.Count },
@@ -2374,7 +2369,7 @@ function buildFilterGroups(): Widget[] {
         value: '–', subValue: 'AND group', trend: '', trendUp: true,
         accent: '#3b82f6', prefix: '', suffix: '',
         description: 'AND group: is_repeat=true AND status=active',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'prescriptions', entities: ['prescription'],
           agg: { entity: 'prescription', field: 'id', function: AggregationFunction.Count },
@@ -2398,7 +2393,7 @@ function buildFilterGroups(): Widget[] {
         value: '–', subValue: 'cross-entity AND', trend: '', trendUp: false,
         accent: '#f97316', prefix: '', suffix: '',
         description: 'AND: medication.is_controlled=true AND prescription.status=active',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'prescriptions', entities: ['prescription', 'prescription_item', 'medication'],
           agg: { entity: 'prescription', field: 'id', function: AggregationFunction.Count },
@@ -2422,7 +2417,7 @@ function buildFilterGroups(): Widget[] {
         value: '–', subValue: 'two-group combo', trend: '', trendUp: false,
         accent: '#a78bfa', prefix: '', suffix: '',
         description: '(emergency OR urgent) AND is_repeat=true',
-        showSparkline: false, sparkData: [], selectedFields: [],
+        showSparkline: false, sparkData: [],
         queryConfig: {
           product: 'prescriptions', entities: ['prescription'],
           agg: { entity: 'prescription', field: 'id', function: AggregationFunction.Count },
@@ -2442,6 +2437,89 @@ function buildFilterGroups(): Widget[] {
             } as FilterGroup,
           ],
           periodLabel: 'OR+AND groups',
+        },
+      },
+    },
+
+    // ── Donut Charts with AND / OR filter groups ────────────────
+    section(0, 12, 'Donut Charts with AND / OR Filter Groups', '#f59e0b'),
+
+    // Donut — EPX: payor breakdown filtered to completed OR confirmed appointments
+    {
+      ...FACTORIES[WidgetType.Pie](0, 13),
+      w: 4, h: 3,
+      title: 'Payor Mix — Active Appointments (OR)',
+      config: {
+        innerRadius: 55, showLabels: false, showLegend: true, data: [],
+        queryConfig: {
+          product: 'epx',
+          entities: ['appointment', 'appointment_patient'],
+          groupBy: { entity: 'appointment_patient', field: 'payor_type' },
+          valueAgg: { entity: 'appointment_patient', field: 'appointment_id', function: AggregationFunction.Count },
+          filterGroups: [
+            {
+              id: 'donut-epx-or', logic: 'OR',
+              conditions: [
+                { entity: 'appointment', field: 'status', operator: FilterOperator.Eq, value: 'completed' },
+                { entity: 'appointment', field: 'status', operator: FilterOperator.Eq, value: 'confirmed' },
+              ],
+            } as FilterGroup,
+          ],
+        },
+      },
+    },
+
+    // Donut — Accounting: invoice status breakdown filtered to non-void (AND)
+    {
+      ...FACTORIES[WidgetType.Pie](4, 13),
+      w: 4, h: 3,
+      title: 'Invoice Status — Non-Void (AND)',
+      config: {
+        innerRadius: 55, showLabels: false, showLegend: true, data: [],
+        queryConfig: {
+          product: 'accounting',
+          entities: ['invoice'],
+          groupBy: { entity: 'invoice', field: 'status' },
+          valueAgg: { entity: 'invoice', field: 'total_amount', function: AggregationFunction.Sum },
+          filterGroups: [
+            {
+              id: 'donut-acc-and', logic: 'AND',
+              conditions: [
+                { entity: 'invoice', field: 'is_void', operator: FilterOperator.Eq, value: 'false' },
+              ],
+            } as FilterGroup,
+          ],
+        },
+      },
+    },
+
+    // Donut — Prescriptions: drug class breakdown for urgent/emergency AND repeat Rx (OR+AND)
+    {
+      ...FACTORIES[WidgetType.Pie](8, 13),
+      w: 4, h: 3,
+      title: 'Drug Class — Urgent Repeats (OR+AND)',
+      config: {
+        innerRadius: 55, showLabels: false, showLegend: true, data: [],
+        queryConfig: {
+          product: 'prescriptions',
+          entities: ['prescription', 'prescription_item', 'medication'],
+          groupBy: { entity: 'medication', field: 'drug_class' },
+          valueAgg: { entity: 'prescription', field: 'id', function: AggregationFunction.Count },
+          filterGroups: [
+            {
+              id: 'donut-rx-or', logic: 'OR',
+              conditions: [
+                { entity: 'prescription', field: 'priority', operator: FilterOperator.Eq, value: 'emergency' },
+                { entity: 'prescription', field: 'priority', operator: FilterOperator.Eq, value: 'urgent'    },
+              ],
+            } as FilterGroup,
+            {
+              id: 'donut-rx-and', logic: 'AND',
+              conditions: [
+                { entity: 'prescription', field: 'is_repeat', operator: FilterOperator.Eq, value: 'true' },
+              ],
+            } as FilterGroup,
+          ],
         },
       },
     },
@@ -2505,7 +2583,7 @@ export const PRODUCT_TEMPLATES: DashboardTemplate[] = [
   {
     id:          'filter-groups',
     name:        'AND / OR Filter Groups',
-    description: 'Single AND group, single OR group, two-group combinations — all three products with stat and table widgets',
+    description: 'Single AND group, single OR group, two-group combinations — all three products with stat, table, and donut chart widgets',
     icon:        '⊕',
     color:       '#3b82f6',
     build:       buildFilterGroups,

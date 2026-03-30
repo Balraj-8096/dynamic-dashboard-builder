@@ -8,40 +8,6 @@
   height:  100%;
 }
 
-// ── Multi-field grid ──────────────────────────────────────────
-.multi-grid {
-  display:               grid;
-  height:                100%;
-  gap:                   1px;
-  background:            var(--bdr);
-  border-top:            1px solid var(--bdr);
-}
-
-.mini-tile {
-  background:     var(--bg1);
-  padding:        10px 12px;
-  display:        flex;
-  flex-direction: column;
-  gap:            3px;
-
-  &__value {
-    font-size:   18px;
-    font-weight: 600;
-    line-height: 1;
-    font-family: var(--font-mono);
-  }
-
-  &__label {
-    font-size: 10px;
-    color:     var(--txt2);
-  }
-
-  &__trend {
-    font-size:   10px;
-    font-family: var(--font-mono);
-  }
-}
-
 // ── Single field layout ───────────────────────────────────────
 .single-layout {
   display:        flex;

@@ -1,13 +1,6 @@
 // ═══════════════════════════════════════════════════════════════
 //  DASHCRAFT — Stat Widget Component
 //  Single KPI tile with trend indicator and sparkline
-//
-//  Two render modes:
-//  ├── Single field mode — large value, trend, sparkline
-//  └── Multi field mode  — 2-3 column grid of mini KPI tiles
-//      activated when selectedFields.length > 1
-//
-//  Direct port from React StatContent component
 // ═══════════════════════════════════════════════════════════════
 
 import {
@@ -22,7 +15,6 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ColorThreshold, StatConfig, Widget } from '../../../core/interfaces';
-import { DATA_SCHEMA } from '../../../core/data-schema';
 import { QueryService } from '../../../services/query.service';
 import { mapStatResult, StatDisplayData } from '../../../core/query-result-mapper';
 import { WidgetDatePickerComponent, DatePickerChange } from '../../shared/widget-date-picker/widget-date-picker';
@@ -126,41 +118,6 @@ export class StatWidget implements OnChanges {
       .sort((a: ColorThreshold, b: ColorThreshold) => b.threshold - a.threshold)
       .find((r: ColorThreshold) => val >= r.threshold);
     return matched?.color ?? this.cfg?.accent ?? '';
-  }
-
-  // ── Multi-field mode ─────────────────────────────────────────
-
-  /**
-   * Selected KPI fields from DATA_SCHEMA.
-   * Populated when user selects fields in wizard or edit modal.
-   * null = single field mode (use cfg.value directly)
-   */
-  get selectedFields() {
-    const ids = this.cfg.selectedFields;
-    if (!ids?.length) return null;
-    return ids
-      .map(id => DATA_SCHEMA.kpi.find(f => f.id === id))
-      .filter(Boolean) as typeof DATA_SCHEMA.kpi;
-  }
-
-  /**
-   * Whether to render in multi-field grid mode.
-   * True when 2+ fields selected.
-   */
-  get isMultiField(): boolean {
-    const f = this.selectedFields;
-    return f !== null && f.length > 1;
-  }
-
-  /**
-   * Column count for multi-field grid.
-   * 1-2 fields = 2 cols, 3-4 fields = 2 cols, 5+ = 3 cols
-   */
-  get multiCols(): number {
-    const count = this.selectedFields?.length ?? 0;
-    if (count <= 2) return 2;
-    if (count <= 4) return 2;
-    return 3;
   }
 
   // ── Sparkline helpers ────────────────────────────────────────
