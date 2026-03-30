@@ -481,26 +481,31 @@ export function computeColW(canvasW: number): number {
  *   bottom = (y + h) * (ROW_H + GAP)
  *
  * Adds 60px padding at the bottom for breathing room.
- * Minimum height is always 600px even on empty canvas.
+ * Minimum height is the largest of the 600px floor, the visible viewport,
+ * and the space required by the current widget layout.
  *
  * @param widgets - Current widget array
+ * @param rowH - Grid row height in pixels
+ * @param viewportH - Visible canvas viewport height in pixels
  * @returns       - Canvas height in pixels
  *
  * @example
  * // Widget at y=5, h=3 → bottom row = y+h = 8
- * computeCanvasH([{ y:5, h:3 }])
- * // → Math.max(600, 8 * (80+10) + 120) = Math.max(600, 840) = 840
+ * computeCanvasH([{ y:5, h:3 }], 80, 720)
+ * // → Math.max(500, 720, 8 * (80+10) + 120) = Math.max(500, 720, 840) = 840
  */
 export function computeCanvasH(
   widgets: Pick<Widget, 'y' | 'h'>[],
-  rowH:    number = DEFAULT_ROW_H
+  rowH:    number = DEFAULT_ROW_H,
+  viewportH: number = 600
 ): number {
-  if (!widgets.length) return 600;
+  const minCanvasH = Math.max(500, viewportH);
+  if (!widgets.length) return minCanvasH;
   const maxBottom = Math.max(
     ...widgets.map(w => (w.y + w.h) * (rowH + GAP))
   );
   // B1 fix: 120px padding matches React source (was 60px — too tight)
-  return Math.max(600, maxBottom + 120);
+  return Math.max(minCanvasH, maxBottom + 120);
 }
 
 

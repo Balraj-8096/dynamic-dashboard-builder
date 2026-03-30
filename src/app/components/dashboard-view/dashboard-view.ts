@@ -97,10 +97,11 @@ export class DashboardView  implements OnInit, OnDestroy {
     // offsetWidth of the canvas element — falls back to window width minus
     // any chrome (header/footer are negligible for column math).
     const w = this.canvasRef.nativeElement.offsetWidth || window.innerWidth;
+    const viewportH = this.mainRef.nativeElement.clientHeight;
     this.colW    = computeColW(Math.max(w, MIN_CANVAS_W));
-    this.canvasH = computeCanvasH(this.widgets, this.svc.rowH());
+    this.canvasH = computeCanvasH(this.widgets, this.svc.rowH(), viewportH);
     this.svc.setCanvasW(w);
-    this.svc.setViewportH(this.mainRef.nativeElement.clientHeight);
+    this.svc.setViewportH(viewportH);
     this.svc.setScrollTop(this.mainRef.nativeElement.scrollTop);
   }
  

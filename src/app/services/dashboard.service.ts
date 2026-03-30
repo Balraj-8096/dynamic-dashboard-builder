@@ -293,12 +293,12 @@ export class DashboardService {
 
   /**
    * Computed canvas height in pixels.
-   * Re-computed whenever widgets array or rowH changes.
+   * Re-computed whenever widgets array, rowH, or viewportH changes.
    * Ensures canvas is always tall enough to show all widgets.
-   * Minimum 600px even on empty canvas.
+   * Fills the visible viewport on larger screens while preserving the 600px floor.
    */
   readonly canvasH = computed(() =>
-    computeCanvasH(this.widgets(), this.rowH())
+    computeCanvasH(this.widgets(), this.rowH(), this.viewportH())
   );
 
   /**
