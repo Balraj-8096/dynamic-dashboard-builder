@@ -1,12 +1,15 @@
 :host {
-  display: block;
-  width:   100%;
-  height:  100%;
+  display:        flex;
+  flex-direction: column;
+  width:          100%;
+  height:         100%;
+  overflow:       hidden;
 }
 
 .table-wrapper {
+  flex:       1;
+  min-height: 0;
   overflow:   auto;
-  height:     100%;
   width:      100%;
 }
 
@@ -76,6 +79,59 @@
   height:        5px;
   border-radius: 50%;
   flex-shrink:   0;
+}
+
+.pagination-bar {
+  display:         flex;
+  align-items:     center;
+  justify-content: end;
+  gap:             10px;
+  height:          36px;
+  flex-shrink:     0;
+  border-top:      1px solid var(--bdr);
+  background:      var(--bg2);
+  padding:         0 8px;
+}
+
+.page-btn {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  width:           22px;
+  height:          22px;
+  border:          1px solid var(--bdr);
+  border-radius:   4px;
+  background:      var(--bg3);
+  color:           var(--txt1);
+  font-size:       16px;
+  line-height:     1;
+  cursor:          pointer;
+  padding:         0;
+  transition:      background 0.15s, color 0.15s;
+
+  &:hover:not(:disabled) {
+    background: var(--acc);
+    color:      #fff;
+    border-color: var(--acc);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+    cursor:  default;
+  }
+}
+
+.page-info {
+  font-family:  var(--font-mono);
+  font-size:    11px;
+  color:        var(--txt1);
+  white-space:  nowrap;
+  user-select:  none;
+}
+
+.row-count {
+  color:       var(--txt2);
+  margin-left: 4px;
 }
 
 .table-empty {

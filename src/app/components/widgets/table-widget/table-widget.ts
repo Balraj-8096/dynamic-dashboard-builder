@@ -8,7 +8,6 @@ import {
   Component,
   Input,
   OnChanges,
-  ChangeDetectionStrategy,
   ChangeDetectorRef,
   effect,
   untracked,
@@ -37,13 +36,28 @@ export class TableWidget implements OnChanges {
   // Displayed column keys for MatTable
   displayedColumns: string[] = [];
 
+  // Pagination state
+  currentPage = 1;
+  totalRows   = 0;
+
+  get pageSize(): number {
+    return this.cfg?.queryConfig?.pageSize ?? 20;
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.totalRows / this.pageSize));
+  }
+
   private readonly qsvc = inject(QueryService);
   private readonly cdr  = inject(ChangeDetectorRef);
+
+  // Track last queryConfig reference to reset page when config changes
+  private _lastQueryCfgRef: object | undefined;
 
   constructor() {
     effect(() => {
       this.qsvc.globalFilters();
-      untracked(() => { if (this.widget) { this.refresh(); this.cdr.markForCheck(); } });
+      untracked(() => { if (this.widget) { this.currentPage = 1; this.refresh(); this.cdr.markForCheck(); } });
     });
   }
 
@@ -53,6 +67,15 @@ export class TableWidget implements OnChanges {
   onDateChange(e: DatePickerChange): void {
     this.localDateFilter = e.filter;
     this.localDatePreset  = e.preset;
+    this.currentPage = 1;
+    this.refresh();
+    this.cdr.markForCheck();
+  }
+
+  goToPage(page: number): void {
+    const clamped = Math.max(1, Math.min(page, this.totalPages));
+    if (clamped === this.currentPage) return;
+    this.currentPage = clamped;
     this.refresh();
     this.cdr.markForCheck();
   }
@@ -72,15 +95,28 @@ export class TableWidget implements OnChanges {
     return this._displayRows ?? this.cfg?.rows ?? [];
   }
 
-  ngOnChanges(): void { this.refresh(); }
+  ngOnChanges(): void {
+    // Reset to page 1 when the query config object changes (e.g. after saving edits)
+    const qcfg = this.cfg?.queryConfig;
+    if (qcfg !== this._lastQueryCfgRef) {
+      this.currentPage      = 1;
+      this._lastQueryCfgRef = qcfg;
+    }
+    this.refresh();
+  }
 
   private refresh(): void {
     if (this.cfg?.queryConfig) {
       try {
-        const effectiveQcfg = this.localDateFilter
-          ? { ...this.cfg.queryConfig, filters: [...(this.cfg.queryConfig.filters ?? []), this.localDateFilter] }
-          : this.cfg.queryConfig;
-        const mapped = mapTableResult(this.qsvc.executeTableQuery(effectiveQcfg));
+        const effectiveQcfg = {
+          ...(this.localDateFilter
+            ? { ...this.cfg.queryConfig, filters: [...(this.cfg.queryConfig.filters ?? []), this.localDateFilter] }
+            : this.cfg.queryConfig),
+          page: this.currentPage,
+        };
+        const result = this.qsvc.executeTableQuery(effectiveQcfg);
+        const mapped = mapTableResult(result);
+        this.totalRows = result.totalRows;
         // Prefer cfg.columns (user-configured visible columns) so that source fields
         // fetched for derived/combined columns don't appear as extra table columns.
         this._displayCols = this.cfg.columns?.length ? this.cfg.columns : mapped.columns;
@@ -88,10 +124,12 @@ export class TableWidget implements OnChanges {
       } catch {
         this._displayCols = null;
         this._displayRows = null;
+        this.totalRows    = 0;
       }
     } else {
       this._displayCols = null;
       this._displayRows = null;
+      this.totalRows    = 0;
     }
     this.displayedColumns = this.cols.map(c => c.key);
   }

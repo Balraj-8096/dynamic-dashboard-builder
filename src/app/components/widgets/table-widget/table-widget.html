@@ -12,8 +12,7 @@
 @if (cfg && cols.length) {
   <div
     class="table-wrapper"
-    [class.table--compact]="cfg.compact"
-    [style.max-height.px]="contentH">
+    [class.table--compact]="cfg.compact">
 
     <table
       mat-table
@@ -67,6 +66,31 @@
     </table>
 
   </div>
+
+  @if (cfg.queryConfig) {
+    <div class="pagination-bar" aria-label="Table pagination">
+      <button
+        class="page-btn"
+        [disabled]="currentPage <= 1"
+        (click)="goToPage(currentPage - 1)"
+        aria-label="Previous page">
+        &#8249;
+      </button>
+
+      <span class="page-info">
+        {{ currentPage }} / {{ totalPages }}
+        <span class="row-count">({{ totalRows }} rows)</span>
+      </span>
+
+      <button
+        class="page-btn"
+        [disabled]="currentPage >= totalPages"
+        (click)="goToPage(currentPage + 1)"
+        aria-label="Next page">
+        &#8250;
+      </button>
+    </div>
+  }
 } @else {
   <div class="table-empty">
     <span>No columns configured</span>
