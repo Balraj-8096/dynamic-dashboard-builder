@@ -195,6 +195,110 @@
   }
 }
 
+// ── Save status indicator ─────────────────────────────────────
+// Appears between the title and the right cluster when Live API is active.
+.save-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--bdr);
+  background: color-mix(in srgb, var(--bg2) 70%, transparent);
+  color: var(--txt2);
+  font-size: 10px;
+  font-family: var(--font-mono);
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+
+  &--saving {
+    color: var(--amb);
+    border-color: color-mix(in srgb, var(--amb) 35%, transparent);
+  }
+
+  &--saved {
+    color: var(--grn);
+    border-color: color-mix(in srgb, var(--grn) 35%, transparent);
+  }
+
+  &--error {
+    color: var(--red);
+    border-color: color-mix(in srgb, var(--red) 35%, transparent);
+    cursor: help;
+  }
+}
+
+.save-status__dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: currentColor;
+  opacity: 0.7;
+
+  &--pulse {
+    animation: save-pulse 1s ease-in-out infinite;
+    opacity: 1;
+  }
+}
+
+@keyframes save-pulse {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%       { opacity: 0.3; transform: scale(0.7); }
+}
+
+// ── Data source toggle ────────────────────────────────────────
+// Shown in dev/test builds only (hidden in production via @if in template).
+// Default state = mock data (neutral). Active state = live API (amber warning).
+.btn-datasource {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--bdr);
+  background: transparent;
+  color: var(--txt2);
+  cursor: pointer;
+  font-size: 10px;
+  font-family: var(--font-mono);
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+
+  &:hover {
+    background: var(--bg3);
+    color: var(--txt0);
+    border-color: var(--bdrH);
+  }
+
+  // Live-API active state — amber to signal "real data in use"
+  &--live {
+    border-color: color-mix(in srgb, var(--amb) 50%, transparent);
+    color: var(--amb);
+    background: color-mix(in srgb, var(--amb) 8%, transparent);
+
+    &:hover {
+      background: color-mix(in srgb, var(--amb) 16%, transparent);
+      color: var(--amb);
+    }
+  }
+}
+
+.btn-datasource__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--txt2);
+  transition: background var(--transition-fast);
+
+  .btn-datasource--live & {
+    background: var(--amb);
+    box-shadow: 0 0 4px 1px color-mix(in srgb, var(--amb) 60%, transparent);
+  }
+}
+
 .utility-group {
   display: flex;
   align-items: center;
@@ -248,6 +352,39 @@
     background: var(--bg3);
     color: var(--txt0);
     border-color: var(--bdr);
+  }
+}
+
+.toolbar-menu__item--datasource {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border-top: 1px solid var(--bdr);
+  margin-top: 2px;
+  padding-top: 10px;
+}
+
+.toolbar-menu__datasource-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--txt2);
+  transition: background var(--transition-fast);
+
+  .toolbar-menu__item--live & {
+    background: var(--amb);
+    box-shadow: 0 0 4px 1px color-mix(in srgb, var(--amb) 60%, transparent);
+  }
+}
+
+.toolbar-menu__item--live {
+  color: var(--amb);
+
+  &:hover {
+    color: var(--amb);
+    border-color: color-mix(in srgb, var(--amb) 28%, transparent);
+    background: color-mix(in srgb, var(--amb) 10%, transparent);
   }
 }
 

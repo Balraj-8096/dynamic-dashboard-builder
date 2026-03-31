@@ -1,7 +1,10 @@
 import { Component, ElementRef, inject, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { DashboardService } from '../../services/dashboard.service';
-import { ThemeService } from '../../services/theme.service';
+import { DashboardService }  from '../../services/dashboard.service';
+import { ThemeService }      from '../../services/theme.service';
+import { AppConfigService }           from '../../services/app-config.service';
+import { DashboardPersistenceService } from '../../services/dashboard-persistence.service';
+import { environment }                from '../../../environments/environment';
 
 @Component({
   selector: 'app-toolbar',
@@ -10,9 +13,14 @@ import { ThemeService } from '../../services/theme.service';
   styleUrl: './toolbar.scss',
 })
 export class Toolbar {
-  readonly svc = inject(DashboardService);
-  readonly themeSvc = inject(ThemeService);
+  readonly svc         = inject(DashboardService);
+  readonly themeSvc    = inject(ThemeService);
+  readonly configSvc   = inject(AppConfigService);
+  readonly persistence = inject(DashboardPersistenceService);
   private readonly router = inject(Router);
+
+  /** Only show the data-source toggle in non-production builds. */
+  readonly showDataSourceToggle = !environment.production;
 
   @ViewChild('titleInput') titleInputRef?: ElementRef<HTMLInputElement>;
 
@@ -79,8 +87,13 @@ export class Toolbar {
     this.svc.closeToolbarMenu();
   }
 
+  toggleDataSource(): void {
+    this.configSvc.toggleDataSource();
+    this.svc.closeToolbarMenu();
+  }
+
   goToView(): void {
     this.svc.closeToolbarMenu();
-    this.router.navigate(['/view']);
+    this.router.navigate(['/view', this.persistence.dashboardId()]);
   }
 }

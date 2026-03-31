@@ -5,60 +5,76 @@
 @if (cfg) {
   <div class="analytics-layout">
 
-    <!-- ── Top: value + change badge ─────────────────────── -->
-    <div class="analytics-top">
+    <!-- Loading rail (re-queries) -->
+    @if (isLoading) {
+      <div class="wld-rail" aria-hidden="true"></div>
+    }
 
-      <div class="analytics-value" [style.color]="accent">
-        {{ displayValue }}
+    <!-- Skeleton (initial load — no value yet) -->
+    @if (isLoading && !displayValue) {
+      <div class="analytics-skel" aria-busy="true" aria-label="Loading widget data">
+        <div class="analytics-skel__val   wld-skel"></div>
+        <div class="analytics-skel__badge wld-skel"></div>
+        <div class="analytics-skel__chart wld-skel"></div>
+      </div>
+    } @else {
+
+      <!-- ── Top: value + change badge ─────────────────────── -->
+      <div class="analytics-top">
+
+        <div class="analytics-value" [style.color]="accent">
+          {{ displayValue }}
+        </div>
+
+        @if (displayChangeValue) {
+          <div class="change-badge"
+            [class.change--up]="displayTrendUp"
+            [class.change--down]="!displayTrendUp">
+            <span class="change-arrow">{{ displayTrendUp ? '▲' : '▼' }}</span>
+            <span class="change-value">{{ displayChangeValue }}</span>
+            @if (displayChangeLabel) {
+              <span class="change-label">{{ displayChangeLabel }}</span>
+            }
+          </div>
+        }
+
       </div>
 
-      @if (displayChangeValue) {
-        <div class="change-badge"
-          [class.change--up]="displayTrendUp"
-          [class.change--down]="!displayTrendUp">
-          <span class="change-arrow">{{ displayTrendUp ? '▲' : '▼' }}</span>
-          <span class="change-value">{{ displayChangeValue }}</span>
-          @if (displayChangeLabel) {
-            <span class="change-label">{{ displayChangeLabel }}</span>
-          }
+      <!-- ── Middle: area chart ─────────────────────────────── -->
+      @if (displayData.length) {
+        <div class="chart-wrapper">
+          <svg [attr.viewBox]="'0 0 ' + svgW + ' ' + svgH"
+            width="100%" [attr.height]="svgH"
+            overflow="visible" preserveAspectRatio="none">
+            <defs>
+              <linearGradient [attr.id]="gradientId" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   [attr.stop-color]="accent" stop-opacity="0.35" />
+                <stop offset="100%" [attr.stop-color]="accent" stop-opacity="0.02" />
+              </linearGradient>
+            </defs>
+            <path [attr.d]="getAreaPaths(displayData).fillPath"
+              [attr.fill]="'url(#' + gradientId + ')'" />
+            <path [attr.d]="getAreaPaths(displayData).linePath"
+              fill="none" [attr.stroke]="accent"
+              stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
         </div>
       }
 
-    </div>
+      <!-- ── Bottom: period picker / label ─────────────────── -->
+      @if (cfg.queryConfig?.dateRangeField; as drf) {
+        <div class="period-picker">
+          <app-widget-date-picker
+            [entity]="drf.entity"
+            [field]="drf.field"
+            [preset]="localDatePreset"
+            (presetChange)="onDateChange($event)">
+          </app-widget-date-picker>
+        </div>
+      } @else if (displayPeriod) {
+        <div class="period-label">{{ displayPeriod }}</div>
+      }
 
-    <!-- ── Middle: area chart ─────────────────────────────── -->
-    @if (displayData.length) {
-      <div class="chart-wrapper">
-        <svg [attr.viewBox]="'0 0 ' + svgW + ' ' + svgH"
-          width="100%" [attr.height]="svgH"
-          overflow="visible" preserveAspectRatio="none">
-          <defs>
-            <linearGradient [attr.id]="gradientId" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%"   [attr.stop-color]="accent" stop-opacity="0.35" />
-              <stop offset="100%" [attr.stop-color]="accent" stop-opacity="0.02" />
-            </linearGradient>
-          </defs>
-          <path [attr.d]="getAreaPaths(displayData).fillPath"
-            [attr.fill]="'url(#' + gradientId + ')'" />
-          <path [attr.d]="getAreaPaths(displayData).linePath"
-            fill="none" [attr.stroke]="accent"
-            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-      </div>
-    }
-
-    <!-- ── Bottom: period picker / label ─────────────────── -->
-    @if (cfg.queryConfig?.dateRangeField; as drf) {
-      <div class="period-picker">
-        <app-widget-date-picker
-          [entity]="drf.entity"
-          [field]="drf.field"
-          [preset]="localDatePreset"
-          (presetChange)="onDateChange($event)">
-        </app-widget-date-picker>
-      </div>
-    } @else if (displayPeriod) {
-      <div class="period-label">{{ displayPeriod }}</div>
     }
 
   </div>

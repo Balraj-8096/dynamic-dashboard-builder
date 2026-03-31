@@ -1,3 +1,8 @@
+<!-- Loading rail -->
+@if (isLoading) {
+  <div class="wld-rail" aria-hidden="true"></div>
+}
+
 @if (cfg.queryConfig?.dateRangeField; as drf) {
   <div class="widget-date-toolbar">
     <app-widget-date-picker
@@ -12,58 +17,69 @@
 @if (cfg && cols.length) {
   <div
     class="table-wrapper"
-    [class.table--compact]="cfg.compact">
+    [class.table--compact]="cfg.compact"
+    [class.table-wrapper--loading]="isLoading">
 
-    <table
-      mat-table
-      [dataSource]="rows"
-      class="widget-table">
+    @if (isLoading && !rows.length) {
+      <!-- Skeleton rows: initial load with no data yet -->
+      <div class="table-skel" aria-busy="true" aria-label="Loading table data">
+        <div class="table-skel__header wld-skel"></div>
+        @for (row of [1, 2, 3, 4, 5]; track row) {
+          <div class="table-skel__row wld-skel"></div>
+        }
+      </div>
+    } @else {
+      <table
+        mat-table
+        [dataSource]="rows"
+        class="widget-table">
 
-      <!-- Dynamic columns -->
-      @for (col of cols; track col.key) {
-        <ng-container [matColumnDef]="col.key">
+        <!-- Dynamic columns -->
+        @for (col of cols; track col.key) {
+          <ng-container [matColumnDef]="col.key">
 
-          <!-- Header -->
-          <th mat-header-cell *matHeaderCellDef>
-            {{ col.label }}
-          </th>
+            <!-- Header -->
+            <th mat-header-cell *matHeaderCellDef>
+              {{ col.label }}
+            </th>
 
-          <!-- Cell -->
-          <td mat-cell *matCellDef="let row">
+            <!-- Cell -->
+            <td mat-cell *matCellDef="let row">
 
-            @if (isStatusCol(col)) {
-              <!-- Status badge -->
-              <span
-                class="status-badge"
-                [style.background]="getStatusStyle(getCellValue(row, col.key)).bg"
-                [style.color]="getStatusStyle(getCellValue(row, col.key)).fg">
+              @if (isStatusCol(col)) {
+                <!-- Status badge -->
                 <span
-                  class="status-dot"
-                  [style.background]="getStatusStyle(getCellValue(row, col.key)).fg">
+                  class="status-badge"
+                  [style.background]="getStatusStyle(getCellValue(row, col.key)).bg"
+                  [style.color]="getStatusStyle(getCellValue(row, col.key)).fg">
+                  <span
+                    class="status-dot"
+                    [style.background]="getStatusStyle(getCellValue(row, col.key)).fg">
+                  </span>
+                  {{ getStatusStyle(getCellValue(row, col.key)).label }}
                 </span>
-                {{ getStatusStyle(getCellValue(row, col.key)).label }}
-              </span>
-            } @else {
-              {{ getCellValue(row, col.key) }}
-            }
+              } @else {
+                {{ getCellValue(row, col.key) }}
+              }
 
-          </td>
+            </td>
 
-        </ng-container>
-      }
+          </ng-container>
+        }
 
-      <!-- Header + rows -->
-      <tr
-        mat-header-row
-        *matHeaderRowDef="displayedColumns; sticky: true">
-      </tr>
-      <tr
-        mat-row
-        *matRowDef="let row; columns: displayedColumns;"
-        [class.row--striped]="cfg.striped">
-      </tr>
+        <!-- Header + rows -->
+        <tr
+          mat-header-row
+          *matHeaderRowDef="displayedColumns; sticky: true">
+        </tr>
+        <tr
+          mat-row
+          *matRowDef="let row; columns: displayedColumns;"
+          [class.row--striped]="cfg.striped">
+        </tr>
 
-    </table>
+      </table>
+    }
 
   </div>
 
@@ -71,7 +87,7 @@
     <div class="pagination-bar" aria-label="Table pagination">
       <button
         class="page-btn"
-        [disabled]="currentPage <= 1"
+        [disabled]="currentPage <= 1 || isLoading"
         (click)="goToPage(currentPage - 1)"
         aria-label="Previous page">
         &#8249;
@@ -84,7 +100,7 @@
 
       <button
         class="page-btn"
-        [disabled]="currentPage >= totalPages"
+        [disabled]="currentPage >= totalPages || isLoading"
         (click)="goToPage(currentPage + 1)"
         aria-label="Next page">
         &#8250;

@@ -1,3 +1,12 @@
+<!-- ═══════════════════════════════════════════════════════════
+     Pie / Donut Chart Widget
+     ═══════════════════════════════════════════════════════════ -->
+
+<!-- Loading rail (re-queries with existing chart) -->
+@if (isLoading && chartOptions) {
+  <div class="wld-rail" aria-hidden="true"></div>
+}
+
 @if (cfg.queryConfig?.dateRangeField; as drf) {
   <div class="widget-date-toolbar">
     <app-widget-date-picker
@@ -9,8 +18,13 @@
   </div>
 }
 
-@if (chartOptions && chartOptions.series.length) {
-  <div class="chart-container">
+@if (isLoading && !chartOptions) {
+  <!-- Spinner: initial load, no chart data yet -->
+  <div class="wld-center-spinner" role="status" aria-label="Loading chart data">
+    <div class="wld-center-spinner__ring"></div>
+  </div>
+} @else if (chartOptions && chartOptions.series.length) {
+  <div class="chart-container" [class.chart-container--loading]="isLoading">
     <apx-chart
       [series]="chartOptions.series"
       [chart]="chartOptions.chart"

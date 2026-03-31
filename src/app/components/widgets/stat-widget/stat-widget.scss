@@ -10,17 +10,31 @@
 
 // ── Single field layout ───────────────────────────────────────
 .single-layout {
-  display:        flex;
-  flex-direction: column;
+  display:         flex;
+  flex-direction:  column;
   justify-content: space-between;
-  height:         100%;
-  padding:        14px 16px 12px;
+  height:          100%;
+  padding:         14px 16px 12px;
+  position:        relative;
 
   &__top {
     display:        flex;
     flex-direction: column;
     gap:            6px;
   }
+}
+
+// ── Skeleton (initial load) ───────────────────────────────────
+.stat-skel {
+  display:        flex;
+  flex-direction: column;
+  gap:            10px;
+  padding:        14px 16px 12px;
+  height:         100%;
+
+  &__val   { height: 36px; width: 55%; }
+  &__badge { height: 20px; width: 38%; }
+  &__spark { height: 32px; width: 100%; margin-top: auto; }
 }
 
 // ── Value block ───────────────────────────────────────────────

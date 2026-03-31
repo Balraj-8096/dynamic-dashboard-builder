@@ -8,6 +8,7 @@ import {
   Component,
   Input,
   OnChanges,
+  OnDestroy,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   effect,
@@ -15,9 +16,12 @@ import {
   inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Subject, Subscription, forkJoin } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+
 import { ProgressColorRule, ProgressConfig, ProgressItem, Widget } from '../../../core/interfaces';
-import { QueryService } from '../../../services/query.service';
-import { mapProgressResults } from '../../../core/query-result-mapper';
+import { QUERY_SERVICE_TOKEN }   from '../../../core/query-service.interface';
+import { mapProgressResults }    from '../../../core/query-result-mapper';
 
 @Component({
   selector: 'app-progress-widget',
@@ -26,13 +30,21 @@ import { mapProgressResults } from '../../../core/query-result-mapper';
   styleUrl: './progress-widget.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProgressWidget implements OnChanges {
+export class ProgressWidget implements OnChanges, OnDestroy {
 
   @Input({ required: true }) widget!: Widget;
   @Input() contentH: number = 200;
 
-  private readonly qsvc = inject(QueryService);
+  private readonly qsvc = inject(QUERY_SERVICE_TOKEN);
   private readonly cdr  = inject(ChangeDetectorRef);
+
+  /** Cancels the in-flight forkJoin subscription when a new refresh begins. */
+  private refreshSub?: Subscription;
+  /** Completes all subscriptions on component destroy. */
+  private readonly destroy$ = new Subject<void>();
+
+  isLoading = false;
+
   private _displayItems: ProgressItem[] | null = null;
 
   constructor() {
@@ -40,6 +52,11 @@ export class ProgressWidget implements OnChanges {
       this.qsvc.globalFilters();
       untracked(() => { if (this.widget) { this.refresh(); this.cdr.markForCheck(); } });
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   get cfg(): ProgressConfig {
@@ -53,15 +70,29 @@ export class ProgressWidget implements OnChanges {
   ngOnChanges(): void { this.refresh(); }
 
   private refresh(): void {
-    const queries = this.cfg?.progressQueries;
+    const queries   = this.cfg?.progressQueries;
     const baseItems = this.cfg?.items ?? [];
+
     if (queries?.length && baseItems.length) {
-      try {
-        const results = queries.map(q => this.qsvc.executeStatQuery(q));
-        this._displayItems = mapProgressResults(results, baseItems);
-      } catch {
-        this._displayItems = null;
-      }
+      // Cancel any previous in-flight request before starting a new one.
+      this.refreshSub?.unsubscribe();
+
+      // forkJoin fires all stat queries in parallel and waits for all to complete.
+      this.isLoading = true;
+      this.refreshSub = forkJoin(queries.map(q => this.qsvc.executeStatQuery(q)))
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: results => {
+            this._displayItems = mapProgressResults(results, baseItems);
+            this.isLoading = false;
+            this.cdr.markForCheck();
+          },
+          error: () => {
+            this._displayItems = null;
+            this.isLoading = false;
+            this.cdr.markForCheck();
+          },
+        });
     } else {
       this._displayItems = null;
     }

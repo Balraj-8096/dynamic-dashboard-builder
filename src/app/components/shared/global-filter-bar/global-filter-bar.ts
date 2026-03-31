@@ -2,19 +2,25 @@
 //  DASHCRAFT — Global Filter Bar
 //  Dashboard-level filters that apply to all query widgets.
 //  Reads GlobalFilterDimension config from the active product
-//  and writes FilterCondition[] to QueryService.globalFilters.
+//  and writes FilterCondition[] to the query service facade.
 // ═══════════════════════════════════════════════════════════════
 
 import {
   Component,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  OnDestroy,
+  effect,
+  untracked,
   inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject, Subscription } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
-import { DashboardService } from '../../../services/dashboard.service';
-import { QueryService }     from '../../../services/query.service';
+import { DashboardService }    from '../../../services/dashboard.service';
+import { QUERY_SERVICE_TOKEN } from '../../../core/query-service.interface';
 import {
   GlobalFilterDimension,
   GlobalFilterType,
@@ -30,15 +36,42 @@ import {
   styleUrl: './global-filter-bar.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class GlobalFilterBarComponent {
+export class GlobalFilterBarComponent implements OnDestroy {
 
   private readonly svc  = inject(DashboardService);
-  private readonly qsvc = inject(QueryService);
+  private readonly qsvc = inject(QUERY_SERVICE_TOKEN);
+  private readonly cdr  = inject(ChangeDetectorRef);
+
+  /** Completes all subscriptions on component destroy. */
+  private readonly destroy$ = new Subject<void>();
+  /** Cancels in-flight dimension load when product changes. */
+  private dimSub?: Subscription;
+  /** Cancels in-flight distinct-value loads when dimensions change. */
+  private valuesSubs: Subscription[] = [];
 
   protected readonly GlobalFilterType = GlobalFilterType;
 
   // ── Reactive product signal ──────────────────────────────────
   protected readonly product = this.svc.activeProduct;
+
+  // ── Loaded schema state ──────────────────────────────────────
+  /** Dimensions for the active product — loaded asynchronously. */
+  protected dimensions: GlobalFilterDimension[] = [];
+  /** Cache of distinct values per dimension key (entity.field). */
+  private valuesCache: Record<string, string[]> = {};
+
+  constructor() {
+    // React to product changes — reload dimensions and clear filter state.
+    effect(() => {
+      const p = this.product();
+      untracked(() => this.loadDimensions(p));
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   // ── Filter state ─────────────────────────────────────────────
   /** site_key → selected value ('' = all) */
@@ -46,18 +79,13 @@ export class GlobalFilterBarComponent {
   /** date_key → selected preset ('' = all time) */
   datePresets: Record<string, string> = {};
 
-  protected get dimensions(): GlobalFilterDimension[] {
-    const p = this.product();
-    return p ? this.qsvc.getGlobalFilterDimensions(p) : [];
-  }
-
   protected dimKey(dim: GlobalFilterDimension): string {
     return `${dim.entity}.${dim.field}`;
   }
 
+  /** Returns cached distinct values for a site dimension. */
   protected siteValues(dim: GlobalFilterDimension): string[] {
-    const p = this.product();
-    return p ? this.qsvc.getDistinctValues(p, dim.entity, dim.field) : [];
+    return this.valuesCache[this.dimKey(dim)] ?? [];
   }
 
   protected get hasActiveFilters(): boolean {
@@ -76,6 +104,60 @@ export class GlobalFilterBarComponent {
     { value: DateRangePreset.ThisYear,   label: 'This year'   },
     { value: DateRangePreset.LastYear,   label: 'Last year'   },
   ];
+
+  // ── Async dimension + values loading ─────────────────────────
+
+  private loadDimensions(product: string | null | undefined): void {
+    // Cancel previous loads.
+    this.dimSub?.unsubscribe();
+    this.valuesSubs.forEach(s => s.unsubscribe());
+    this.valuesSubs = [];
+
+    if (!product) {
+      this.dimensions   = [];
+      this.valuesCache  = {};
+      this.siteSelections = {};
+      this.datePresets    = {};
+      this.cdr.markForCheck();
+      return;
+    }
+
+    this.dimSub = this.qsvc.getGlobalFilterDimensions(product)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: dims => {
+          this.dimensions  = dims;
+          this.valuesCache = {};
+          // Pre-load distinct values for every site-type dimension.
+          for (const dim of dims) {
+            if (dim.type === GlobalFilterType.Site) {
+              this.loadDistinctValues(product, dim);
+            }
+          }
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.dimensions = [];
+          this.cdr.markForCheck();
+        },
+      });
+  }
+
+  private loadDistinctValues(product: string, dim: GlobalFilterDimension): void {
+    const key = this.dimKey(dim);
+    const sub = this.qsvc.getDistinctValues(product, dim.entity, dim.field)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: values => {
+          this.valuesCache = { ...this.valuesCache, [key]: values };
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.valuesCache = { ...this.valuesCache, [key]: [] };
+        },
+      });
+    this.valuesSubs.push(sub);
+  }
 
   // ── Filter application ───────────────────────────────────────
 

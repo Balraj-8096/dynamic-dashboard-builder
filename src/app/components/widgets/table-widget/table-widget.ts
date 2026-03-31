@@ -8,6 +8,7 @@ import {
   Component,
   Input,
   OnChanges,
+  OnDestroy,
   ChangeDetectorRef,
   effect,
   untracked,
@@ -15,12 +16,15 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
+import { Subject, Subscription } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+
 import { TableColumn, TableConfig, TableRow, Widget } from '../../../core/interfaces';
-import { STATUS_FALLBACK, STATUS_MAP } from '../../../core/constants';
-import { QueryService } from '../../../services/query.service';
-import { mapTableResult } from '../../../core/query-result-mapper';
+import { STATUS_FALLBACK, STATUS_MAP }                from '../../../core/constants';
+import { QUERY_SERVICE_TOKEN }                        from '../../../core/query-service.interface';
+import { mapTableResult }                             from '../../../core/query-result-mapper';
 import { WidgetDatePickerComponent, DatePickerChange } from '../../shared/widget-date-picker/widget-date-picker';
-import { FilterCondition } from '../../../core/query-types';
+import { FilterCondition }                            from '../../../core/query-types';
 
 @Component({
   selector: 'app-table-widget',
@@ -28,13 +32,16 @@ import { FilterCondition } from '../../../core/query-types';
   templateUrl: './table-widget.html',
   styleUrl: './table-widget.scss',
 })
-export class TableWidget implements OnChanges {
+export class TableWidget implements OnChanges, OnDestroy {
 
   @Input({ required: true }) widget!: Widget;
   @Input() contentH: number = 200;
 
   // Displayed column keys for MatTable
   displayedColumns: string[] = [];
+
+  // Loading state
+  isLoading = false;
 
   // Pagination state
   currentPage = 1;
@@ -48,8 +55,13 @@ export class TableWidget implements OnChanges {
     return Math.max(1, Math.ceil(this.totalRows / this.pageSize));
   }
 
-  private readonly qsvc = inject(QueryService);
+  private readonly qsvc = inject(QUERY_SERVICE_TOKEN);
   private readonly cdr  = inject(ChangeDetectorRef);
+
+  /** Cancels the in-flight subscription when a new refresh begins. */
+  private refreshSub?: Subscription;
+  /** Completes all subscriptions on component destroy. */
+  private readonly destroy$ = new Subject<void>();
 
   // Track last queryConfig reference to reset page when config changes
   private _lastQueryCfgRef: object | undefined;
@@ -59,6 +71,11 @@ export class TableWidget implements OnChanges {
       this.qsvc.globalFilters();
       untracked(() => { if (this.widget) { this.currentPage = 1; this.refresh(); this.cdr.markForCheck(); } });
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   localDatePreset = '';
@@ -107,31 +124,46 @@ export class TableWidget implements OnChanges {
 
   private refresh(): void {
     if (this.cfg?.queryConfig) {
-      try {
-        const effectiveQcfg = {
-          ...(this.localDateFilter
-            ? { ...this.cfg.queryConfig, filters: [...(this.cfg.queryConfig.filters ?? []), this.localDateFilter] }
-            : this.cfg.queryConfig),
-          page: this.currentPage,
-        };
-        const result = this.qsvc.executeTableQuery(effectiveQcfg);
-        const mapped = mapTableResult(result);
-        this.totalRows = result.totalRows;
-        // Prefer cfg.columns (user-configured visible columns) so that source fields
-        // fetched for derived/combined columns don't appear as extra table columns.
-        this._displayCols = this.cfg.columns?.length ? this.cfg.columns : mapped.columns;
-        this._displayRows = mapped.rows;
-      } catch {
-        this._displayCols = null;
-        this._displayRows = null;
-        this.totalRows    = 0;
-      }
+      // Cancel any previous in-flight request before starting a new one.
+      this.refreshSub?.unsubscribe();
+
+      const effectiveQcfg = {
+        ...(this.localDateFilter
+          ? { ...this.cfg.queryConfig, filters: [...(this.cfg.queryConfig.filters ?? []), this.localDateFilter] }
+          : this.cfg.queryConfig),
+        page: this.currentPage,
+      };
+
+      this.isLoading = true;
+      this.refreshSub = this.qsvc.executeTableQuery(effectiveQcfg)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: result => {
+            const mapped     = mapTableResult(result);
+            this.totalRows   = result.totalRows;
+            // Prefer cfg.columns (user-configured visible columns) so that source fields
+            // fetched for derived/combined columns don't appear as extra table columns.
+            this._displayCols = this.cfg.columns?.length ? this.cfg.columns : mapped.columns;
+            this._displayRows = mapped.rows;
+            this.displayedColumns = this.cols.map(c => c.key);
+            this.isLoading = false;
+            this.cdr.markForCheck();
+          },
+          error: () => {
+            this._displayCols     = null;
+            this._displayRows     = null;
+            this.totalRows        = 0;
+            this.displayedColumns = this.cols.map(c => c.key);
+            this.isLoading = false;
+            this.cdr.markForCheck();
+          },
+        });
     } else {
       this._displayCols = null;
       this._displayRows = null;
       this.totalRows    = 0;
+      this.displayedColumns = this.cols.map(c => c.key);
     }
-    this.displayedColumns = this.cols.map(c => c.key);
   }
 
   /**
@@ -166,4 +198,3 @@ export class TableWidget implements OnChanges {
     return row[key] ?? '';
   }
 }
-

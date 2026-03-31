@@ -7,6 +7,7 @@ import {
   Component,
   Input,
   OnChanges,
+  OnDestroy,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   effect,
@@ -14,8 +15,11 @@ import {
   inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Subject, Subscription } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+
 import { ColorThreshold, StatConfig, Widget } from '../../../core/interfaces';
-import { QueryService } from '../../../services/query.service';
+import { QUERY_SERVICE_TOKEN } from '../../../core/query-service.interface';
 import { mapStatResult, StatDisplayData } from '../../../core/query-result-mapper';
 import { WidgetDatePickerComponent, DatePickerChange } from '../../shared/widget-date-picker/widget-date-picker';
 import { FilterCondition } from '../../../core/query-types';
@@ -28,13 +32,18 @@ import { FilterCondition } from '../../../core/query-types';
   styleUrl: './stat-widget.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class StatWidget implements OnChanges {
+export class StatWidget implements OnChanges, OnDestroy {
 
   @Input({ required: true }) widget!: Widget;
   @Input() contentH: number = 120;
 
-  private readonly qsvc = inject(QueryService);
-  private readonly cdr  = inject(ChangeDetectorRef);
+  private readonly qsvc = inject(QUERY_SERVICE_TOKEN);
+  private readonly cdr = inject(ChangeDetectorRef);
+
+  /** Cancels the in-flight subscription when a new refresh begins. */
+  private refreshSub?: Subscription;
+  /** Completes all subscriptions on component destroy. */
+  private readonly destroy$ = new Subject<void>();
 
   constructor() {
     effect(() => {
@@ -43,16 +52,24 @@ export class StatWidget implements OnChanges {
     });
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  // ── Loading state ─────────────────────────────────────────────
+  isLoading = false;
+
   // ── Display state (query result OR static config) ────────────
-  displayValue     = '';
-  displayTrend     = '';
-  displayTrendUp   = true;
+  displayValue = '';
+  displayTrend = '';
+  displayTrendUp = true;
   displaySparkData: number[] = [];
-  displayPeriod    = '';
+  displayPeriod = '';
   /** E1: raw numeric value used for threshold evaluation */
-  private rawValue   = 0;
+  private rawValue = 0;
   /** E1: resolved accent after threshold evaluation — used in template instead of cfg.accent */
-  resolvedAccent   = '';
+  resolvedAccent = '';
 
   // ── Per-widget date filter ────────────────────────────────────
   localDatePreset = '';
@@ -60,7 +77,7 @@ export class StatWidget implements OnChanges {
 
   onDateChange(e: DatePickerChange): void {
     this.localDateFilter = e.filter;
-    this.localDatePreset  = e.preset;
+    this.localDatePreset = e.preset;
     this.refresh();
     this.cdr.markForCheck();
   }
@@ -75,34 +92,49 @@ export class StatWidget implements OnChanges {
   private refresh(): void {
     const qcfg = this.cfg?.queryConfig;
     if (qcfg) {
-      try {
-        const effectiveQcfg = this.localDateFilter
-          ? { ...qcfg, filters: [...(qcfg.filters ?? []), this.localDateFilter] }
-          : qcfg;
-        const result = this.qsvc.executeStatQuery(effectiveQcfg);
-        const mapped: StatDisplayData = mapStatResult(result, qcfg.periodLabel);
-        this.displayValue     = mapped.value;
-        this.displayTrend     = mapped.trend;
-        this.displayTrendUp   = mapped.trendUp;
-        this.displaySparkData = mapped.sparkData;
-        this.displayPeriod    = mapped.periodLabel;
-        // E1: use raw numeric result for accurate threshold evaluation
-        this.rawValue = result.value ?? 0;
-      } catch {
-        this.displayValue = 'Error';
-        this.displayTrend = '';
-        this.rawValue = 0;
-      }
+      // Cancel any previous in-flight request before starting a new one.
+      this.refreshSub?.unsubscribe();
+
+      const effectiveQcfg = this.localDateFilter
+        ? { ...qcfg, filters: [...(qcfg.filters ?? []), this.localDateFilter] }
+        : qcfg;
+
+      this.isLoading = true;
+      this.refreshSub = this.qsvc.executeStatQuery(effectiveQcfg)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: result => {
+            const mapped: StatDisplayData = mapStatResult(result, qcfg.periodLabel);
+            this.displayValue = mapped.value;
+            this.displayTrend = mapped.trend;
+            this.displayTrendUp = mapped.trendUp;
+            this.displaySparkData = mapped.sparkData;
+            this.displayPeriod = mapped.periodLabel;
+            // E1: use raw numeric result for accurate threshold evaluation
+            this.rawValue = result.value ?? 0;
+            this.resolvedAccent = this.evalThresholds(this.rawValue);
+            this.isLoading = false;
+            this.cdr.markForCheck();
+          },
+          error: () => {
+            this.displayValue = 'Error';
+            this.displayTrend = '';
+            this.rawValue = 0;
+            this.resolvedAccent = this.evalThresholds(0);
+            this.isLoading = false;
+            this.cdr.markForCheck();
+          },
+        });
     } else {
-      this.displayValue     = this.cfg?.value       ?? '';
-      this.displayTrend     = this.cfg?.trend        ?? '';
-      this.displayTrendUp   = this.cfg?.trendUp      ?? true;
-      this.displaySparkData = this.cfg?.sparkData    ?? [];
+      this.displayValue = this.cfg?.value ?? '';
+      this.displayTrend = this.cfg?.trend ?? '';
+      this.displayTrendUp = this.cfg?.trendUp ?? true;
+      this.displaySparkData = this.cfg?.sparkData ?? [];
       // E1: parse static value string for threshold evaluation
       this.rawValue = parseFloat((this.cfg?.value ?? '').replace(/[^0-9.-]/g, '')) || 0;
+      // E1: resolve accent after value is known — falls back to cfg.accent when no thresholds set
+      this.resolvedAccent = this.evalThresholds(this.rawValue);
     }
-    // E1: resolve accent after value is known — falls back to cfg.accent when no thresholds set
-    this.resolvedAccent = this.evalThresholds(this.rawValue);
   }
 
   // ── E1: threshold evaluator ───────────────────────────────────

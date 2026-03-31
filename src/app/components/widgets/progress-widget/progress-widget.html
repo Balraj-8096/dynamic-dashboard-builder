@@ -1,5 +1,10 @@
 @if (cfg) {
-  <div class="progress-layout">
+  <div class="progress-layout" [class.progress-layout--loading]="isLoading">
+
+    <!-- Loading rail -->
+    @if (isLoading) {
+      <div class="wld-rail" aria-hidden="true"></div>
+    }
 
     @for (item of items; track item.label) {
       <div class="progress-item">

@@ -14,6 +14,7 @@ import {
   Component,
   Input,
   OnChanges,
+  OnDestroy,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   effect,
@@ -21,11 +22,14 @@ import {
   inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Subject, Subscription } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+
 import { AnalyticsConfig, ColorThreshold, Widget } from '../../../core/interfaces';
-import { QueryService } from '../../../services/query.service';
-import { mapStatResult } from '../../../core/query-result-mapper';
+import { QUERY_SERVICE_TOKEN }                     from '../../../core/query-service.interface';
+import { mapStatResult }                           from '../../../core/query-result-mapper';
 import { WidgetDatePickerComponent, DatePickerChange } from '../../shared/widget-date-picker/widget-date-picker';
-import { FilterCondition } from '../../../core/query-types';
+import { FilterCondition }                         from '../../../core/query-types';
 
 @Component({
   selector: 'app-analytics-widget',
@@ -34,13 +38,18 @@ import { FilterCondition } from '../../../core/query-types';
   styleUrl: './analytics-widget.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AnalyticsWidget implements OnChanges {
+export class AnalyticsWidget implements OnChanges, OnDestroy {
 
   @Input({ required: true }) widget!: Widget;
   @Input() contentH: number = 120;
 
-  private readonly qsvc = inject(QueryService);
+  private readonly qsvc = inject(QUERY_SERVICE_TOKEN);
   private readonly cdr  = inject(ChangeDetectorRef);
+
+  /** Cancels the in-flight subscription when a new refresh begins. */
+  private refreshSub?: Subscription;
+  /** Completes all subscriptions on component destroy. */
+  private readonly destroy$ = new Subject<void>();
 
   constructor() {
     effect(() => {
@@ -48,6 +57,14 @@ export class AnalyticsWidget implements OnChanges {
       untracked(() => { if (this.widget) { this.refresh(); this.cdr.markForCheck(); } });
     });
   }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  // ── Loading state ─────────────────────────────────────────────
+  isLoading = false;
 
   // ── Display state ────────────────────────────────────────────
   displayValue       = '';
@@ -82,24 +99,39 @@ export class AnalyticsWidget implements OnChanges {
   private refresh(): void {
     const qcfg = this.cfg?.queryConfig;
     if (qcfg) {
-      try {
-        const effectiveQcfg = this.localDateFilter
-          ? { ...qcfg, filters: [...(qcfg.filters ?? []), this.localDateFilter] }
-          : qcfg;
-        const result = this.qsvc.executeStatQuery(effectiveQcfg);
-        const mapped = mapStatResult(result, qcfg.periodLabel);
-        this.displayValue       = mapped.value;
-        this.displayChangeValue = mapped.trend;
-        this.displayChangeLabel = mapped.changeLabel;
-        this.displayTrendUp     = mapped.trendUp;
-        this.displayData        = mapped.sparkData;
-        this.displayPeriod      = mapped.periodLabel;
-        // E1: use raw numeric result for accurate threshold evaluation
-        this.rawValue = result.value ?? 0;
-      } catch {
-        this.displayValue = 'Error';
-        this.rawValue = 0;
-      }
+      // Cancel any previous in-flight request before starting a new one.
+      this.refreshSub?.unsubscribe();
+
+      const effectiveQcfg = this.localDateFilter
+        ? { ...qcfg, filters: [...(qcfg.filters ?? []), this.localDateFilter] }
+        : qcfg;
+
+      this.isLoading = true;
+      this.refreshSub = this.qsvc.executeStatQuery(effectiveQcfg)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: result => {
+            const mapped = mapStatResult(result, qcfg.periodLabel);
+            this.displayValue       = mapped.value;
+            this.displayChangeValue = mapped.trend;
+            this.displayChangeLabel = mapped.changeLabel;
+            this.displayTrendUp     = mapped.trendUp;
+            this.displayData        = mapped.sparkData;
+            this.displayPeriod      = mapped.periodLabel;
+            // E1: use raw numeric result for accurate threshold evaluation
+            this.rawValue         = result.value ?? 0;
+            this.resolvedAccent   = this.evalThresholds(this.rawValue);
+            this.isLoading = false;
+            this.cdr.markForCheck();
+          },
+          error: () => {
+            this.displayValue   = 'Error';
+            this.rawValue       = 0;
+            this.resolvedAccent = this.evalThresholds(0);
+            this.isLoading = false;
+            this.cdr.markForCheck();
+          },
+        });
     } else {
       this.displayValue       = this.cfg?.value       ?? '';
       this.displayChangeValue = this.cfg?.changeValue ?? '';
@@ -109,9 +141,9 @@ export class AnalyticsWidget implements OnChanges {
       this.displayPeriod      = this.cfg?.period      ?? '';
       // E1: parse static value string for threshold evaluation
       this.rawValue = parseFloat((this.cfg?.value ?? '').replace(/[^0-9.-]/g, '')) || 0;
+      // E1: resolve accent after value is known
+      this.resolvedAccent = this.evalThresholds(this.rawValue);
     }
-    // E1: resolve accent after value is known
-    this.resolvedAccent = this.evalThresholds(this.rawValue);
   }
 
   // ── E1: threshold evaluator ───────────────────────────────────

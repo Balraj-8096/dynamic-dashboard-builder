@@ -370,10 +370,10 @@ export class DashboardService {
    * contextMenu separately and close it on Esc only.
    */
   readonly isAnyModalOpen = computed(() =>
-    this.wizardOpen()      ||
+    this.wizardOpen() ||
     this.isEditModalOpen() ||
-    this.showTemplates()   ||
-    this.showImport()      ||
+    this.showTemplates() ||
+    this.showImport() ||
     this.showHelp()
     // contextMenu excluded — B8 fix
   );
@@ -717,21 +717,21 @@ export class DashboardService {
    * - modal state
    */
   pushHistory(snapshot: Widget[], label: string): void {
-    const currentIdx  = this.histIdx();
+    const currentIdx = this.histIdx();
     const currentHist = this.history();
 
     // Truncate forward history — redo states are lost
     const truncated = currentHist.slice(0, currentIdx + 1);
     const newEntry: HistorySnapshot = {
-      widgets:     deepClone(snapshot),
-      timestamp:   Date.now(),
+      widgets: deepClone(snapshot),
+      timestamp: Date.now(),
       label,
       widgetCount: snapshot.length,
     };
 
     // Cap stack size — trim oldest entries beyond MAX_HISTORY_ENTRIES
     const uncapped = [...truncated, newEntry];
-    const capped   = uncapped.length > MAX_HISTORY_ENTRIES
+    const capped = uncapped.length > MAX_HISTORY_ENTRIES
       ? uncapped.slice(uncapped.length - MAX_HISTORY_ENTRIES)
       : uncapped;
 
@@ -772,7 +772,7 @@ export class DashboardService {
    * Does nothing if at newest state (canRedo = false).
    */
   redo(): void {
-    const idx  = this.histIdx();
+    const idx = this.histIdx();
     const hist = this.history();
     if (idx >= hist.length - 1) return;
 
@@ -800,15 +800,15 @@ export class DashboardService {
    */
   addWidget(widget: Partial<Widget>): void {
     const newId = uid();
-    const w     = (widget as Widget).w ?? 3;
-    const h     = (widget as Widget).h ?? 2;
-    const slot  = findFirstFreeSlot(w, h, this.widgets()); // P1: fill gaps before appending at bottom
+    const w = (widget as Widget).w ?? 3;
+    const h = (widget as Widget).h ?? 2;
+    const slot = findFirstFreeSlot(w, h, this.widgets()); // P1: fill gaps before appending at bottom
 
     const placed: Widget = {
       ...(widget as Widget),
       id: newId,
-      x:  slot.x,
-      y:  slot.y,
+      x: slot.x,
+      y: slot.y,
     };
 
     this.updateWidgets(prev => [...prev, placed], `Added "${placed.title}" (${placed.type})`);
@@ -852,8 +852,8 @@ export class DashboardService {
    * go through this method — consistent behavior.
    */
   duplicateWidget(widget: Widget): void {
-    const newId  = uid();
-    const all    = this.widgets();
+    const newId = uid();
+    const all = this.widgets();
     const { x, y, isAdjacent } = findAdjacentPlacement(widget, widget, all);
 
     const duplicate: Widget = {
@@ -897,7 +897,7 @@ export class DashboardService {
     const pasted: Widget = {
       ...deepClone(source),
       id: newId,
-      y:  nextY,
+      y: nextY,
     };
 
     this.updateWidgets(prev => [...prev, pasted], `Pasted "${source.title}"`);
@@ -917,13 +917,13 @@ export class DashboardService {
    */
   deleteWidget(id: string): void {
     const target = this.widgets().find(w => w.id === id);
-    const label  = target ? `Deleted "${target.title}" (${target.type})` : 'Delete widget';
+    const label = target ? `Deleted "${target.title}" (${target.type})` : 'Delete widget';
     this.updateWidgets(prev => prev.filter(w => w.id !== id), label);
 
     // Angular fix (A2 audit):
     // Always clear stale IDs — unlike React which only cleared
     // selectedId on Del key, not on button/context-menu delete
-    if (this.selectedId()  === id) this.selectedId.set(null);
+    if (this.selectedId() === id) this.selectedId.set(null);
     if (this.animatingId() === id) this.animatingId.set(null);
     if (this.editingWidget()?.id === id) this.closeEditModal();
   }
@@ -1016,7 +1016,7 @@ export class DashboardService {
    */
   commitDragResize(): void {
     const active = this.widgets().find(w => w.id === this.activeId());
-    const label  = active ? `Moved "${active.title}"` : 'Move / resize';
+    const label = active ? `Moved "${active.title}"` : 'Move / resize';
     this.pushHistory(this.widgets(), label);
     this.alignmentGuides.set([]);
     this.activeId.set(null);
@@ -1106,19 +1106,19 @@ export class DashboardService {
    */
   exportLayout(): void {
     const data: DashboardExport = {
-      title:   this.dashTitle(),
+      title: this.dashTitle(),
       widgets: this.widgets(),
-      rowH:    this.rowH(),
+      rowH: this.rowH(),
     };
 
-    const json     = JSON.stringify(data, null, 2);
-    const blob     = new Blob([json], { type: 'application/json' });
-    const url      = URL.createObjectURL(blob);
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
     const filename = `${toFilename(this.dashTitle())}.json`;
 
     // Trigger browser download
-    const a   = document.createElement('a');
-    a.href     = url;
+    const a = document.createElement('a');
+    a.href = url;
     a.download = filename;
     a.click();
 
@@ -1182,7 +1182,7 @@ export class DashboardService {
 
       // Clear selection state
       this.selectedId.set(null);
-  
+
       this.animatingId.set(null);
 
       // Close import modal

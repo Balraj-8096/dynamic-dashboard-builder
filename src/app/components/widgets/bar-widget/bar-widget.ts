@@ -11,6 +11,7 @@ import {
   Component,
   Input,
   OnChanges,
+  OnDestroy,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   effect,
@@ -19,10 +20,13 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgApexchartsModule } from 'ng-apexcharts';
-import { QueryService } from '../../../services/query.service';
-import { mapChartResult } from '../../../core/query-result-mapper';
+import { Subject, Subscription } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+
+import { QUERY_SERVICE_TOKEN }   from '../../../core/query-service.interface';
+import { mapChartResult }        from '../../../core/query-result-mapper';
 import { WidgetDatePickerComponent, DatePickerChange } from '../../shared/widget-date-picker/widget-date-picker';
-import { FilterCondition } from '../../../core/query-types';
+import { FilterCondition }       from '../../../core/query-types';
 
 import {
   ApexAxisChartSeries,
@@ -68,18 +72,24 @@ export interface BarChartOptions {
   styleUrl: './bar-widget.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BarWidget implements OnChanges {
+export class BarWidget implements OnChanges, OnDestroy {
 
   @Input({ required: true }) widget!: Widget;
   @Input() contentH: number = 200;
 
   chartOptions?: BarChartOptions;
+  isLoading = false;
 
   localDatePreset = '';
   private localDateFilter: FilterCondition | null = null;
 
-  private readonly qsvc = inject(QueryService);
+  private readonly qsvc = inject(QUERY_SERVICE_TOKEN);
   private readonly cdr  = inject(ChangeDetectorRef);
+
+  /** Cancels the in-flight subscription when a new refresh begins. */
+  private buildSub?: Subscription;
+  /** Completes all subscriptions on component destroy. */
+  private readonly destroy$ = new Subject<void>();
 
   onDateChange(e: DatePickerChange): void {
     this.localDateFilter = e.filter;
@@ -95,19 +105,16 @@ export class BarWidget implements OnChanges {
     });
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   // ── Config accessor ──────────────────────────────────────────
   get cfg(): BarConfig {
     return this.widget.config as BarConfig;
   }
 
-  // ── E2: value formatter ───────────────────────────────────────
-  /**
-   * Formats a numeric value for Y-axis labels and tooltips.
-   * When no numberFormat is configured (existing widgets) the original
-   * compact behaviour is preserved exactly:
-   *   axis:    >=1000 → Xk (0 dp)   e.g. 42000 → "42k"
-   *   tooltip: >=1000 → X.Xk (1 dp) e.g. 42000 → "42.0k"
-   */
   // ── E3: annotation builder ────────────────────────────────────
   /**
    * Converts cfg.referenceLines into ApexAnnotations.yaxis entries.
@@ -168,28 +175,47 @@ export class BarWidget implements OnChanges {
   private buildChart(): void {
     const cfg = this.cfg;
 
-    // Resolve series + categories: query result OR static config
-    let activeSeries = cfg?.series ?? [];
-    let activeCategories: string[] = activeSeries[0]?.data.map(d => d.n) ?? [];
-
     if (cfg?.queryConfig) {
-      try {
-        const effectiveQcfg = this.localDateFilter
-          ? { ...cfg.queryConfig, filters: [...(cfg.queryConfig.filters ?? []), this.localDateFilter] }
-          : cfg.queryConfig;
-        const result = this.qsvc.executeChartQuery(effectiveQcfg);
-        const mapped = mapChartResult(result);
-        activeSeries     = mapped.series;
-        activeCategories = mapped.labels;
-      } catch { /* keep static */ }
-    }
+      // Cancel any previous in-flight request before starting a new one.
+      this.buildSub?.unsubscribe();
 
+      const effectiveQcfg = this.localDateFilter
+        ? { ...cfg.queryConfig, filters: [...(cfg.queryConfig.filters ?? []), this.localDateFilter] }
+        : cfg.queryConfig;
+
+      this.isLoading = true;
+      this.buildSub = this.qsvc.executeChartQuery(effectiveQcfg)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: result => {
+            const mapped = mapChartResult(result);
+            this.applyChartOptions(cfg, mapped.series, mapped.labels);
+            this.isLoading = false;
+            this.cdr.markForCheck();
+          },
+          error: () => {
+            this.isLoading = false;
+            this.cdr.markForCheck();
+          },
+        });
+    } else {
+      // Static config path — synchronous, no subscription needed.
+      const activeSeries     = cfg?.series ?? [];
+      const activeCategories = activeSeries[0]?.data.map(d => d.n) ?? [];
+      this.applyChartOptions(cfg, activeSeries, activeCategories);
+    }
+  }
+
+  /** Builds and assigns the final ApexCharts options object. */
+  private applyChartOptions(
+    cfg: BarConfig,
+    activeSeries: Array<{ key: string; color?: string; data: Array<{ n: string; v: number }> }>,
+    activeCategories: string[],
+  ): void {
     const series: ApexAxisChartSeries = activeSeries.map(s => ({
       name: s.key,
       data: s.data.map(d => d.v),
     }));
-
-    const categories = activeCategories;
 
     const colors = activeSeries.map(
       (s, i) => s.color || CHART_COLORS[i % CHART_COLORS.length]
@@ -244,7 +270,7 @@ export class BarWidget implements OnChanges {
       },
 
       xaxis: {
-        categories,
+        categories: activeCategories,
         labels: {
           style: {
             colors: '#526070',

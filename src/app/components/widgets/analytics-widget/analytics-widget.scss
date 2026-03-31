@@ -15,6 +15,20 @@
   height:          100%;
   padding:         12px 14px 10px;
   gap:             8px;
+  position:        relative;
+}
+
+// ── Skeleton (initial load) ───────────────────────────────────
+.analytics-skel {
+  display:        flex;
+  flex-direction: column;
+  gap:            10px;
+  padding:        12px 14px 10px;
+  height:         100%;
+
+  &__val   { height: 32px; width: 48%; }
+  &__badge { height: 20px; width: 32%; }
+  &__chart { flex: 1; border-radius: 4px; }
 }
 
 // ── Top section ───────────────────────────────────────────────

@@ -6,6 +6,20 @@
 
   <div class="single-layout">
 
+    <!-- Loading rail (re-queries with existing data) -->
+    @if (isLoading) {
+      <div class="wld-rail" aria-hidden="true"></div>
+    }
+
+    <!-- Skeleton (initial load — no value yet) -->
+    @if (isLoading && !displayValue) {
+      <div class="stat-skel" aria-busy="true" aria-label="Loading widget data">
+        <div class="stat-skel__val   wld-skel"></div>
+        <div class="stat-skel__badge wld-skel"></div>
+        <div class="stat-skel__spark wld-skel"></div>
+      </div>
+    } @else {
+
       <!-- Top section: value + trend -->
       <div class="single-layout__top">
 
@@ -93,6 +107,8 @@
         </div>
       }
 
-    </div>
+    }
+
+  </div>
 
 }

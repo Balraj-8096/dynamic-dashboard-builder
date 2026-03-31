@@ -9,6 +9,7 @@ import {
   Component,
   Input,
   OnChanges,
+  OnDestroy,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   effect,
@@ -17,10 +18,13 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgApexchartsModule } from 'ng-apexcharts';
-import { QueryService } from '../../../services/query.service';
-import { mapPieResult } from '../../../core/query-result-mapper';
+import { Subject, Subscription } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+
+import { QUERY_SERVICE_TOKEN }   from '../../../core/query-service.interface';
+import { mapPieResult }          from '../../../core/query-result-mapper';
 import { WidgetDatePickerComponent, DatePickerChange } from '../../shared/widget-date-picker/widget-date-picker';
-import { FilterCondition } from '../../../core/query-types';
+import { FilterCondition }       from '../../../core/query-types';
 
 import {
   ApexNonAxisChartSeries,
@@ -55,18 +59,24 @@ export interface PieChartOptions {
   styleUrl: './pie-widget.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PieWidget implements OnChanges {
+export class PieWidget implements OnChanges, OnDestroy {
 
   @Input({ required: true }) widget!: Widget;
   @Input() contentH: number = 200;
 
   chartOptions?: PieChartOptions;
+  isLoading = false;
 
   localDatePreset = '';
   private localDateFilter: FilterCondition | null = null;
 
-  private readonly qsvc = inject(QueryService);
+  private readonly qsvc = inject(QUERY_SERVICE_TOKEN);
   private readonly cdr  = inject(ChangeDetectorRef);
+
+  /** Cancels the in-flight subscription when a new refresh begins. */
+  private buildSub?: Subscription;
+  /** Completes all subscriptions on component destroy. */
+  private readonly destroy$ = new Subject<void>();
 
   onDateChange(e: DatePickerChange): void {
     this.localDateFilter = e.filter;
@@ -82,6 +92,11 @@ export class PieWidget implements OnChanges {
     });
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   get cfg(): PieConfig {
     return this.widget.config as PieConfig;
   }
@@ -93,21 +108,45 @@ export class PieWidget implements OnChanges {
   private buildChart(): void {
     const cfg = this.cfg;
 
-    let activeData = cfg?.data ?? [];
     if (cfg?.queryConfig) {
-      try {
-        const effectiveQcfg = this.localDateFilter
-          ? { ...cfg.queryConfig, filters: [...(cfg.queryConfig.filters ?? []), this.localDateFilter] }
-          : cfg.queryConfig;
-        activeData = mapPieResult(this.qsvc.executePieQuery(effectiveQcfg));
-      } catch { /* keep static */ }
+      // Cancel any previous in-flight request before starting a new one.
+      this.buildSub?.unsubscribe();
+
+      const effectiveQcfg = this.localDateFilter
+        ? { ...cfg.queryConfig, filters: [...(cfg.queryConfig.filters ?? []), this.localDateFilter] }
+        : cfg.queryConfig;
+
+      this.isLoading = true;
+      this.buildSub = this.qsvc.executePieQuery(effectiveQcfg)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: result => {
+            const activeData = mapPieResult(result);
+            this.applyChartOptions(cfg, activeData);
+            this.isLoading = false;
+            this.cdr.markForCheck();
+          },
+          error: () => {
+            this.isLoading = false;
+            this.cdr.markForCheck();
+          },
+        });
+    } else {
+      // Static config path — synchronous, no subscription needed.
+      this.applyChartOptions(cfg, cfg?.data ?? []);
     }
+  }
+
+  /** Builds and assigns the final ApexCharts options object. */
+  private applyChartOptions(
+    cfg: PieConfig,
+    activeData: Array<{ name: string; value: number; color?: string }>,
+  ): void {
     if (!activeData.length) { this.chartOptions = undefined; return; }
 
-    const data   = activeData;
-    const series = data.map(d => d.value);
-    const labels = data.map(d => d.name);
-    const colors = data.map((d, i) => d.color ?? CHART_COLORS[i % CHART_COLORS.length]);
+    const series = activeData.map(d => d.value);
+    const labels = activeData.map(d => d.name);
+    const colors = activeData.map((d, i) => d.color ?? CHART_COLORS[i % CHART_COLORS.length]);
 
     this.chartOptions = {
       series,
@@ -172,4 +211,3 @@ export class PieWidget implements OnChanges {
     };
   }
 }
-

@@ -12,6 +12,10 @@
   justify-content: space-evenly;
   gap:             8px;
   overflow:        hidden;
+  position:        relative;
+  transition:      opacity var(--transition-fast);
+
+  &--loading { opacity: 0.55; }
 }
 
 .progress-item {

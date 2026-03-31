@@ -19,6 +19,12 @@ export const routes: Routes = [
         .then(m => m.DashboardView)
   },
   {
+    path: 'view/:id',
+    loadComponent: () =>
+      import('./components/dashboard-view/dashboard-view')
+        .then(m => m.DashboardView)
+  },
+  {
     path: '**',
     redirectTo: 'builder'
   }

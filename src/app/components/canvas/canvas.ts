@@ -20,7 +20,8 @@ import {
   takeUntil,
 } from 'rxjs';
 
-import { DashboardService } from '../../services/dashboard.service';
+import { DashboardService }             from '../../services/dashboard.service';
+import { DashboardPersistenceService }  from '../../services/dashboard-persistence.service';
 import { AlignmentGuide, Widget, WidgetType } from '../../core/interfaces';
 import { gridToPixel, nudgeWidget } from '../../core/layout.utils';
 import { COLS, GAP, KB_BLOCKED_TAGS, ZOOM_MAX, ZOOM_MIN, clamp } from '../../core/constants';
@@ -48,6 +49,8 @@ import { HistoryPanel } from "../history-panel/history-panel";
 })
 export class Canvas implements OnInit, OnDestroy {
   readonly svc = inject(DashboardService);
+  // Injected to bootstrap the auto-save effect for the full app session.
+  readonly persistence = inject(DashboardPersistenceService);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
 

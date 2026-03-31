@@ -97,6 +97,12 @@
   background: color-mix(in srgb, var(--grn) 9%, transparent);
   color: var(--grn);
   border: 1px solid color-mix(in srgb, var(--grn) 20%, transparent);
+
+  &--remote {
+    background: color-mix(in srgb, var(--acc) 9%, transparent);
+    color: var(--acc);
+    border-color: color-mix(in srgb, var(--acc) 20%, transparent);
+  }
 }
 
 // Type breakdown chips
@@ -187,6 +193,74 @@
 .empty-icon    { font-size: 64px; opacity: var(--empty-icon-opacity); font-family: var(--font-mono); }
 .empty-primary { font-size: 14px; color: var(--txt2); opacity: var(--empty-text-opacity-1); }
 .empty-secondary { font-size: 12px; color: var(--txt2); opacity: var(--empty-text-opacity-2); }
+
+// ── Loading overlay ───────────────────────────────────────────
+.load-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: color-mix(in srgb, var(--bg0) 80%, transparent);
+  backdrop-filter: blur(4px);
+  z-index: 10;
+}
+
+.load-spinner {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--bdr);
+  border-top-color: var(--acc);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.load-text {
+  font-size: 13px;
+  font-family: var(--font-mono);
+  color: var(--txt2);
+}
+
+// ── Error state ───────────────────────────────────────────────
+.error-state {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+}
+
+.error-icon {
+  font-size: 48px;
+  color: var(--red);
+  opacity: 0.7;
+}
+
+.error-primary {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--txt0);
+}
+
+.error-secondary {
+  font-size: 12px;
+  color: var(--txt2);
+  text-align: center;
+  max-width: 380px;
+}
+
+.error-back {
+  margin-top: 8px;
+}
 
 // ── Footer ────────────────────────────────────────────────────
 .view-footer {

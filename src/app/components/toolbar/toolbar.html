@@ -28,6 +28,22 @@
     }
   </div>
 
+  <!-- ── SAVE STATUS (Live API mode only) ────────────────────────── -->
+  @if (configSvc.useRealApi()) {
+  <div class="save-status"
+       [class.save-status--saving]="persistence.saveStatus() === 'saving'"
+       [class.save-status--saved]="persistence.saveStatus() === 'saved'"
+       [class.save-status--error]="persistence.saveStatus() === 'error'"
+       [title]="persistence.saveStatus() === 'error' ? 'Save failed — check connection' : ''">
+    @switch (persistence.saveStatus()) {
+      @case ('saving') { <span class="save-status__dot save-status__dot--pulse"></span> Saving… }
+      @case ('saved')  { <span class="save-status__dot"></span> Saved }
+      @case ('error')  { <span class="save-status__dot"></span> Save failed }
+      @default         { <span class="save-status__dot"></span> Auto-save on }
+    }
+  </div>
+  }
+
   <!-- ── RIGHT CLUSTER ─────────────────────────────────────────── -->
   <div class="cluster cluster--right">
 
@@ -41,6 +57,20 @@
       <button class="btn-text btn-text--utility" title="Export layout as JSON" (click)="svc.exportLayout()">
         ⬇ export
       </button>
+
+      <!-- Data source toggle (dev/test only — hidden in production) -->
+      @if (showDataSourceToggle) {
+      <button
+        class="btn-datasource"
+        [class.btn-datasource--live]="configSvc.useRealApi()"
+        [title]="configSvc.useRealApi()
+          ? 'Data source: Live API (http://localhost:8080) — click to switch to mock'
+          : 'Data source: Mock data — click to switch to Live API'"
+        (click)="configSvc.toggleDataSource()">
+        <span class="btn-datasource__dot"></span>
+        {{ configSvc.useRealApi() ? 'Live API' : 'Mock' }}
+      </button>
+      }
 
       <!-- Theme toggle -->
       <button class="btn-icon btn-theme"
@@ -70,6 +100,15 @@
     <button class="toolbar-menu__item" (click)="toggleTheme()">
       {{ themeSvc.theme() === 'dark' ? 'Light Mode' : 'Dark Mode' }}
     </button>
+    @if (showDataSourceToggle) {
+    <button
+      class="toolbar-menu__item toolbar-menu__item--datasource"
+      [class.toolbar-menu__item--live]="configSvc.useRealApi()"
+      (click)="toggleDataSource()">
+      <span class="toolbar-menu__datasource-dot"></span>
+      {{ configSvc.useRealApi() ? 'Switch to Mock Data' : 'Switch to Live API' }}
+    </button>
+    }
   </div>
   }
 
