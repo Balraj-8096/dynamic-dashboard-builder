@@ -1,7 +1,13 @@
 {
   "permissions": {
     "allow": [
-      "Bash(node -e \":*)"
+      "Bash(node -e \":*)",
+      "Bash(dir \"E:\\\\my_github-projects\\\\dashboard-builder\\\\src\\\\app\\\\pages\" /s /b)",
+      "Bash(wc -l /e/my_github-projects/dnamic-dashboard-builder/src/app/components/shared/config-panels/*.ts /e/my_github-projects/dnamic-dashboard-builder/src/app/components/shared/edit-*-config/*.ts /e/my_github-projects/dnamic-dashboard-builder/src/app/components/shared/query-builder/*.ts /e/my_github-projects/dnamic-dashboard-builder/src/app/components/shared/query-builder/*/*.ts)",
+      "Bash(copy \"E:\\\\my_github-projects\\\\dnamic-dashboard-builder\\\\src\\\\app\\\\test-cases\\\\prescriptions-mock-data.ts\" \"E:\\\\my_github-projects\\\\dashboard-builder\\\\src\\\\app\\\\test-cases\\\\prescriptions-mock-data.ts\")",
+      "Bash(npx ng:*)",
+      "Skill(update-config)",
+      "Skill(update-config:*)"
     ]
   }
 }
